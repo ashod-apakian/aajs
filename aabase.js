@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 
 
  var deathro="data:audio/mpeg;base64,/+MgxAASoXLFVUFIADCADMDgB/ykAYxjGMYxwhCEIe5oEDEIQz+\
@@ -37,7 +37,8 @@ var aa=(function()
  var     main_obj={};
 
 
- navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUserMedia||navigator.mozGetUserMedia||navigator.msGetUserMedia||window.RTCPeerConnection;
+ navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUserMedia||
+ navigator.mozGetUserMedia||navigator.msGetUserMedia||window.RTCPeerConnection;
 
 /*-----------------------------------------------------------------------*/
 
@@ -262,6 +263,59 @@ var aa=(function()
  do { frame=stack.shift();  } while (!frameRE.exec(frame)&&stack.length);
  ln=parseInt(frameRE.exec(stack.shift())[1]);
  return ln;
+ }
+
+
+
+ function debugFunctionName ()
+ {
+ var caller,stack,fn,fnRE;
+ fnRE=/function\s*([\w\-$]+)?\s*\(/i;
+ caller=arguments.callee.caller;
+ stack="";
+ while(caller)
+  {
+  fn=fnRE.test(caller.toString())?RegExp.$1||"{?}":"{?}";
+  stack=fn;
+  break;
+  };
+ return stack;
+ }
+
+
+
+ function debugStackUsage ()
+ {
+ var caller,stack,fn,fnRE;
+ fnRE=/function\s*([\w\-$]+)?\s*\(/i;
+ caller=arguments.callee.caller;
+ stack=0;
+ while(caller)
+  {
+  fn=fnRE.test(caller.toString())?RegExp.$1||"{?}":"{?}";
+  stack++;
+  caller=caller.arguments.callee.caller;
+  };
+ return stack;
+ }
+
+
+ function debugStackGet (index)
+ {
+ var caller,stack,fn,fnRE,i;
+ fnRE=/function\s*([\w\-$]+)?\s*\(/i;
+ caller=arguments.callee.caller;
+ stack="";
+ i=0;
+ while(caller)
+  {
+  fn=fnRE.test(caller.toString())?RegExp.$1||"{?}":"{?}";
+  stack=fn;
+  caller=caller.arguments.callee.caller;
+  if(i>=index) { break; }
+  i++;
+  };
+ return stack;
  }
 
 
@@ -2624,19 +2678,10 @@ var aa=(function()
 
  if((group=guiGroupGet(handle))==null) { return false; }
  dpr=window.devicePixelRatio||1;
- if(group.obj.type=="canvas")
-  {
-  guiSizeSet(handle,wid*dpr,hit*dpr);
-  }
- else
-  {
-  guiSizeSet(handle,wid,hit);
-  }
+ if(group.obj.type=="canvas")  {  guiSizeSet(handle,wid*dpr,hit*dpr);  }
+ else                          {  guiSizeSet(handle,wid,hit);  }
  guiCssAreaSet(handle,x,y,wid,hit);
- if(group.obj.type=="canvas")
-  {
-  group.ctx.scale(dpr,dpr);
-  }
+ if(group.obj.type=="canvas")  {  group.ctx.scale(dpr,dpr);  }
  return true;
  }
 
@@ -2644,7 +2689,7 @@ var aa=(function()
 
 
 
-
+/*
  function guiCanvasSizeSet (handle,wid,hit)
  {
  var obj;
@@ -2654,7 +2699,7 @@ var aa=(function()
  obj.dom.height=hit;
  return true;
  }
-
+*/
 
 
 
@@ -4134,6 +4179,81 @@ var aa=(function()
 
 
 
+ function dspZigZag (size)
+ {
+ var i,j,e,obj={};
+
+ obj.type="zigzag";
+ obj.width=size;
+ obj.height=size;
+ obj.matrix=[];
+ for(i=0;i<size;i++) { obj.matrix[i]=[]; }
+ i=1;
+ j=1;
+ for(e=0;e<size*size;e++)
+  {
+  obj.matrix[i-1][j-1]=e|0;
+  if((i+j)%2==0)
+   {
+   if(j<size) { j++;  }
+   else       { i+=2; }
+   if(i>1)    { i--; }
+   }
+  else
+   {
+   if(i<size) { i++; }
+   else       { j+=2; }
+   if(j>1)    { j--; }
+   }
+  }
+ return obj;
+ }
+
+
+
+ function dspGetBlock (rgbaframe,framewid,framehit,channel,blksize,blkx,blky,block)
+ {
+ var bx,by,px,py,off,z,skp;
+
+ off=((blky*framewid*4)+(blkx*4)+channel)|0;
+ z=0|0;
+ skp=((framewid*4)-(blksize*4))|0;
+ for(py=0|0;py<blksize|0;py++)
+  {
+  for(px=0|0;px<blksize|0;px++)
+   {
+   block[z]=rgbaframe[off|0];
+   off+=4|0;
+   z+=1|0;
+   }
+  off+=skp|0;
+  }
+ return block;
+ }
+
+
+
+
+ function dspSetBlock (rgbaframe,framewid,framehit,channel,blksize,blkx,blky,block)
+ {
+ var bx,by,px,py,off,z,skp;
+
+ off=((blky*framewid*4)+(blkx*4)+channel)|0;
+ z=0|0;
+ skp=((framewid*4)-(blksize*4))|0;
+ for(py=0|0;py<blksize|0;py++)
+  {
+  for(px=0|0;px<blksize|0;px++)
+   {
+   rgbaframe[off|0]=block[z];
+   off+=4|0;
+   z+=1|0;
+   }
+  off+=skp|0;
+  }
+ }
+
+
 
 /*-----------------------------------------------------------------------*/
 
@@ -4985,6 +5105,9 @@ var aa=(function()
  main_obj:main_obj,
 
  debugLineNumber:debugLineNumber,
+ debugFunctionName:debugFunctionName,
+ debugStackUsage:debugStackUsage,
+ debugStackGet:debugStackGet,
  debugAlert:debugAlert,
  debugLog:debugLog,
 
@@ -5117,7 +5240,7 @@ var aa=(function()
  guiSizeSet:guiSizeSet,
  guiCssAreaSet:guiCssAreaSet,
  guiSizeFix:guiSizeFix,
- guiCanvasSizeSet:guiCanvasSizeSet,
+// guiCanvasSizeSet:guiCanvasSizeSet,
  guiCanvasClear:guiCanvasClear,
  guiCanvasReset:guiCanvasReset,
  guiCanvasSmoothingSet:guiCanvasSmoothingSet,
@@ -5181,6 +5304,9 @@ var aa=(function()
 
  dspAudioResample:dspAudioResample,
  dspSineWaveAt:dspSineWaveAt,
+ dspZigZag:dspZigZag,
+ dspGetBlock:dspGetBlock,
+ dspSetBlock:dspSetBlock,
 
  bitioCreate:bitioCreate,
  bitioDestroy:bitioDestroy,

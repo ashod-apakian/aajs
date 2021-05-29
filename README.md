@@ -246,6 +246,7 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more
  function guiCanvasReset (handle)\
  function guiCanvasSmoothingSet (handle,state,offx,offy,blur,color)\
  function guiCanvasTextMeasure (handle,txt)\
+ function guiCanvasTextSizeList (handle,weight,family)\
  function guiCanvasImageGet (handle,x,y,w,h)\
  function guiCanvasImagePut (handle,x,y,sx,sy,sw,sh,img)\
  function guiCanvasImageDraw (handle,x,y,w,h,dx,dy,dw,dh,dest)\

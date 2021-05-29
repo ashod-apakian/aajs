@@ -1,8 +1,8 @@
 # aajs
-A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
-\
-\
-**Function catagories**\
+A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more
+
+
+# Catagories
 
 [Main](#main)\
 [Handles](#handles)\
@@ -45,8 +45,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function mainStageSet (stage)\
  function mainStageGet ()\
  function mainCycleGet ()\
- function mainCyclePulse (stride)
-
+ function mainCyclePulse (stride)\
+[Back to Top](#catagories)
 
 # Handles
 
@@ -59,8 +59,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function handleRemove (handef,handle)\
  function handleNext (handef)\
  function handleText (handle)\
- function handleGlobalDump ()
-
+ function handleGlobalDump ()\
+[Back to Top](#catagories)
 
 # Debug
 
@@ -70,8 +70,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function debugStackUsage ()\
  function debugStackGet (index)\
  function debugAlert (txt)\
- function debugLog (...params)
-
+ function debugLog (...params)\
+[Back to Top](#catagories)
 
 # Promises
 
@@ -79,7 +79,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function promiseCreate (nativepromise)\
  function promiseDestroy (handle)\
  function promiseGet (handle)\
- function promiseStatus (handle)
+ function promiseStatus (handle)\
+[Back to Top](#catagories)
 
 
 # Time
@@ -91,8 +92,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function timerMicroRunning ()\
  function timerTimeoutSet (to)\
  function timerTimeoutReset (tmo,newto)\
- function timerTimeoutTest (tmo)
-
+ function timerTimeoutTest (tmo)\
+[Back to Top](#catagories)
 
 # Numeric
 
@@ -104,8 +105,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function numPad(numb,width,z)\
  function numIntToHex(intg)\
  function numRound(numb,precision)\
- function numFloatFormat (numb,wholewid,pad,isps,fracwid)
-
+ function numFloatFormat (numb,wholewid,pad,isps,fracwid)\
+[Back to Top](#catagories)
 
 # Data
 
@@ -125,8 +126,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function dataFloat32ArrayToInt16Array (array)\
  function dataInt16ArrayToFloat32Array (array)\
  function dataInt16ArrayToUint8Array (array)\
- function dataUint8ArrayToInt16Array (array)
-
+ function dataUint8ArrayToInt16Array (array)\
+[Back to Top](#catagories)
 
 # String
 
@@ -140,8 +141,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function stringBase64FromUint8 (buffer)\
  function stringBase64ToUint8 (str)\
  function stringSplitter (str,by)\
- function stringTime (unixtimestamp)
-
+ function stringTime (unixtimestamp)\
+[Back to Top](#catagories)
 
 # Environment
 
@@ -157,8 +158,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function envTitleGet ()\
  function envReload (forced,ms)\
  function envFavIconGet ()\
- function envFavIconSet (url)
-
+ function envFavIconSet (url)\
+[Back to Top](#catagories)
 
 # Queue
 
@@ -170,8 +171,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function queueRead (handle)\
  function queuePeek (handle,ofs)\
  function queueDiscard (handle)\
- function queueStatus (handle)
-
+ function queueStatus (handle)\
+[Back to Top](#catagories)
 
 # Touch
 
@@ -180,8 +181,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function touchPeek (ofs)\
  function touchRead ()\
  function touchProcess (msg)\
- function touchStatus ()
-
+ function touchStatus ()\
+[Back to Top](#catagories)
 
 # Mouse
 
@@ -192,8 +193,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function mouseRead ()\
  function mouseStatus ()\
  function mouseCursorGet ()\
- function mouseCursorSet (style)
-
+ function mouseCursorSet (style)\
+[Back to Top](#catagories)
  
 # Pointer
 
@@ -202,8 +203,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function pointerOnEvent (name,ev)\
  function pointerPeek (ofs)\
  function pointerRead ()\
- function pointerStatus ()
-
+ function pointerStatus ()\
+[Back to Top](#catagories)
 
 # Keyboard
 
@@ -212,8 +213,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function keyboardOnEvent (name,ev)\
  function keyboardPeek (ofs)\
  function keyboardRead ()\
- function keyboardStatus ()
-
+ function keyboardStatus ()\
+[Back to Top](#catagories)
 
 # Storage
 
@@ -226,8 +227,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function storageWrite (handle,key,val)\
  function storageRemove (handle,key)\
  function storageTuple (handle,index)\
- function storageStatus (handle)
-
+ function storageStatus (handle)\
+[Back to Top](#catagories)
 
 # GuiCanvas
 
@@ -267,8 +268,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function guiAreaAdjust (area,la,ta,wa,ha)\
  function guiRgbaSet (r,g,b,a)\
  function guiRgbaAdjust (rgba,ra,ga,ba,aa)\
- function guiRgbaToString (rgba)
-
+ function guiRgbaToString (rgba)\
+[Back to Top](#catagories)
 
 # Media
 
@@ -281,7 +282,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function mediaDestroy (handle)\
  function mediaGet (handle)\
  function mediaAttach (handle,dhandle)\
- function mediaStatus (handle)
+ function mediaStatus (handle)\
+[Back to Top](#catagories)
 
 # WebSocket
 
@@ -295,8 +297,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function socketDiscard (handle)\
  function socketProcess (handle)\
  function socketStatus (handle)\
- function socketYield ()
-
+ function socketYield ()\
+[Back to Top](#catagories)
 
 # Room
 
@@ -311,8 +313,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function roomPeerNext (handle)\
  function roomPeerByAlias (handle,alias)\
  function roomPeerById (handle,id)\
- function roomPeerByIndex (handle,index)
-
+ function roomPeerByIndex (handle,index)\
+[Back to Top](#catagories)
 
 # Dsp
 
@@ -321,8 +323,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function dspSineWaveAt (rate,sampleNumber,tone)\
  function dspZigZag (size)\
  function dspGetBlock (rgbaframe,framewid,framehit,channel,blksize,blkx,blky,block)\
- function dspSetBlock (rgbaframe,framewid,framehit,channel,blksize,blkx,blky,block)
-
+ function dspSetBlock (rgbaframe,framewid,framehit,channel,blksize,blkx,blky,block)\
+[Back to Top](#catagories)
 
 # BitIO
 
@@ -332,8 +334,8 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function bitioGet (handle)\
  function bitioStatus (handle)\
  function bitioRead (handle)\
- function bitioWrite (handle,bits,val,prepend)
-
+ function bitioWrite (handle,bits,val,prepend)\
+[Back to Top](#catagories)
 
 # WebRtc
 
@@ -354,4 +356,5 @@ A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more\
  function rtcFindDataChannel (handle,name)\
  function rtcOnData (handle,event)\
  function rtcCreateDataChannel (handle,name,mode)\
- function rtcAddDataChannel (handle,name,cdc)
+ function rtcAddDataChannel (handle,name,cdc)\
+[Back to Top](#catagories)

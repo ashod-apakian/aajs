@@ -24,7 +24,6 @@ var aa=(function()
  var    queue_obj={};
  var    touch_obj={};
  var    mouse_obj={};
- var  pointer_obj={};
  var keyboard_obj={};
  var  storage_obj={};
  var      gui_obj={};
@@ -55,7 +54,6 @@ var aa=(function()
  queueObjInit();
  touchObjInit();
  mouseObjInit();
- pointerObjInit();
  keyboardObjInit();
  storageObjInit();
  guiObjInit();
@@ -1446,6 +1444,26 @@ var aa=(function()
  }
 
 
+
+/*
+ man=aa.envManifestInit();
+ man=aa.envManifestSet(man,"background_color","#2f3399");
+ man=aa.envManifestSet(man,"categories",["books","education","medical"]);
+ man=aa.envManifestSet(man,"description","You see what I'm saying!");
+ man=aa.envManifestSet(man,"dir","auto");
+ man=aa.envManifestSet(man,"display","standalone");
+ man=aa.envManifestSet(man,"icons",[{"src":"https://mebeam.com/favicon.png","sizes":"32x32","type":"image/png"},{"src":"https://mebeam.com/favicon192x192.png","sizes":"192x192","type":"image/png"},{"src":"https://mebeam.com/splash512x512.png","sizes":"512x512","type":"image/png"}]);
+ man=aa.envManifestSet(man,"lang","en-US");
+ man=aa.envManifestSet(man,"name","MeBeam. You see what I'm saying!");
+ man=aa.envManifestSet(man,"orientation","portrait");
+ man=aa.envManifestSet(man,"scope","https://mebeam.com/");
+ man=aa.envManifestSet(man,"screenshots",[{"src":"https://mebeam.com/favicon192x192.png","sizes":"192x192","type":"image/png"}]);
+ man=aa.envManifestSet(man,"short_name","MeBeam");
+ man=aa.envManifestSet(man,"start_url","https://mebeam.com/");
+ man=aa.envManifestSet(man,"theme_color","#2FfF7F");
+ aa.envManifestApply(man,"manifestId");
+*/
+
 /*-----------------------------------------------------------------------*/
 
 
@@ -2094,157 +2112,6 @@ var aa=(function()
 
 
 /*-----------------------------------------------------------------------*/
-
-
-
- function pointerObjInit ()
- {
- var state;
-
- if(Object.keys(pointer_obj).length!=0) { return; }
- state={};
- state.is_started=false;
- pointer_obj.state=state;
- pointer_obj.is_init=true;
- }
-
-
-
-
- function pointerStart ()
- {
- if(pointer_obj.state.is_started!=false) { return false; }
- pointer_obj.state.is_started=true;
- pointer_obj.state.event_count=0;
- pointer_obj.state.event_queue_handle=queueCreate();
- pointer_obj.state.event_queue_status=queueStatus(pointer_obj.state.event_queue_handle);
- document.onpointerover=function(event)      { pointerOnEvent("pointerover",event); }
- document.onpointerenter=function(event)     { pointerOnEvent("pointerenter",event); }
- document.onpointerdown=function(event)      { pointerOnEvent("pointerdown",event); }
- document.onpointermove=function(event)      { pointerOnEvent("pointermove",event); }
- document.onpointerup=function(event)        { pointerOnEvent("pointerup",event); }
- document.onpointercancel=function(event)    { pointerOnEvent("pointercancel",event); }
- document.onpointerout=function(event)       { pointerOnEvent("pointerout",event); }
- document.onpointerleave=function(event)     { pointerOnEvent("pointerleave",event); }
- document.gotpointercapture=function(event)  { pointerOnEvent("pointercapture",event); }
- document.lostpointercapture=function(event) { pointerOnEvent("pointerrelease",event); }
- return true;
- }
-
-
-
- function pointerOnEvent (name,ev)
- {
- var msg;
-
-//// aa.debugLog(ev);
-
- msg={};
- msg.name=name;
- msg.type=ev.type;
- msg.stamp=ev.timeStamp;
-
- /*
-  msg.altKey=false
- msg.altitudeAngle=1.5707963267948966
- msg.azimuthAngle=0
- msg.bubbles=true
- msg.button=-1
- msg.buttons=0
- msg.cancelBubble=false
- msg.cancelable=true
- msg.clientX=0
- msg.clientY=539.97509765625
- msg.composed=true
- msg.ctrlKey=false
- msg.currentTarget=null
- msg.defaultPrevented=false
- msg.detail=0
- msg.eventPhase=0
- msg.fromElement=null
- msg.height=1
- msg.isPrimary=true
- msg.isTrusted=true
- msg.layerX=0
- msg.layerY=539
- msg.metaKey=false
- msg.movementX=-36
- msg.movementY=-3
- msg.offsetX=0
- msg.offsetY=539.9751137487619
- msg.pageX=0
- msg.pageY=539.97509765625
- msg.pointerId=1
- msg.pointerType="mouse"
- msg.pressure=0
- msg.relatedTarget=null
- msg.returnValue=true
- msg.screenX=874
- msg.screenY=472
- msg.shiftKey=false
- msg.sourceCapabilities=null
- msg.tangentialPressure=0
- msg.tiltX=0
- msg.tiltY=0
- //msg.timeStamp=1872.1599999989849
- msg.toElement=null
- msg.twist=0
- msg.type="pointermove"
- msg.which=0
- msg.width=1
- */
- msg.x=ev.x;
- msg.y=ev.y;
- queueWrite(pointer_obj.state.event_queue_handle,msg);
- pointer_obj.state.event_queue_status=queueStatus(pointer_obj.state.event_queue_handle);
- }
-
-
-
-
-
- function pointerPeek (ofs)
- {
- var msg;
-
- if(pointer_obj.state.is_started!=true) { return null; }
- msg=queuePeek(pointer_obj.state.event_queue_handle,ofs);
- return msg;
- }
-
-
-
-
- function pointerRead ()
- {
- var msg;
-
- if(pointer_obj.state.is_started!=true) { return null; }
- msg=queueRead(pointer_obj.state.event_queue_handle);
- pointer_obj.state.event_queue_status=queueStatus(pointer_obj.state.event_queue_handle);
- return msg;
- }
-
-
-
- function pointerStatus ()
- {
- var info;
-
- if(pointer_obj.state.is_started!=true) { return null; }
- pointer_obj.state.event_queue_status=queueStatus(pointer_obj.state.event_queue_handle);
- info={};
- info.msgs_queued=pointer_obj.state.event_queue_status.msgs_queued;
- info.msgs_total=pointer_obj.state.event_queue_status.msgs_total;
- return info;
- }
-
-
-
-
-/*-----------------------------------------------------------------------*/
-
-
 
 
 
@@ -5171,7 +5038,6 @@ var aa=(function()
  queue_obj:queue_obj,
  touch_obj:touch_obj,
  mouse_obj:mouse_obj,
- pointer_obj:pointer_obj,
  keyboard_obj:keyboard_obj,
  storage_obj:storage_obj,
  gui_obj:gui_obj,
@@ -5289,15 +5155,6 @@ var aa=(function()
  mouseStatus:mouseStatus,
  mouseCursorGet:mouseCursorGet,
  mouseCursorSet:mouseCursorSet,
-
-
- pointerStart:pointerStart,
- pointerOnEvent:pointerOnEvent,
- pointerPeek:pointerPeek,
- pointerRead:pointerRead,
- pointerStatus:pointerStatus,
-
-
 
  keyboardStart:keyboardStart,
  keyboardPeek:keyboardPeek,

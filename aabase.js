@@ -1355,7 +1355,14 @@ var aa=(function()
    wid=(win.innerWidth||docelem.clientWidth||body.clientWidth);
    hit=(win.innerHeight||docelem.clientHeight||body.clientHeight);
    }
-  viewport.content="initial-scale=1,width="+(wid)+",maximum-scale=1,user-scalable=no";
+
+  viewport.content="initial-scale=1";
+  viewport.content="width="+(wid);
+//  viewport.content="height="+(hit);
+  viewport.content="maximum-scale=1"; // newly added
+  viewport.content="user-scalable=0"; // was no
+
+//  viewport.content="initial-scale=1,width="+(wid)+",maximum-scale=1,user-scalable=0";
   return true;
   }
  return false;
@@ -1405,7 +1412,38 @@ var aa=(function()
 
 
 
+ function envManifestInit ()
+ {
+ var obj;
+ obj={};
+ obj.type="manifest";
+ obj.manifest={};
+ return obj;
+ }
 
+
+
+ function envManifestSet (obj,key,val)
+ {
+ if(obj.type!="manifest") { return null; }
+ obj.manifest[key]=val;
+ return obj;
+ }
+
+
+
+ function envManifestApply (obj,eid)
+ {
+ var sid,sm,blob,mu;
+
+ if(obj.type!="manifest") { return false; }
+ sm=JSON.stringify(obj);
+ blob=new Blob([sm],{type:'application/json'});
+ mu=URL.createObjectURL(blob);
+ sid="#"+eid;
+ document.querySelector(sid).setAttribute('href',mu);
+ return true;
+ }
 
 
 /*-----------------------------------------------------------------------*/
@@ -2099,7 +2137,7 @@ var aa=(function()
  {
  var msg;
 
- aa.debugLog(ev);
+//// aa.debugLog(ev);
 
  msg={};
  msg.name=name;
@@ -2705,6 +2743,29 @@ var aa=(function()
 
 
 
+ function guiCssCordSet (handle,x,y)
+ {
+ var group;
+
+ if((group=guiGroupGet(handle))==null) { return false; }
+ group.css.left=x+"px";
+ group.css.top=y+"px";
+ return true;
+ }
+
+
+ function guiCssSizeSet (handle,w,h)
+ {
+ var group;
+
+ if((group=guiGroupGet(handle))==null) { return false; }
+ group.css.width=w+"px";
+ group.css.height=h+"px";
+ return true;
+ }
+
+
+
 
  function guiSizeFix (handle,x,y,wid,hit)
  {
@@ -2714,7 +2775,8 @@ var aa=(function()
  dpr=window.devicePixelRatio||1;
  if(group.obj.type=="canvas")  {  guiSizeSet(handle,wid*dpr,hit*dpr);  }
  else                          {  guiSizeSet(handle,wid,hit);  }
- guiCssAreaSet(handle,x,y,wid,hit);
+ if(x==null&&y==null)  {  guiCssSizeSet(handle,wid,hit);  }
+ else  {  guiCssAreaSet(handle,x,y,wid,hit);  }
  if(group.obj.type=="canvas")  {  group.ctx.scale(dpr,dpr);  }
  return true;
  }
@@ -2841,18 +2903,28 @@ var aa=(function()
 
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return null; }
  ofnt=obj.ctx.font;
- txt="|_";
- txt="W";
+ txt="^;";
  r=0;
- for(px=4;px<256;px+=2)
+ for(px=4;px<256;px+=4)
   {
   fnt=weight+" "+px+"px "+family;;
   aa.guiCanvasFontSet(handle,fnt);
   recta=aa.guiCanvasTextMeasure(handle,txt);
   nfo={};
   nfo.pixels=px;
-  nfo.width=recta.w;
+  nfo.width=0;
   nfo.height=recta.h;
+  ray[r++]=nfo;
+  }
+ txt="_";
+ r=0;
+ for(px=4;px<256;px+=4)
+  {
+  fnt=weight+" "+px+"px "+family;;
+  aa.guiCanvasFontSet(handle,fnt);
+  recta=aa.guiCanvasTextMeasure(handle,txt);
+  nfo=ray[r];
+  nfo.width=recta.w;
   ray[r++]=nfo;
   }
  obj.ctx.font=ofnt;
@@ -3074,7 +3146,7 @@ var aa=(function()
 
 
 
- function guiEaseInit (type,start,dest,duration)
+ function guiEaseInit (type,start,dest,minstart,maxdest,duration)
  {
  var ez;
 
@@ -3083,43 +3155,45 @@ var aa=(function()
  switch(type)
   {
   default:
-  case "linear":       case 0: ez.mode=0; ez.type="linear"; break;
-  case "inquad":       case 1: ez.mode=1; ez.type="inquad"; break;
-  case "outquad":      case 2: ez.mode=2; ez.type="outquad"; break;
-  case "inoutquad":    case 3: ez.mode=3; ez.type="inoutquad"; break;
-  case "incube":       case 4: ez.mode=4; ez.type="incube"; break;
-  case "outcube":      case 5: ez.mode=5; ez.type="outcube"; break;
-  case "inoutcube":    case 6: ez.mode=6; ez.type="inoutcube"; break;
-  case "inquart":      case 7: ez.mode=7; ez.type="inquart"; break;
-  case "outquart":     case 8: ez.mode=8; ez.type="outquart"; break;
-  case "inoutquart":   case 9: ez.mode=9; ez.type="inoutquart"; break;
-  case "inquint":      case 10: ez.mode=10; ez.type="inquint"; break;
-  case "outquint":     case 11: ez.mode=11; ez.type="outquint"; break;
-  case "inoutquint":   case 12: ez.mode=12; ez.type="inoutquint"; break;
-  case "insine":       case 13: ez.mode=13; ez.type="insine"; break;
-  case "outsine":      case 14: ez.mode=14; ez.type="outsine"; break;
-  case "inoutsine":    case 15: ez.mode=15; ez.type="inoutsine"; break;
-  case "inexpo":       case 16: ez.mode=16; ez.type="inexpo"; break;
-  case "outexpo":      case 17: ez.mode=17; ez.type="outexpo"; break;
-  case "inoutexpo":    case 18: ez.mode=18; ez.type="inoutexpo"; break;
-  case "incirc":       case 19: ez.mode=19; ez.type="incirc"; break;
-  case "outcirc":      case 20: ez.mode=20; ez.type="outcirc"; break;
-  case "inoutcirc":    case 21: ez.mode=21; ez.type="inoutcirc"; break;
-  case "inback":       case 22: ez.mode=22; ez.type="inback"; break;
-  case "outback":      case 23: ez.mode=23; ez.type="outback"; break;
-  case "inoutback":    case 24: ez.mode=24; ez.type="inoutback"; break;
-  case "inbounce":     case 25: ez.mode=25; ez.type="inbounce"; break;
-  case "outbounce":    case 26: ez.mode=26; ez.type="outbounce"; break;
-  case "inoutbounce":  case 27: ez.mode=27; ez.type="inoutbounce"; break;
-  case "inelastic":    case 28: ez.mode=28; ez.type="inelastic"; break;
-  case "outelastic":   case 29: ez.mode=29; ez.type="outelastic"; break;
-  case "inoutelastic": case 30: ez.mode=30; ez.type="inoutelastic"; break;
+  case "linear":       case 0:  ez.mode=0;  ez.type="linear"; ez.mul=1; break;
+  case "inquad":       case 1:  ez.mode=1;  ez.type="inquad"; ez.mul=1; break;
+  case "outquad":      case 2:  ez.mode=2;  ez.type="outquad"; ez.mul=1; break;
+  case "inoutquad":    case 3:  ez.mode=3;  ez.type="inoutquad"; ez.mul=2; break;
+  case "incube":       case 4:  ez.mode=4;  ez.type="incube"; ez.mul=1; break;
+  case "outcube":      case 5:  ez.mode=5;  ez.type="outcube"; ez.mul=1; break;
+  case "inoutcube":    case 6:  ez.mode=6;  ez.type="inoutcube"; ez.mul=2; break;
+  case "inquart":      case 7:  ez.mode=7;  ez.type="inquart"; ez.mul=1; break;
+  case "outquart":     case 8:  ez.mode=8;  ez.type="outquart"; ez.mul=1; break;
+  case "inoutquart":   case 9:  ez.mode=9;  ez.type="inoutquart"; ez.mul=2; break;
+  case "inquint":      case 10: ez.mode=10; ez.type="inquint"; ez.mul=1; break;
+  case "outquint":     case 11: ez.mode=11; ez.type="outquint"; ez.mul=1; break;
+  case "inoutquint":   case 12: ez.mode=12; ez.type="inoutquint"; ez.mul=2; break;
+  case "insine":       case 13: ez.mode=13; ez.type="insine"; ez.mul=1; break;
+  case "outsine":      case 14: ez.mode=14; ez.type="outsine"; ez.mul=1; break;
+  case "inoutsine":    case 15: ez.mode=15; ez.type="inoutsine"; ez.mul=2; break;
+  case "inexpo":       case 16: ez.mode=16; ez.type="inexpo"; ez.mul=1; break;
+  case "outexpo":      case 17: ez.mode=17; ez.type="outexpo"; ez.mul=1; break;
+  case "inoutexpo":    case 18: ez.mode=18; ez.type="inoutexpo"; ez.mul=2; break;
+  case "incirc":       case 19: ez.mode=19; ez.type="incirc"; ez.mul=1; break;
+  case "outcirc":      case 20: ez.mode=20; ez.type="outcirc"; ez.mul=1; break;
+  case "inoutcirc":    case 21: ez.mode=21; ez.type="inoutcirc"; ez.mul=2; break;
+  case "inback":       case 22: ez.mode=22; ez.type="inback"; ez.mul=1; break;
+  case "outback":      case 23: ez.mode=23; ez.type="outback"; ez.mul=1; break;
+  case "inoutback":    case 24: ez.mode=24; ez.type="inoutback"; ez.mul=2; break;
+  case "inbounce":     case 25: ez.mode=25; ez.type="inbounce"; ez.mul=1; break;
+  case "outbounce":    case 26: ez.mode=26; ez.type="outbounce"; ez.mul=1; break;
+  case "inoutbounce":  case 27: ez.mode=27; ez.type="inoutbounce"; ez.mul=2; break;
+  case "inelastic":    case 28: ez.mode=28; ez.type="inelastic"; ez.mul=1; break;
+  case "outelastic":   case 29: ez.mode=29; ez.type="outelastic"; ez.mul=1; break;
+  case "inoutelastic": case 30: ez.mode=30; ez.type="inoutelastic"; ez.mul=2; break;
   }
  ez.start=start;
  ez.dest=dest;
  ez.duration=duration;
  ez.times=aa.timerMsRunning();
  ez.timee=ez.times+ez.duration;
+ ez.mins=minstart;
+ ez.maxd=maxdest;
  return ez;
  }
 
@@ -3132,160 +3206,101 @@ var aa=(function()
 
  now=aa.timerMsRunning();
  os=ez.state;
- if(now-ez.times>=ez.duration) { ez.state=false; }
- if(ez.state!=os)              { aa.debugLog("stop"); }
+ if(now>=ez.timee) { ez.state=false; }
+ if(ez.state!=os)  {  }
  val=(now-ez.times)/ez.duration;
+ val=val*ez.mul;
+ function linear(n)       { return n; }
+ function inQuad(n)       { return n*n; }
+ function outQuad(n)      { return n*(2-n); }
+ function inOutQuad(n)    { n*=2;  if(n<1) return 0.5*n*n;  return-0.5*(--n*(n-2)-1); }
+ function inCube(n)       { return n*n*n; }
+ function outCube(n)      { return --n*n*n+1; }
+ function inOutCube(n)    { n*=2;  if(n<1) return 0.5*n*n*n;  return 0.5*((n-=2)*n*n+2); }
+ function inQuart(n)      { return n*n*n*n; }
+ function outQuart(n)     { return 1-(--n*n*n*n); }
+ function inOutQuart(n)   { n*=2;  if(n<1) return 0.5*n*n*n*n;  return -0.5*((n-=2)*n*n*n-2); }
+ function inQuint(n)      { return n*n*n*n*n; }
+ function outQuint(n)     { return --n*n*n*n*n+1; }
+ function inOutQuint(n)   { n*=2;  if(n<1) return 0.5*n*n*n*n*n;  return 0.5*((n-=2)*n*n*n*n+2); }
+ function inSine(n)       { return 1-Math.cos(n*Math.PI/2); }
+ function outSine(n)      { return Math.sin(n*Math.PI/2); }
+ function inOutSine(n)    { return .5*(1-Math.cos(Math.PI*n)); }
+ function inExpo(n)       { return 0==n?0:Math.pow(1024,n-1); }
+ function outExpo(n)      { return 1==n?n:1-Math.pow(2,-10*n); }
+ function inOutExpo(n)    { if(0==n) return 0;
+                            if(1==n) return 1;
+                            if((n*=2)<1) return .5*Math.pow(1024,n-1);
+                            return .5*(-Math.pow(2,-10*(n-1))+2);
+                          }
+ function inCirc(n)       { return 1-Math.sqrt(1-n*n); }
+ function outCirc(n)      { return Math.sqrt(1-(--n*n)); }
+ function inOutCirc(n)    { n*=2;  if(n<1) return -0.5*(Math.sqrt(1-n*n)-1);  return 0.5*(Math.sqrt(1-(n-=2)*n)+1); }
+ function inBack(n)       { s=1.70158;  return n*n*((s+1)*n-s); }
+ function outBack(n)      { s=1.70158;  return --n*n*((s+1)*n+s)+1; }
+ function inOutBack(n)    { s=1.70158*1.525;  if((n*=2)<1) return 0.5*(n*n*((s+1)*n-s));  return 0.5*((n-=2)*n*((s+1)*n+s)+2); }
+ function inBounce(n)     { return 1-outBounce(1-n); }
+ function outBounce(n)    { if(n<(1/2.75))   { return 7.5625*n*n; }
+                            if(n<(2/2.75))   { return 7.5625*(n-=(1.5/2.75))*n+0.75;  }
+                            if(n<(2.5/2.75)) { return 7.5625*(n-=(2.25/2.75))*n+0.9375;  }
+                            return 7.5625*(n-=(2.625/2.75))*n+0.984375;  }
+ function inOutBounce(n)  { if(n<.5) return inBounce(n*2)*.5;  return  outBounce(n*2-1)*.5+.5; }
+ function inElastic(n)    { a=0.1; p=0.4;
+                            if(n===0) return 0;
+                            if(n===1) return 1;
+                            if(!a||a<1) { a=1; s=p/4; } else s=p*Math.asin(1/a)/(2*Math.PI);
+                            return-(a*Math.pow(2,10*(n-=1))*Math.sin((n-s)*(2*Math.PI)/p));
+                          }
+ function outElastic(n)   { a=0.1; p=0.4;
+                            if(n===0) return 0;
+                            if(n===1) return 1;
+                            if(!a||a<1) { a=1; s=p/4; }  else s=p*Math.asin(1/a)/(2*Math.PI);
+                            return (a*Math.pow(2,-10*n)*Math.sin((n-s)*(2*Math.PI)/p)+1);
+                            }
+ function inOutElastic(n) { a=0.1; p=0.4;
+                            if(n===0) return 0;
+                            if(n===1) return 1;
+                            if(!a||a<1) { a=1; s=p/4; }  else s=p*Math.asin(1/a)/(2*Math.PI);
+                            if((n*=2)<1) return-0.5*(a*Math.pow(2,10*(n-=1))*Math.sin((n-s)*(2*Math.PI)/p));
+                            return a*Math.pow(2,-10*(n-=1))*Math.sin((n-s)*(2*Math.PI)/p)*0.5+1;
+                            }
  switch(ez.mode)
   {
-  case 0:
-  res=val;
-  break;
-  case 1:
-  res=val*val;
-  break;
-  case 2:
-  res=val*(2-val);
-  break;
-  case 3:
-  res=val*2;
-  if(res<1) { res=0.5*val*val; }
-  else      { res=0.5*(--res*(res-2)-1); }
-  break;
-  case 4:
-  res=val*val*val;
-  break;
-  case 5:
-  res=--val*val*val+1;
-  break;
-  case 6:
-  val*=2;
-  if(val<1) { res=0.5*val*val*val; }
-  else      { res=0.5*((val-=2)*val*val+2); }
-  break;
-  case 7:
-  res=val*val*val*val;
-  break;
-  case 8:
-  res=1-(--val*val*val*val);
-  break;
-  case 9:
-  val*=2;
-  if(val<1) { res=0.5*val*val*val*val; }
-  else      { res=-0.5*((val-=2)*val*val*val-2); }
-  break;
-  case 10:
-  res=val*val*val*val*val;
-  break;
-  case 11:
-  res=--val*val*val*val*val+1;
-  break;
-  case 12:
-  val*=2;
-  if(val<1) { res=0.5*val*val*val*val*val; }
-  else      { res=0.5*((val-=2)*val*val*val*val+2); }
-  break;
-  case 13:
-  res=1-Math.cos(val*Math.PI/2);
-  break;
-  case 14:
-  res=Math.sin(val*Math.PI/2);
-  break;
-  case 15:
-  res=.5*(1-Math.cos(Math.PI*val));
-  break;
-  case 16:
-  res=0==val?0:Math.pow(1024,val-1);
-  break;
-  case 17:
-  res=1==val?val:1-Math.pow(2,-10*val);
-  break;
-  case 18:
-  if(0==val) { res=0; break; }
-  if(1==val) { res=1; break; }
-  if((val*=2)<1) { res=.5*Math.pow(1024,val-1); }
-  else           { res=.5*(-Math.pow(2,-10*(val-1))+2); }
-  break;
-  case 19:
-  res=1-Math.sqrt(1-val*val);
-  break;
-  case 20:
-  res=Math.sqrt(1-(--val*val));
-  break;
-  case 21:
-  val*=2
-  if(val<1) { res=-0.5*(Math.sqrt(1-val*val)-1); }
-  else      { res=0.5*(Math.sqrt(1-(val-=2)*val)+1); }
-  break;
-  case 22:
-  s=1.70158; res=val*val*((s+1)*val-s);
-  break;
-  case 23:
-  s=1.70158; res=--val*val*((s+1)*val+s)+1;
-  break;
-  case 24:
-  s=1.70158*1.525;
-  if((val*=2)<1) { res=0.5*(val*val*((s+1)*val-s)); }
-  else           { res=0.5*((val-=2)*val*((s+1)*val+s)+2); }
-  break;
-  case 25:
-  if(val<(1/2.75))   { val=1-val; res=1-(7.5625*val*val);  } else
-  if(val<(2/2.75))   { val=1-val; res=1-(7.5625*(val-=(1.5/2.75))*val+0.75);       } else
-  if(val<(2.5/2.75)) { val=1-val; res=1-(7.5625*(val-=(2.25/2.75))*val+0.9375);    } else
-                     { val=1-val; res=1-(7.5625*(val-=(2.625/2.75))*val+0.984375); }
-  break;
-  case 26:
-  if(val<(1/2.75))   { res=7.5625*val*val;  } else
-  if(val<(2/2.75))   { res=7.5625*(val-=(1.5/2.75))*val+0.75;       } else
-  if(val<(2.5/2.75)) { res=7.5625*(val-=(2.25/2.75))*val+0.9375;    } else
-                     { res=7.5625*(val-=(2.625/2.75))*val+0.984375; }
-  break;
-  case 27:
-  if(val<.5)
-   {
-   val=val*2;
-   if(val<(1/2.75))   { val=1-val; res=1-(7.5625*val*val);  } else
-   if(val<(2/2.75))   { val=1-val; res=1-(7.5625*(val-=(1.5/2.75))*val+0.75);       } else
-   if(val<(2.5/2.75)) { val=1-val; res=1-(7.5625*(val-=(2.25/2.75))*val+0.9375);    } else
-                      { val=1-val; res=1-(7.5625*(val-=(2.625/2.75))*val+0.984375); }
-   res=res*.5;
-   }
-  else
-   {
-   val=(val*2)-1;
-   if(val<(1/2.75))   { res=7.5625*val*val;  } else
-   if(val<(2/2.75))   { res=7.5625*(val-=(1.5/2.75))*val+0.75;       } else
-   if(val<(2.5/2.75)) { res=7.5625*(val-=(2.25/2.75))*val+0.9375;    } else
-                      { res=7.5625*(val-=(2.625/2.75))*val+0.984375; }
-   res=res*.5+.5;
-   }
-  break;
-  case 28:
-  if(val===0) { res=0; break; }
-  if(val===1) { res=1; break; }
-  a=0.1,p=0.4;
-  if(!a||a<1) { a=1; s=p/4; }
-  else        { s=p*Math.asin(1/a)/(2*Math.PI); }
-  res=-(a*Math.pow(2,10*(val-=1))*Math.sin((val-s)*(2*Math.PI)/p));
-  break;
-  case 29:
-  if(val===0) { res=0; break; }
-  if(val===1) { res=1; break; }
-  a=0.1; p=0.4;
-  if(!a||a<1) { a=1; s=p/4; }
-  else        { s=p*Math.asin(1/a)/(2*Math.PI); }
-  res=a*Math.pow(2,-10*val)*Math.sin((val-s)*(2*Math.PI)/p)+1;
-  break;
-  case 30:
-  if(val===0) { res=0; break; }
-  if(val===1) { res=1; break; }
-  a=0.1; p=0.4;
-  if(!a||a<1) { a=1; s=p/4; }
-  else        { s=p*Math.asin(1/a)/(2*Math.PI); }
-  if((val*=2)<1) { res=-0.5*(a*Math.pow(2,10*(val-=1))*Math.sin((val-s)*(2*Math.PI)/p)); }
-  else           { res=a*Math.pow(2,-10*(val-=1))*Math.sin((val-s)*(2*Math.PI)/p)*0.5+1; }
-  break;
+  case 0:  res=linear(val);       break;
+  case 1:  res=inQuad(val);       break;
+  case 2:  res=outQuad(val);      break;
+  case 3:  res=inOutQuad(val);    break;
+  case 4:  res=inCube(val);       break;
+  case 5:  res=outCube(val);      break;
+  case 6:  res=inOutCube(val);    break;
+  case 7:  res=inQuart(val);      break;
+  case 8:  res=outQuart(val);     break;
+  case 9:  res=inOutQuart(val);   break;
+  case 10: res=inQuint(val);      break;
+  case 11: res=outQuint(val);     break;
+  case 12: res=inOutQuint(val);   break;
+  case 13: res=inSine(val);       break;
+  case 14: res=outSine(val);      break;
+  case 15: res=inOutSine(val);    break;
+  case 16: res=inExpo(val);       break;
+  case 17: res=outExpo(val);      break;
+  case 18: res=inOutExpo(val);    break;
+  case 19: res=inCirc(val);       break;
+  case 20: res=outCirc(val);      break;
+  case 21: res=inOutCirc(val);    break;
+  case 22: res=inBack(val);       break;
+  case 23: res=outBack(val);      break;
+  case 24: res=inOutBack(val);    break;
+  case 25: res=inBounce(val);     break;
+  case 26: res=outBounce(val);    break;
+  case 27: res=inOutBounce(val);  break;
+  case 28: res=inElastic(val);    break;
+  case 29: res=outElastic(val);   break;
+  case 30: res=inOutElastic(val); break;
   }
  z=ez.start+(ez.dest-ez.start)*res;
+ if(z<=ez.mins)  { z=ez.mins; }
+ if(z>=ez.maxd)  { z=ez.maxd  }
  return z;
  }
 
@@ -3300,16 +3315,23 @@ var aa=(function()
 
  function guiRgbaStringCommon (index)
  {
- switch(index%8)
+ switch(index%14)
   {
-  case 0: return(guiRgbaString(0,0,0,1));
-  case 1: return(guiRgbaString(255,255,255,1));
-  case 2: return(guiRgbaString(255,0,0,1));
-  case 3: return(guiRgbaString(0,255,0,1));
-  case 4: return(guiRgbaString(0,0,255,1));
-  case 5: return(guiRgbaString(0,255,255,1));
-  case 6: return(guiRgbaString(255,0,255,1));
-  case 7: return(guiRgbaString(255,255,0,1));
+  case 0:  return(guiRgbaString(0,0,0,1));
+  case 1:  return(guiRgbaString(255,255,255,1));
+  case 2:  return(guiRgbaString(255,0,0,1));
+  case 3:  return(guiRgbaString(0,255,0,1));
+  case 4:  return(guiRgbaString(0,0,255,1));
+  case 5:  return(guiRgbaString(0,255,255,1));
+  case 6:  return(guiRgbaString(255,0,255,1));
+  case 7:  return(guiRgbaString(255,255,0,1));
+  case 8:  return(guiRgbaString(255,128,128,1));
+  case 9:  return(guiRgbaString(128,255,128,1));
+  case 10: return(guiRgbaString(128,128,255,1));
+  case 11: return(guiRgbaString(128,255,255,1));
+  case 12: return(guiRgbaString(255,128,255,1));
+  case 13: return(guiRgbaString(255,255,128,1));
+
   }
  }
 
@@ -5231,6 +5253,9 @@ var aa=(function()
  envReload:envReload,
  envFavIconGet:envFavIconGet,
  envFavIconSet:envFavIconSet,
+ envManifestInit:envManifestInit,
+ envManifestSet:envManifestSet,
+ envManifestApply:envManifestApply,
 
  handleDefine:handleDefine,
  handleCheck:handleCheck,
@@ -5297,6 +5322,8 @@ var aa=(function()
  guiParentSet:guiParentSet,
  guiSizeSet:guiSizeSet,
  guiCssAreaSet:guiCssAreaSet,
+ guiCssCordSet:guiCssCordSet,
+ guiCssSizeSet:guiCssSizeSet,
  guiSizeFix:guiSizeFix,
  guiCanvasClear:guiCanvasClear,
  guiCanvasReset:guiCanvasReset,

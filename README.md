@@ -81,6 +81,7 @@ Todo
  function debugStackGet (index)\
  function debugAlert (txt)\
  function debugLog (...params)\
+ function debugMemoryUsage ()\
 [Back to Top](#catagories)
 
 # Promises
@@ -260,6 +261,7 @@ Todo
  function guiCanvasImageGet (handle,x,y,w,h)\
  function guiCanvasImagePut (handle,x,y,sx,sy,sw,sh,img)\
  function guiCanvasImageDraw (handle,x,y,w,h,dx,dy,dw,dh,dest)\
+ function guiCanvasScroll (handle,x,y,w,h,sx,sy)\
  function guiCanvasBorder (handle,x,y,w,h,blw,bcl)\
  function guiCanvasFill (handle,x,y,w,h,fcl)\
  function guiCanvasLine (handle,x1,y1,x2,y2,lw,cl)\

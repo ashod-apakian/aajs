@@ -230,11 +230,14 @@ var aa=(function()
 
  function handleGlobalDump ()
  {
+ var i,ths;
 
-
+ for(i=0;i<handle_obj.state.handle_array.length;i++)
+  {
+  ths=handle_obj.state.handle_array[i];
+  aa.debugLog(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
+  }
  }
-
-
 
 
 /*-----------------------------------------------------------------------*/
@@ -350,6 +353,37 @@ var aa=(function()
  function debugLog (...params)
  {
  setTimeout(console.log.bind(console,...params),0);
+ }
+
+
+
+ function debugMemoryUsage ()
+ {
+ var supported,obj;
+
+ supported=false;
+ obj={};
+ try   { if(performance.memory) { supported=true; }  }
+ catch { }
+ if(supported==true)
+  {
+  obj.heap_limit=performance.memory.jsHeapSizeLimit;
+  obj.heap_size=performance.memory.totalJSHeapSize;
+  obj.heap_used=performance.memory.usedJSHeapSize;
+  obj.heap_limit_kb=parseInt(obj.heap_limit/1024.0);
+  obj.heap_size_kb=parseInt(obj.heap_size/1024.0);
+  obj.heap_used_kb=parseInt(obj.heap_used/1024.0);
+  }
+ else
+  {
+  obj.heap_limit=0;
+  obj.heap_size=0;
+  obj.heap_used=0;
+  obj.heap_limit_kb=0
+  obj.heap_size_kb=0
+  obj.heap_used_kb=0
+  }
+ return obj;
  }
 
 
@@ -2338,7 +2372,7 @@ var aa=(function()
   alert(e);
   return false;
   }
- storage_obj.handef=handleDefine("storage",16);
+ storage_obj.handef=handleDefine("storage",128);
  storage_obj.is_init=true;
  }
 
@@ -2689,21 +2723,6 @@ var aa=(function()
 
 
 
-/*
- function guiCanvasSizeSet (handle,wid,hit)
- {
- var obj;
-
- if((obj=handleCheck(gui_obj.handef,handle))==null)   { return false; }
- obj.dom.width=wid;
- obj.dom.height=hit;
- return true;
- }
-*/
-
-
-
-
 
 
  function guiCanvasClear (handle,full)
@@ -2816,6 +2835,31 @@ var aa=(function()
 
 
 
+ function guiCanvasTextSizeList (handle,weight,family)
+ {
+ var obj,ofnt,fnt,txt,px,recta,r,nfo,ray=[];
+
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return null; }
+ ofnt=obj.ctx.font;
+ txt="|_";
+ txt="W";
+ r=0;
+ for(px=4;px<256;px+=2)
+  {
+  fnt=weight+" "+px+"px "+family;;
+  aa.guiCanvasFontSet(handle,fnt);
+  recta=aa.guiCanvasTextMeasure(handle,txt);
+  nfo={};
+  nfo.pixels=px;
+  nfo.width=recta.w;
+  nfo.height=recta.h;
+  ray[r++]=nfo;
+  }
+ obj.ctx.font=ofnt;
+ return ray;
+ }
+
+
 
 
 
@@ -2855,6 +2899,19 @@ var aa=(function()
  }
 
 
+ function guiCanvasScroll (handle,x,y,w,h,sx,sy)
+ {
+ var obj,img;
+
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ img=obj.ctx.getImageData(x,y,w,h);
+ obj.ctx.putImageData(img,x+sx,y+sy,0,0,w,h);
+ return true;
+ }
+
+
+
+
 
 
  function guiCanvasBorder (handle,x,y,w,h,blw,bcl)
@@ -2864,7 +2921,7 @@ var aa=(function()
  if(obj.type!="canvas")                             { return false; }
  if(bcl) { obj.ctx.strokeStyle=bcl; }
  if(blw) { obj.ctx.lineWidth=blw;   }
- obj.ctx.strokeRect(x,y,w,h);
+ obj.ctx.strokeRect(x,y,w-blw,h-blw);
  return true;
  }
 
@@ -3061,7 +3118,7 @@ var aa=(function()
  ez.start=start;
  ez.dest=dest;
  ez.duration=duration;
- ez.times=Date.now();
+ ez.times=aa.timerMsRunning();
  ez.timee=ez.times+ez.duration;
  return ez;
  }
@@ -3073,7 +3130,7 @@ var aa=(function()
  {
  var res,s,a,now,z,val,os;
 
- now=Date.now();
+ now=aa.timerMsRunning();
  os=ez.state;
  if(now-ez.times>=ez.duration) { ez.state=false; }
  if(ez.state!=os)              { aa.debugLog("stop"); }
@@ -3365,7 +3422,7 @@ var aa=(function()
  state.detect_stage=0;
  state.detect_state="idle";
  state.detect_obj={};
- media_obj.handef=handleDefine("media",16);
+ media_obj.handef=handleDefine("media",128);
  media_obj.state=state;
  media_obj.is_init=true;
  }
@@ -3695,7 +3752,7 @@ var aa=(function()
  function socketObjInit ()
  {
  if(Object.keys(socket_obj).length!=0) { return; }
- socket_obj.handef=handleDefine("socket",64);
+ socket_obj.handef=handleDefine("socket",128);
  socket_obj.is_init=true;
  }
 
@@ -3880,7 +3937,7 @@ var aa=(function()
  function roomObjInit ()
  {
  if(Object.keys(room_obj).length!=0) { return; }
- room_obj.handef=handleDefine("room",16);
+ room_obj.handef=handleDefine("room",128);
  room_obj.is_init=true;
  }
 
@@ -4263,7 +4320,7 @@ var aa=(function()
  function bitioObjInit ()
  {
  if(Object.keys(bitio_obj).length!=0) { return; }
- bitio_obj.handef=handleDefine("bitio",32);
+ bitio_obj.handef=handleDefine("bitio",128);
  bitio_obj.is_init=true;
  }
 
@@ -4406,7 +4463,7 @@ var aa=(function()
  function rtcObjInit ()
  {
  if(Object.keys(rtc_obj).length!=0) { return; }
- rtc_obj.handef=handleDefine("rtcio",32);
+ rtc_obj.handef=handleDefine("rtc",128);
  rtc_obj.is_init=true;
  }
 
@@ -5110,6 +5167,7 @@ var aa=(function()
  debugStackGet:debugStackGet,
  debugAlert:debugAlert,
  debugLog:debugLog,
+ debugMemoryUsage:debugMemoryUsage,
 
  promiseCreate:promiseCreate,
  promiseDestroy:promiseDestroy,
@@ -5240,15 +5298,16 @@ var aa=(function()
  guiSizeSet:guiSizeSet,
  guiCssAreaSet:guiCssAreaSet,
  guiSizeFix:guiSizeFix,
-// guiCanvasSizeSet:guiCanvasSizeSet,
  guiCanvasClear:guiCanvasClear,
  guiCanvasReset:guiCanvasReset,
  guiCanvasSmoothingSet:guiCanvasSmoothingSet,
  guiCanvasFontSet:guiCanvasFontSet,
  guiCanvasTextMeasure:guiCanvasTextMeasure,
+ guiCanvasTextSizeList:guiCanvasTextSizeList,
  guiCanvasImageGet:guiCanvasImageGet,
  guiCanvasImagePut:guiCanvasImagePut,
  guiCanvasImageDraw:guiCanvasImageDraw,
+ guiCanvasScroll:guiCanvasScroll,
  guiCanvasBorder:guiCanvasBorder,
  guiCanvasFill:guiCanvasFill,
  guiCanvasLine:guiCanvasLine,

@@ -252,6 +252,7 @@ Todo
  function guiParentSet (handle,phandle)\
  function guiSizeSet (handle,wid,hit)\
  function guiCssAreaSet (handle,x,y,w,h)\
+ function guiCssCordSet (handle,x,y)\
  function guiSizeFix (handle,x,y,wid,hit)\
  function guiCanvasClear (handle,full)\
  function guiCanvasReset (handle)\

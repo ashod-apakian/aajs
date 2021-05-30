@@ -1,6 +1,16 @@
 # aajs
 A JavaScript library for Canvas, WebRtc, Media, Data Structures and much more
 
+# Introduction
+Todo
+
+# Rationale
+Todo
+
+# Examples
+Todo
+
+
 
 # Catagories
 

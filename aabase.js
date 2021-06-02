@@ -233,7 +233,38 @@ var aa=(function()
  for(i=0;i<handle_obj.state.handle_array.length;i++)
   {
   ths=handle_obj.state.handle_array[i];
-  aa.debugLog(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
+  if(ths.count==0) { continue; }
+  //aa.debugLog(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
+  console.log(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
+  }
+ }
+
+
+
+
+ function handleGlobalKill ()
+ {
+ var i,ths,h,obj,han;
+
+ for(h=0;h<handle_obj.state.handle_array.length;h++)
+  {
+  ths=handle_obj.state.handle_array[h];
+  //console.log(">> base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
+  for(i=0;i<ths.slots;i++)
+   {
+   if(ths.count==0) { continue; }
+   obj=ths.array[i];
+   if(obj.in_use!=true) { continue; }
+   han=obj.self_handle;
+   ///console.log(">> base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type+" "+i+" "+ths.slots+" "+obj.self_index+" "+han);
+   switch(ths.type)
+    {
+    case "gui":
+    aa.guiDestroy(han);
+    break;
+    }
+   }
+  //aa.debugLog(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
   }
  }
 
@@ -558,6 +589,30 @@ var aa=(function()
  tmo.el=aa.timerMsRunning()-tmo.ms;
  if(tmo.el>=tmo.to) { return true; }
  return false;
+ }
+
+
+
+ function timerRaterInit ()
+ {
+ var obj;
+ obj={};
+ obj.type="rater";
+ obj.tik=timerTikNow(true);
+ obj.elapsed=0;
+ obj.hits=0;
+ obj.hz=0;
+ return obj;
+ }
+
+
+ function timerRaterUpdate (obj,hits)
+ {
+ if(obj.type!="rater") { return null; }
+ obj.hits+=hits;
+ obj.elapsed=timerTikElapsed(true,obj.tik);
+ obj.hz=obj.hits/(obj.elapsed/1000);
+ return obj;
  }
 
 
@@ -934,7 +989,7 @@ var aa=(function()
  var hash,k,primeCounter,isComposite,candidate,w,oldHash;
  var i2,w15,a,b,e,temp1,temp2,w2;
 
- function rightRotate(value,amount) { return (value>>>amount)|(value<<(32-amount)); };
+ function _rightRotate(value,amount) { return (value>>>amount)|(value<<(32-amount)); };
  lengthProperty='length'
  result='';
  words=[];
@@ -972,10 +1027,10 @@ var aa=(function()
    i2=i+j;
    w15=w[i-15],w2=w[i-2];
    a=hash[0],e=hash[4];
-   temp1=hash[7]+(rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:
+   temp1=hash[7]+(_rightRotate(e,6)^_rightRotate(e,11)^_rightRotate(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:
     (
-    w[i-16]+(rightRotate(w15,7)^rightRotate(w15,18)^(w15>>>3))+w[i-7]+(rightRotate(w2,17)^rightRotate(w2,19)^(w2>>>10)))|0);
-    temp2=(rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+    w[i-16]+(_rightRotate(w15,7)^_rightRotate(w15,18)^(w15>>>3))+w[i-7]+(_rightRotate(w2,17)^_rightRotate(w2,19)^(w2>>>10)))|0);
+    temp2=(_rightRotate(a,2)^_rightRotate(a,13)^_rightRotate(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
     hash=[(temp1+temp2)|0].concat(hash);
     hash[4]=(hash[4]+temp1)|0;
     }
@@ -1204,24 +1259,40 @@ var aa=(function()
 
  function envEventProc (event)
  {
- if(event.type=="click")
+ switch(event.type)
   {
+  case "click":
+  case "tap":
+  case "touchend":
   if(aa.main_state.dethrottle_stage==1)  {   aa.mainDethrottle();    }
-  }
- else
- if(event.type=="visibilitychange"||event.type=="webkitvisibilitychange"||event.type=="blur"||event.type=="focus")
-  {
-  // aa.debugLog("vs="+document.visibilityState+"  hd="+document.hidden);
-  }
- else
- if(event.type=="mousemove")   {   }
- else
- if(event.type=="resize")   {   }
- else
- if(event.type=="orientationchange")   {   }
- else
-  {
+  break;
+
+  case "visibilitychange":
+  case "webkitvisibilitychange":
+  case "blur":
+  case "focus":
+  //aa.debugLog("vs="+document.visibilityState+"  hd="+document.hidden);
+  break;
+
+  case "mousemove":
+  break;
+
+  case "resize":
+  break;
+
+  case "orientationchange":
+  break;
+
+  case "beforeunload":
+  break;
+
+  case "unload":
+  break;
+
+  default:
+  console.log("ev=",event);
   //aa.debugLog("ev=",event);
+  break;
   }
  }
 
@@ -1242,7 +1313,9 @@ var aa=(function()
   window.removeEventListener("focus",env_obj.event_proc,false);
   window.removeEventListener("blur",env_obj.event_proc,false);
   window.removeEventListener("wheel",env_obj.event_proc,false);
+  document.body.removeEventListener("touchend",env_obj.event_proc,false);
   document.body.removeEventListener("click",env_obj.event_proc,false);
+  document.body.removeEventListener("tap",env_obj.event_proc,false);
   document.body.removeEventListener("mousemove",env_obj.event_proc,false);
   document.removeEventListener("visibilitychange",env_obj.event_proc,false);
   document.removeEventListener("mozvisibilitychange",env_obj.event_proc,false);
@@ -1261,7 +1334,9 @@ var aa=(function()
   window.addEventListener("focus",function(event)             { env_obj.event_proc(event);  },false);
   window.addEventListener("blur",function(event)              { env_obj.event_proc(event);  },false);
   window.addEventListener("wheel",function(event)             { env_obj.event_proc(event);  });
+  document.body.addEventListener("touchend",function(event)             { env_obj.event_proc(event);  });
   document.body.addEventListener("click",function(event)             { env_obj.event_proc(event);  });
+  document.body.addEventListener("tap",function(event)               { env_obj.event_proc(event);  });
   document.body.addEventListener("mousemove",function(event)         { env_obj.event_proc(event);  });//   audio.play()})
   document.addEventListener("visibilitychange",function(event)       { env_obj.event_proc(event);  });
   document.addEventListener("mozvisibilitychange",function(event)    { env_obj.event_proc(event);  });
@@ -1287,8 +1362,11 @@ var aa=(function()
  docelem=doc.documentElement;
  ori=(screen.orientation||{}).type||screen.mozOrientation||screen.msOrientation;
  body=doc.getElementsByTagName('body')[0];
- disp.win_wid=win.innerWidth||docelem.clientWidth||body.clientWidth;
- disp.win_hit=win.innerHeight||docelem.clientHeight||body.clientHeight;
+ disp.win_wid=docelem.clientWidth||win.innerWidth||body.clientWidth;
+ disp.win_hit=docelem.clientHeight||win.innerHeight||body.clientHeight;
+ disp.win_wid=win.innerWidth||docelem.clientWidth;
+ disp.win_hit=win.innerHeight||docelem.clientHeight;
+
  disp.scr_wid=screen.width;
  disp.scr_hit=screen.height;
  disp.density=1.0;
@@ -1350,13 +1428,12 @@ var aa=(function()
    doc=document;
    docelem=doc.documentElement;
    body=doc.getElementsByTagName('body')[0];
-   wid=(win.innerWidth||docelem.clientWidth||body.clientWidth);
-   hit=(win.innerHeight||docelem.clientHeight||body.clientHeight);
+   wid=(docelem.clientWidth||win.innerWidth||body.clientWidth);
+   hit=(docelem.clientHeight||win.innerHeight||body.clientHeight);
    }
-
   viewport.content="initial-scale=1";
   viewport.content="width="+(wid);
-//  viewport.content="height="+(hit);
+  viewport.content="height="+(hit);
   viewport.content="maximum-scale=1"; // newly added
   viewport.content="user-scalable=0"; // was no
 
@@ -1385,7 +1462,7 @@ var aa=(function()
 
  function envReload (forced,ms)
  {
- ms=parseInt(ms+num.Rand(500));
+ ms=parseInt(ms+aa.numRand(500));
  setTimeout(function() { window.location.reload(forced);  return false;  }, ms);
  return true;
  }
@@ -1588,7 +1665,26 @@ var aa=(function()
 
 /*-----------------------------------------------------------------------*/
 
+/*
+       touches: A list of information for every finger currently touching the screen
+ targetTouches: Like touches, but is filtered to only the information for finger touches that started out within the same node
+changedTouches: A list of information for every finger involved in the event
 
+=When I put a finger down, all three lists will have the same information.
+ It will be in changedTouches because putting the finger down is what caused the event
+
+=When I put a second finger down, touches will have two items, one for each finger.
+ targetTouches will have two items only if the finger was placed in the same node as the first finger.
+ changedTouches will have the information related to the second finger, because it’s what caused the event
+*If I put two fingers down at exactly the same time, it’s possible to have two items in changedTouches, one for each finger
+
+=If I move my fingers, the only list that will change is changedTouches and will
+ contain information related to as many fingers as have moved (at least one).
+
+=When I lift a finger, it will be removed from touches, targetTouches and will appear in changedTouches since it’s what caused the event
+
+=Removing my last finger will leave touches and targetTouches empty, and changedTouches will contain information for the last finger
+*/
 
 
  function touchObjInit ()
@@ -1626,48 +1722,72 @@ var aa=(function()
 
  touch_obj.utils.attachEvent=function(element,eventName,callback)
   {
+  //eventName either touchStart,touchMove,touchEnd
+  //              or pointerDown,pointerMove,pointerUp
   if('addEventListener' in window) {  return element.addEventListener(eventName,callback,false);        }
   };
+
  touch_obj.utils.fireFakeEvent=function(e,eventName)
   {
-  if(document.createEvent)         {  return e.target.dispatchEvent(touch_obj.utils.createEvent(e,eventName));    }
-  };
- touch_obj.utils.createEvent=function(olde,name)
-  {
+  // eventname is Tap
+  // e is either pointerevent, or touchevent
   if(document.createEvent)
    {
+   ///###  console.log("about to dispatch, after utils.createevent "+eventName);
+   return e.target.dispatchEvent(touch_obj.utils.createEvent(e,eventName));
+   }
+  };
+
+ touch_obj.utils.createEvent=function(olde,name)
+  {
+  // name is tap
+  // olde is either pointerevent or touchevent
+  if(document.createEvent)
+   {
+   ///###   console.log("utils.createEvent "+name+" now creating HTMLevent");
    evnt=window.document.createEvent('HTMLEvents');
-   evnt.initEvent(name,true,true);
+   evnt.initEvent(name,true,true);//true);
    evnt.olde=olde;
    evnt.eventName=name;
    return evnt;
    }
   aa.debugAlert();
   };
+
  touch_obj.utils.getRealEvent=function(e)
   {
+  // e is either touchevent or pointerevet
   return e;
   };
+
  touch_obj.eventMatrix=
   [
-  {test:('propertyIsEnumerable' in window||'hasOwnProperty' in document)&&(window.propertyIsEnumerable('ontouchstart')||
-   document.hasOwnProperty('ontouchstart')||window.hasOwnProperty('ontouchstart')),
+  {test:('propertyIsEnumerable' in window||'hasOwnProperty' in document)&&(window.propertyIsEnumerable('ontouchstart')||document.hasOwnProperty('ontouchstart')||window.hasOwnProperty('ontouchstart')),
    events: { start: 'touchstart', move: 'touchmove', end: 'touchend'  }   },
-  {test:window.navigator.msPointerEnabled,events: { start: 'MSPointerDown',move: 'MSPointerMove',end: 'MSPointerUp' }   },
-  {test:(window.navigator.pointerEnabled||window.PointerEvent),events: { start: 'pointerdown', move: 'pointermove', end: 'pointerup'  }   }
+
+  {test:window.navigator.msPointerEnabled,
+   events: { start: 'MSPointerDown',move: 'MSPointerMove',end: 'MSPointerUp' }   },
+
+  {test:(window.navigator.pointerEnabled||window.PointerEvent),
+   events: { start: 'pointerdown', move: 'pointermove', end: 'pointerup'  }   }
   ];
+
  touch_obj.Tap.options=
   {
-  eventName: 'tap',fingerMaxOffset: 22
+  eventName: 'tap',fingerMaxOffset: 12
   };
+
  touch_obj.attachDeviceEvent=function(eventName)
   {
+  // this seems only be called once
   return touch_obj.utils.attachEvent(document.documentElement,touch_obj.deviceEvents[eventName],touch_obj.handlers[eventName]);
   };
+
  touch_obj.handlers=
   {
   start: function(e)
    {
+   ///### aa.debugLog("touch_obj.handler start ",e);
    e=touch_obj.utils.getRealEvent(e);
    touch_obj.coords.start=[e.pageX,e.pageY];
    touch_obj.coords.offset=[0,0];
@@ -1684,6 +1804,7 @@ var aa=(function()
   move: function(e)
    {
    if(!touch_obj.coords.start&&!touch_obj.coords.move) {                return false;            }
+   ///### aa.debugLog("touch_obj.handler move ",e);
    e=touch_obj.utils.getRealEvent(e);
    touch_obj.coords.move=[e.pageX,e.pageY];
    touch_obj.coords.offset=[Math.abs(touch_obj.coords.move[0]-touch_obj.coords.start[0]),Math.abs(touch_obj.coords.move[1]-touch_obj.coords.start[1])];
@@ -1699,6 +1820,7 @@ var aa=(function()
    },
   end: function(e)
    {
+   ///### aa.debugLog("touch_obj.handler end ",e);
    e=touch_obj.utils.getRealEvent(e);
    if(!touch_obj.utils.fireFakeEvent(e,touch_obj.Tap.options.eventName))
     {
@@ -1713,15 +1835,19 @@ var aa=(function()
    },
   click: function(e)
    {
+   ///### aa.debugLog("touch_obj.handler click ",e);
    if(!touch_obj.utils.fireFakeEvent(e,touch_obj.Tap.options.eventName)) {    return e.preventDefault();  }
    }
   };
+
  touch_obj.init=function()
   {
+  ///### aa.debugLog(">>touch_obj.init, only calleed once. eventmatrix.len="+touch_obj.eventMatrix.length);
   for(i=0;i<touch_obj.eventMatrix.length;i++)
    {
    if(touch_obj.eventMatrix[i].test)
     {
+    ///### aa.debugLog("eventmatrix["+i+"].test true");
     touch_obj.deviceEvents=touch_obj.eventMatrix[i].events;
     touch_obj.attachDeviceEvent('start');
     touch_obj.attachDeviceEvent('move');
@@ -1731,23 +1857,28 @@ var aa=(function()
    }
   if(i==touch_obj.eventMatrix.length)
    {
+   ///### aa.debugLog("all eventmatrix failed, so attaching click");
    return touch_obj.utils.attachEvent(document.documentElement,'click',touch_obj.handlers.click);
    }
   return;
   };
+
+
+
  touch_obj.state.is_started=true;
- touch_obj.state.event_count=0;
+ ///touch_obj.state.event_count=0;
  touch_obj.state.event_queue_handle=queueCreate();
  touch_obj.state.event_queue_status=queueStatus(touch_obj.state.event_queue_handle);
  touch_obj.state.event_counter=0;
 
+
+ /**
  t=10;
  touch_obj.state.finger={};
  touch_obj.state.finger.max_tracks=t;
  touch_obj.state.finger.track_count=0;
  touch_obj.state.finger.event_track=dataArray2DCreate(t);
- ///touch_obj.state.finger.event_index=[];
- ///for(q=0;q<t;q++) { touch_obj.state.finger.event_index[q]=-1; }
+ */
 
  touch_obj.init();
  document.body.style.touchAction="none";
@@ -1757,28 +1888,28 @@ var aa=(function()
   eve=event;
   obj={};
   obj.ec=touch_obj.state.event_counter;
-  obj.type=typ;
-  obj.eventName=eve.eventName;
-  obj.eventPhase=eve.eventPhase;
+  ///obj.type=typ;
+  ///obj.eventName=eve.eventName;
+  ///obj.eventPhase=eve.eventPhase;
+  obj.what=eve.olde.type;
   obj.altKey=eve.olde.altKey;
   obj.ctrlKey=eve.olde.ctrlKey;
-  obj.what=eve.olde.type;
   obj.shiftKey=eve.olde.shiftKey;
   obj.timeStamp=eve.olde.timeStamp;
-  obj.which=eve.olde.which;
-  obj.srcElementId=eve.olde.srcElement.id;
-  obj.targetId=eve.olde.target.id;
-  obj.x=null;
-  obj.y=null;
-  if(eve.olde.x) { obj.x=eve.olde.x; }
-  if(eve.olde.y) { obj.y=eve.olde.y; }
+  ///obj.which=eve.olde.which;
+  ///obj.srcElementId=eve.olde.srcElement.id;
+  ///obj.targetId=eve.olde.target.id;
+  //obj.x=null;
+  //obj.y=null;
+  //if(eve.olde.x) { obj.x=eve.olde.x; }
+  //if(eve.olde.y) { obj.y=eve.olde.y; }
   obj.changedTouchesLen=0;
   obj.changedTouches=[];
   if(eve.olde.changedTouches)
    {
    obj.changedTouchesLen=eve.olde.changedTouches.length;
    k=obj.changedTouchesLen;
-   for(j=0;j<3;j++)
+   for(j=0;j<5;j++)
     {
     if(j<k)
      {
@@ -1786,81 +1917,87 @@ var aa=(function()
      obj.changedTouches[j].ec=eve.olde.changedTouches[j].ec;//touch_obj.state.event_counter;//eve.olde.changedTouches[j].ec;
      obj.changedTouches[j].clientX=eve.olde.changedTouches[j].clientX;
      obj.changedTouches[j].clientY=eve.olde.changedTouches[j].clientY;
-     obj.changedTouches[j].force=eve.olde.changedTouches[j].force;
+    obj.changedTouches[j].force=eve.olde.changedTouches[j].force;
      obj.changedTouches[j].identifier=eve.olde.changedTouches[j].identifier;
-     obj.changedTouches[j].pageX=eve.olde.changedTouches[j].pageX;
-     obj.changedTouches[j].pageY=eve.olde.changedTouches[j].pageY;
-     obj.changedTouches[j].radiusX=eve.olde.changedTouches[j].radiusX;
-     obj.changedTouches[j].radiusY=eve.olde.changedTouches[j].radiusY;
-     obj.changedTouches[j].rotationAngle=eve.olde.changedTouches[j].rotationAngle;
-     obj.changedTouches[j].screenX=eve.olde.changedTouches[j].screenX;
-     obj.changedTouches[j].screenY=eve.olde.changedTouches[j].screenY;
-     obj.changedTouches[j].targetId=eve.olde.changedTouches[j].targetId;
+    obj.changedTouches[j].pageX=eve.olde.changedTouches[j].pageX;
+    obj.changedTouches[j].pageY=eve.olde.changedTouches[j].pageY;
+    obj.changedTouches[j].radiusX=eve.olde.changedTouches[j].radiusX;
+    obj.changedTouches[j].radiusY=eve.olde.changedTouches[j].radiusY;
+    obj.changedTouches[j].rotationAngle=eve.olde.changedTouches[j].rotationAngle;
+    obj.changedTouches[j].screenX=eve.olde.changedTouches[j].screenX;
+    obj.changedTouches[j].screenY=eve.olde.changedTouches[j].screenY;
+     ///obj.changedTouches[j].targetId=eve.olde.changedTouches[j].targetId;
      }
     }
    }
+
   obj.targetTouchesLen=0;
   obj.targetTouches=[];
   if(eve.olde.targetTouches)
    {
    obj.targetTouchesLen=eve.olde.targetTouches.length;
    k=obj.targetTouchesLen;
-   for(j=0;j<3;j++)
+   for(j=0;j<5;j++)
     {
     if(j<k)
      {
      obj.targetTouches[j]={};
-     //obj.targetTouches[j].ec=eve.olde.targetTouches[j].ec;//touch_obj.state.event_counter;//eve.olde.ec;//targetTouches[j].ec;
+     obj.targetTouches[j].ec=eve.olde.targetTouches[j].ec;//touch_obj.state.event_counter;//eve.olde.ec;//targetTouches[j].ec;
      obj.targetTouches[j].clientX=eve.olde.targetTouches[j].clientX;
      obj.targetTouches[j].clientY=eve.olde.targetTouches[j].clientY;
-     obj.targetTouches[j].force=eve.olde.targetTouches[j].force;
+    obj.targetTouches[j].force=eve.olde.targetTouches[j].force;
      obj.targetTouches[j].identifier=eve.olde.targetTouches[j].identifier;
-     obj.targetTouches[j].pageX=eve.olde.targetTouches[j].pageX;
-     obj.targetTouches[j].pageY=eve.olde.targetTouches[j].pageY;
-     obj.targetTouches[j].radiusX=eve.olde.targetTouches[j].radiusX;
-     obj.targetTouches[j].radiusY=eve.olde.targetTouches[j].radiusY;
+    obj.targetTouches[j].pageX=eve.olde.targetTouches[j].pageX;
+    obj.targetTouches[j].pageY=eve.olde.targetTouches[j].pageY;
+    obj.targetTouches[j].radiusX=eve.olde.targetTouches[j].radiusX;
+    obj.targetTouches[j].radiusY=eve.olde.targetTouches[j].radiusY;
      obj.targetTouches[j].rotationAngle=eve.olde.targetTouches[j].rotationAngle;
      obj.targetTouches[j].screenX=eve.olde.targetTouches[j].screenX;
-     obj.targetTouches[j].screenY=eve.olde.targetTouches[j].screenY;
-     obj.targetTouches[j].targetId=eve.olde.targetTouches[j].targetId;
+      obj.targetTouches[j].screenY=eve.olde.targetTouches[j].screenY;
+     ///obj.targetTouches[j].targetId=eve.olde.targetTouches[j].targetId;
      }
     }
    }
+
+
   obj.touchesLen=0;
   obj.touches=[];
   if(eve.olde.touches)
    {
    obj.touchesLen=eve.olde.touches.length;
    k=obj.touchesLen;
-   for(j=0;j<3;j++)
+   for(j=0;j<5;j++)
     {
     if(j<k)
      {
      obj.touches[j]={};
-     //obj.touches[j].ec=eve.olde.touches[j].ec;
+     obj.touches[j].ec=eve.olde.touches[j].ec;
      obj.touches[j].clientX=eve.olde.touches[j].clientX;
      obj.touches[j].clientY=eve.olde.touches[j].clientY;
-     obj.touches[j].force=eve.olde.touches[j].force;
+    obj.touches[j].force=eve.olde.touches[j].force;
      obj.touches[j].identifier=eve.olde.touches[j].identifier;
-     obj.touches[j].pageX=eve.olde.touches[j].pageX;
-     obj.touches[j].pageY=eve.olde.touches[j].pageY;
-     obj.touches[j].radiusX=eve.olde.touches[j].radiusX;
-     obj.touches[j].radiusY=eve.olde.touches[j].radiusY;
-     obj.touches[j].rotationAngle=eve.olde.touches[j].rotationAngle;
-     obj.touches[j].screenX=eve.olde.touches[j].screenX;
-     obj.touches[j].screenY=eve.olde.touches[j].screenY;
-     obj.touches[j].targetId=eve.olde.touches[j].targetId;
+    obj.touches[j].pageX=eve.olde.touches[j].pageX;
+    obj.touches[j].pageY=eve.olde.touches[j].pageY;
+    obj.touches[j].radiusX=eve.olde.touches[j].radiusX;
+    obj.touches[j].radiusY=eve.olde.touches[j].radiusY;
+    obj.touches[j].rotationAngle=eve.olde.touches[j].rotationAngle;
+    obj.touches[j].screenX=eve.olde.touches[j].screenX;
+    obj.touches[j].screenY=eve.olde.touches[j].screenY;
+     ///obj.touches[j].targetId=eve.olde.touches[j].targetId;
      }
     }
    }
-  touch_obj.state.event_count++;
+  ///touch_obj.state.event_count++;
+  delete obj.changedTouchesLen;
+  delete obj.touchesLen;
+  delete obj.targetTouchesLen;
   queueWrite(touch_obj.state.event_queue_handle,obj);
   touch_obj.state.event_queue_status=queueStatus(touch_obj.state.event_queue_handle);
   touch_obj.state.event_counter++;
   obj={};
   event.preventDefault();
   event.stopPropagation();
-  },false);
+  },false);//false);
  return true;
  }
 
@@ -1892,6 +2029,7 @@ var aa=(function()
 
 
 
+ /**
  function touchProcess (msg)
  {
  var obj,s,i,t,trk,mt,tc,empty,used,trx;
@@ -1899,8 +2037,6 @@ var aa=(function()
  if(touch_obj.state.is_started!=true) { return null; }
  if(msg.what=="pointerup"||msg.what=="pointermove"||msg.what=="pointerup")
   {
-
-
   }
  mt=touch_obj.state.finger.max_tracks;
  tc=touch_obj.state.finger.track_count;
@@ -1962,6 +2098,7 @@ var aa=(function()
  return touch_obj.state.finger;
  }
 
+*/
 
 
  function touchStatus ()
@@ -2489,6 +2626,7 @@ var aa=(function()
    {
    obj.ctx=document.getElementById(obj.id).getContext("2d");
    obj.ctx.self_handle=h;
+   obj.ctx.scale_factor=1.0;
    guiCanvasReset(h);
    }
   return h;
@@ -2595,6 +2733,8 @@ var aa=(function()
  }
 
 
+
+
  function guiCssAreaSet (handle,x,y,w,h)
  {
  var group;
@@ -2604,7 +2744,6 @@ var aa=(function()
  group.css.top=y+"px";
  group.css.width=w+"px";
  group.css.height=h+"px";
- //console.log(handle);
  return true;
  }
 
@@ -2633,18 +2772,35 @@ var aa=(function()
 
 
 
-
- function guiSizeFix (handle,x,y,wid,hit)
+ function guiSizeFix (handle,x,y,wid,hit,hq)
  {
- var group,dpr;
+ var group,dpr,w,h,ww,wh;
 
  if((group=guiGroupGet(handle))==null) { return false; }
  dpr=window.devicePixelRatio||1;
- if(group.obj.type=="canvas")  {  guiSizeSet(handle,wid*dpr,hit*dpr);  }
- else                          {  guiSizeSet(handle,wid,hit);  }
- if(x==null&&y==null)  {  guiCssSizeSet(handle,wid,hit);  }
- else  {  guiCssAreaSet(handle,x,y,wid,hit);  }
- if(group.obj.type=="canvas")  {  group.ctx.scale(dpr,dpr);  }
+ if(!hq) { dpr=1; }
+ if(group.obj.type=="canvas")
+  {
+  ww=document.documentElement.clientWidth||window.innerWidth||body.clientWidth;
+  wh=document.documentElement.clientHeight||window.innerHeight||body.clientHeight;
+  w=Math.floor(wid*dpr);
+  h=Math.floor(hit*dpr);
+//  if(w>=ww) { w=ww; }
+//  if(h>=wh) { h=wh; }
+  guiSizeSet(handle,w,h);
+  //aa.debugLog(w+" "+h);
+  }
+ else
+  {
+  guiSizeSet(handle,wid,hit);
+  }
+ if(x==null&&y==null)  {  guiCssSizeSet(handle,wid,hit);     }
+ else                  {  guiCssAreaSet(handle,x,y,wid,hit); }
+ if(group.obj.type=="canvas")
+  {
+  group.ctx.scale(dpr,dpr);
+  group.ctx.scale_factor=dpr;
+  }
  return true;
  }
 
@@ -2872,8 +3028,10 @@ var aa=(function()
 
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.beginPath();
  if(fcl) { obj.ctx.fillStyle=fcl; }
  obj.ctx.fillRect(x,y,w,h);
+ obj.ctx.closePath();
  return true;
  }
 
@@ -2924,7 +3082,8 @@ var aa=(function()
  mes=aa.guiCanvasTextMeasure(obj.han,text);
  rec=aa.guiRectSet(x,y,mes.w,mes.h);
  if(slw) { obj.ctx.lineWidth=slw; }
- if(sc)  { obj.ctx.strokeStyle=sc; obj.ctx.strokeText(text,rec.x,rec.y);  }
+ if(sc&&slw)  { obj.ctx.strokeStyle=sc; obj.ctx.strokeText(text,rec.x,rec.y);  }
+
  if(fc)  { obj.ctx.fillStyle=fc;   obj.ctx.fillText(text,rec.x,rec.y);    }
  return true;
  }
@@ -2998,10 +3157,17 @@ var aa=(function()
  rco={};
  rec=aa.guiRectSet(0,0,obj.dom.width,obj.dom.height);
  dec=aa.guiRectSet(obj.dom.style.left,obj.dom.style.top,obj.dom.style.width,obj.dom.style.height);
+
  dec.x=parseInt(dec.x.substring(0,dec.x.length-2));
  dec.y=parseInt(dec.y.substring(0,dec.y.length-2));
  dec.w=parseInt(dec.w.substring(0,dec.w.length-2));
  dec.h=parseInt(dec.h.substring(0,dec.h.length-2));
+/*
+ dec.x=(dec.x.substring(0,dec.x.length-2));
+ dec.y=(dec.y.substring(0,dec.y.length-2));
+ dec.w=(dec.w.substring(0,dec.w.length-2));
+ dec.h=(dec.h.substring(0,dec.h.length-2));
+ */
  rco.can_rect=rec;
  rco.dom_rect=dec;
  if(window.devicePixelRatio) { rco.density=window.devicePixelRatio; }
@@ -3077,54 +3243,54 @@ var aa=(function()
  if(ez.state!=os)  {  }
  val=(now-ez.times)/ez.duration;
  val=val*ez.mul;
- function linear(n)       { return n; }
- function inQuad(n)       { return n*n; }
- function outQuad(n)      { return n*(2-n); }
- function inOutQuad(n)    { n*=2;  if(n<1) return 0.5*n*n;  return-0.5*(--n*(n-2)-1); }
- function inCube(n)       { return n*n*n; }
- function outCube(n)      { return --n*n*n+1; }
- function inOutCube(n)    { n*=2;  if(n<1) return 0.5*n*n*n;  return 0.5*((n-=2)*n*n+2); }
- function inQuart(n)      { return n*n*n*n; }
- function outQuart(n)     { return 1-(--n*n*n*n); }
- function inOutQuart(n)   { n*=2;  if(n<1) return 0.5*n*n*n*n;  return -0.5*((n-=2)*n*n*n-2); }
- function inQuint(n)      { return n*n*n*n*n; }
- function outQuint(n)     { return --n*n*n*n*n+1; }
- function inOutQuint(n)   { n*=2;  if(n<1) return 0.5*n*n*n*n*n;  return 0.5*((n-=2)*n*n*n*n+2); }
- function inSine(n)       { return 1-Math.cos(n*Math.PI/2); }
- function outSine(n)      { return Math.sin(n*Math.PI/2); }
- function inOutSine(n)    { return .5*(1-Math.cos(Math.PI*n)); }
- function inExpo(n)       { return 0==n?0:Math.pow(1024,n-1); }
- function outExpo(n)      { return 1==n?n:1-Math.pow(2,-10*n); }
- function inOutExpo(n)    { if(0==n) return 0;
+ function _linear(n)       { return n; }
+ function _inQuad(n)       { return n*n; }
+ function _outQuad(n)      { return n*(2-n); }
+ function _inOutQuad(n)    { n*=2;  if(n<1) return 0.5*n*n;  return-0.5*(--n*(n-2)-1); }
+ function _inCube(n)       { return n*n*n; }
+ function _outCube(n)      { return --n*n*n+1; }
+ function _inOutCube(n)    { n*=2;  if(n<1) return 0.5*n*n*n;  return 0.5*((n-=2)*n*n+2); }
+ function _inQuart(n)      { return n*n*n*n; }
+ function _outQuart(n)     { return 1-(--n*n*n*n); }
+ function _inOutQuart(n)   { n*=2;  if(n<1) return 0.5*n*n*n*n;  return -0.5*((n-=2)*n*n*n-2); }
+ function _inQuint(n)      { return n*n*n*n*n; }
+ function _outQuint(n)     { return --n*n*n*n*n+1; }
+ function _inOutQuint(n)   { n*=2;  if(n<1) return 0.5*n*n*n*n*n;  return 0.5*((n-=2)*n*n*n*n+2); }
+ function _inSine(n)       { return 1-Math.cos(n*Math.PI/2); }
+ function _outSine(n)      { return Math.sin(n*Math.PI/2); }
+ function _inOutSine(n)    { return .5*(1-Math.cos(Math.PI*n)); }
+ function _inExpo(n)       { return 0==n?0:Math.pow(1024,n-1); }
+ function _outExpo(n)      { return 1==n?n:1-Math.pow(2,-10*n); }
+ function _inOutExpo(n)    { if(0==n) return 0;
                             if(1==n) return 1;
                             if((n*=2)<1) return .5*Math.pow(1024,n-1);
                             return .5*(-Math.pow(2,-10*(n-1))+2);
                           }
- function inCirc(n)       { return 1-Math.sqrt(1-n*n); }
- function outCirc(n)      { return Math.sqrt(1-(--n*n)); }
- function inOutCirc(n)    { n*=2;  if(n<1) return -0.5*(Math.sqrt(1-n*n)-1);  return 0.5*(Math.sqrt(1-(n-=2)*n)+1); }
- function inBack(n)       { s=1.70158;  return n*n*((s+1)*n-s); }
- function outBack(n)      { s=1.70158;  return --n*n*((s+1)*n+s)+1; }
- function inOutBack(n)    { s=1.70158*1.525;  if((n*=2)<1) return 0.5*(n*n*((s+1)*n-s));  return 0.5*((n-=2)*n*((s+1)*n+s)+2); }
- function inBounce(n)     { return 1-outBounce(1-n); }
- function outBounce(n)    { if(n<(1/2.75))   { return 7.5625*n*n; }
+ function _inCirc(n)       { return 1-Math.sqrt(1-n*n); }
+ function _outCirc(n)      { return Math.sqrt(1-(--n*n)); }
+ function _inOutCirc(n)    { n*=2;  if(n<1) return -0.5*(Math.sqrt(1-n*n)-1);  return 0.5*(Math.sqrt(1-(n-=2)*n)+1); }
+ function _inBack(n)       { s=1.70158;  return n*n*((s+1)*n-s); }
+ function _outBack(n)      { s=1.70158;  return --n*n*((s+1)*n+s)+1; }
+ function _inOutBack(n)    { s=1.70158*1.525;  if((n*=2)<1) return 0.5*(n*n*((s+1)*n-s));  return 0.5*((n-=2)*n*((s+1)*n+s)+2); }
+ function _inBounce(n)     { return 1-_outBounce(1-n); }
+ function _outBounce(n)    { if(n<(1/2.75))   { return 7.5625*n*n; }
                             if(n<(2/2.75))   { return 7.5625*(n-=(1.5/2.75))*n+0.75;  }
                             if(n<(2.5/2.75)) { return 7.5625*(n-=(2.25/2.75))*n+0.9375;  }
                             return 7.5625*(n-=(2.625/2.75))*n+0.984375;  }
- function inOutBounce(n)  { if(n<.5) return inBounce(n*2)*.5;  return  outBounce(n*2-1)*.5+.5; }
- function inElastic(n)    { a=0.1; p=0.4;
+ function _inOutBounce(n)  { if(n<.5) return _inBounce(n*2)*.5;  return  _outBounce(n*2-1)*.5+.5; }
+ function _inElastic(n)    { a=0.1; p=0.4;
                             if(n===0) return 0;
                             if(n===1) return 1;
                             if(!a||a<1) { a=1; s=p/4; } else s=p*Math.asin(1/a)/(2*Math.PI);
                             return-(a*Math.pow(2,10*(n-=1))*Math.sin((n-s)*(2*Math.PI)/p));
                           }
- function outElastic(n)   { a=0.1; p=0.4;
+ function _outElastic(n)   { a=0.1; p=0.4;
                             if(n===0) return 0;
                             if(n===1) return 1;
                             if(!a||a<1) { a=1; s=p/4; }  else s=p*Math.asin(1/a)/(2*Math.PI);
                             return (a*Math.pow(2,-10*n)*Math.sin((n-s)*(2*Math.PI)/p)+1);
                             }
- function inOutElastic(n) { a=0.1; p=0.4;
+ function _inOutElastic(n) { a=0.1; p=0.4;
                             if(n===0) return 0;
                             if(n===1) return 1;
                             if(!a||a<1) { a=1; s=p/4; }  else s=p*Math.asin(1/a)/(2*Math.PI);
@@ -3133,37 +3299,37 @@ var aa=(function()
                             }
  switch(ez.mode)
   {
-  case 0:  res=linear(val);       break;
-  case 1:  res=inQuad(val);       break;
-  case 2:  res=outQuad(val);      break;
-  case 3:  res=inOutQuad(val);    break;
-  case 4:  res=inCube(val);       break;
-  case 5:  res=outCube(val);      break;
-  case 6:  res=inOutCube(val);    break;
-  case 7:  res=inQuart(val);      break;
-  case 8:  res=outQuart(val);     break;
-  case 9:  res=inOutQuart(val);   break;
-  case 10: res=inQuint(val);      break;
-  case 11: res=outQuint(val);     break;
-  case 12: res=inOutQuint(val);   break;
-  case 13: res=inSine(val);       break;
-  case 14: res=outSine(val);      break;
-  case 15: res=inOutSine(val);    break;
-  case 16: res=inExpo(val);       break;
-  case 17: res=outExpo(val);      break;
-  case 18: res=inOutExpo(val);    break;
-  case 19: res=inCirc(val);       break;
-  case 20: res=outCirc(val);      break;
-  case 21: res=inOutCirc(val);    break;
-  case 22: res=inBack(val);       break;
-  case 23: res=outBack(val);      break;
-  case 24: res=inOutBack(val);    break;
-  case 25: res=inBounce(val);     break;
-  case 26: res=outBounce(val);    break;
-  case 27: res=inOutBounce(val);  break;
-  case 28: res=inElastic(val);    break;
-  case 29: res=outElastic(val);   break;
-  case 30: res=inOutElastic(val); break;
+  case 0:  res=_linear(val);       break;
+  case 1:  res=_inQuad(val);       break;
+  case 2:  res=_outQuad(val);      break;
+  case 3:  res=_inOutQuad(val);    break;
+  case 4:  res=_inCube(val);       break;
+  case 5:  res=_outCube(val);      break;
+  case 6:  res=_inOutCube(val);    break;
+  case 7:  res=_inQuart(val);      break;
+  case 8:  res=_outQuart(val);     break;
+  case 9:  res=_inOutQuart(val);   break;
+  case 10: res=_inQuint(val);      break;
+  case 11: res=_outQuint(val);     break;
+  case 12: res=_inOutQuint(val);   break;
+  case 13: res=_inSine(val);       break;
+  case 14: res=_outSine(val);      break;
+  case 15: res=_inOutSine(val);    break;
+  case 16: res=_inExpo(val);       break;
+  case 17: res=_outExpo(val);      break;
+  case 18: res=_inOutExpo(val);    break;
+  case 19: res=_inCirc(val);       break;
+  case 20: res=_outCirc(val);      break;
+  case 21: res=_inOutCirc(val);    break;
+  case 22: res=_inBack(val);       break;
+  case 23: res=_outBack(val);      break;
+  case 24: res=_inOutBack(val);    break;
+  case 25: res=_inBounce(val);     break;
+  case 26: res=_outBounce(val);    break;
+  case 27: res=_inOutBounce(val);  break;
+  case 28: res=_inElastic(val);    break;
+  case 29: res=_outElastic(val);   break;
+  case 30: res=_inOutElastic(val); break;
   }
  z=ez.start+(ez.dest-ez.start)*res;
  if(z<=ez.mins)  { z=ez.mins; }
@@ -3229,6 +3395,50 @@ var aa=(function()
  }
 
 
+
+   /*
+ function guiRectAdd (rec,arec)
+ {
+ var ax1,ay1,ax2,ay2;
+ var bx1,by1,bx2,by2;
+ var dx1,dy1,dx2,dy2;
+ var res;
+
+ ax1=rec.x;
+ ay1=rec.y;
+ ax2=(rec.x+rec.w)-1;
+ ay2=(rec.y+rec.h)-1;
+
+ bx1=arec.x;
+ by1=arec.y;
+ bx2=(arec.x+raec.w)-1;
+ by2=(arec.y+raec.h)-1;
+
+ dx1=((ax1<bx1)?ax1:bx1);
+ dx2=((ax2>bx2)?ax2:bx2);
+ dy1=((ay1<by1)?ay1:by1);
+ dy2=((ay2>by2)?ay2:by2);
+
+ res.x={};
+ res.x=dx1;
+ res.y=dy1;
+ res.w=(dx2-dx1)+1;
+ res.h=(dy2-dy1)+1;
+
+ //aaRectSet(resrect,cd1.x,cd1.y,(cd2.x-cd1.x)+1,(cd2.y-cd1.y)+1);
+ UnionRect(&rr3,&rr1,&rr2);
+ ro.x=rr3.left;
+ ro.y=rr3.top;
+ ro.w=rr3.right-rr3.left;
+ ro.h=rr3.bottom-rr3.top;
+ if(ro.x!=resrect->x||ro.y!=resrect->y||ro.w!=resrect->w||ro.h!=resrect->h)
+  {
+  aaRectCopy(resrect,rect2);
+  }
+
+ */
+
+
  function guiAreaSet (l,t,w,h)
  {
  var area={};
@@ -3289,6 +3499,47 @@ var aa=(function()
 
 
 
+
+
+ function guiRgbaToHsva (rgba)
+ {
+ var hsva;
+ var r,g,b;
+ var h,s,v;
+ var max,min,d;
+
+ if(rgba.type!="rgba") { return rgba; }
+ r=rgba.r;
+ g=rgba.g;
+ b=rgba.b;
+ max=Math.max(r,g,b);
+ min=Math.min(r,g,b);
+ v=max;
+ d=max-min;
+ s=max===0?0:d/max;
+ if(max==min)
+  {
+  h=0;
+  }
+ else
+  {
+  switch(max)
+   {
+   case r: h=(g-b)/d+(g<b?6:0); break;
+   case g: h=(b-r)/d+2; break;
+   case b: h=(r-g)/d+4; break;
+   }
+  h/=6;
+  }
+ v=v/255;
+ hsva=guiHsvaSet(h,s,v,rgba.a);
+ return hsva;
+ }
+
+
+
+
+
  function guiRgbaToString (rgba)
  {
  if(rgba.type!="rgba") { return rgba; }
@@ -3296,6 +3547,117 @@ var aa=(function()
  }
 
 
+
+
+
+
+
+
+ function guiHsvaSet (h,s,v,a)
+ {
+ var hsva={};
+ hsva.type="hsva";
+ hsva.h=h;
+ hsva.s=s;
+ hsva.v=v;
+ hsva.a=a;
+ return hsva;
+ }
+
+
+
+ function guiHsvaAdjust (hsva,ha,sa,va,aa)
+ {
+ if(hsva.type!="hsva") { return hsva; }
+ hsva.h+=ha;
+ hsva.s+=sa;
+ hsva.v+=va;
+ hsva.a+=aa;
+ return hsva;
+ }
+
+
+
+
+ function guiHsvaToRgba (hsva)
+ {
+ var r,g,b;
+ var i,f,p,q,t;
+ var rgba;
+
+ if(hsva.type!="hsva") { return hsva; }
+ i=Math.floor(hsva.h*6);
+ f=hsva.h*6-i;
+ p=hsva.v*(1-hsva.s);
+ q=hsva.v*(1-f*hsva.s);
+ t=hsva.v*(1-(1-f)*hsva.s);
+ switch(i%6)
+  {
+  case 0: r=hsva.v, g=t, b=p; break;
+  case 1: r=q, g=hsva.v, b=p; break;
+  case 2: r=p, g=hsva.v, b=t; break;
+  case 3: r=p, g=q, b=hsva.v; break;
+  case 4: r=t, g=p, b=hsva.v; break;
+  case 5: r=hsva.v, g=p, b=q; break;
+  }
+ r=Math.round(r*255);
+ g=Math.round(g*255);
+ b=Math.round(b*255);
+ rgba=guiRgbaSet(r,g,b,hsva.a);
+ return rgba;
+ }
+
+
+
+
+
+ function guiUpdateAreaInit ()
+ {
+ var obj;
+ obj={};
+ obj.type="updatearea";
+ obj.state=0;
+ obj.rect=guiRectSet(0,0,0,0);
+ return obj;
+ }
+
+
+
+ function guiUpdateAreaAdd (obj,x,y,w,h)
+ {
+ var x1,y1,x2,y2;
+ var x3,y3,x4,y4;
+
+ if(obj.type!="updatearea") { return null; }
+ if(obj.state==0)
+  {
+  obj.rect.x=x;
+  obj.rect.y=y;
+  obj.rect.w=w;
+  obj.rect.h=h;
+  obj.state=1;
+  }
+ else
+  {
+  x1=obj.rect.x;
+  y1=obj.rect.y;
+  x2=(obj.rect.x+obj.rect.w)-1;
+  y2=(obj.rect.y+obj.rect.h)-1;
+  x3=x;
+  y3=y;
+  x4=(x+w)-1;
+  y4=(y+h)-1;
+  if(x3<x1) { x1=x3; }
+  if(x4>x2) { x2=x4; }
+  if(y3<y1) { y1=y3; }
+  if(y4>y2) { y2=y4; }
+  obj.rect.x=x1;
+  obj.rect.y=x2;
+  obj.rect.w=(x2-x1)+1;
+  obj.rect.h=(y2-y1)+1;
+  }
+ return obj;
+ }
 
 
 /*-----------------------------------------------------------------------*/
@@ -4790,6 +5152,7 @@ var aa=(function()
  state={};
  vars={};
  state.is_running=false;
+ state.is_exiting=false;
  state.version=0;
  state.speed=0;
  state.proc=null;
@@ -4797,6 +5160,7 @@ var aa=(function()
  state.worker_array=[];
  state.dethrottle_url=null;
  state.dethrottle_stage=0;
+ state.dethrottle_ready=false;
  state.dethrottle_object=null;
  main_obj.state=state;
  main_obj.vars=vars;
@@ -4824,15 +5188,18 @@ var aa=(function()
  mainWorkerAdd("socketYield",socketYield,1);
  if(dturl)
   {
-  /*
   if(dturl===true) { main_obj.state.dethrottle_url=deathro; }
   else             { main_obj.state.dethrottle_url=dturl;   }
   main_obj.state.dethrottle_object=new Audio(main_obj.state.dethrottle_url);
   main_obj.state.dethrottle_object.autoplay=false;
   main_obj.state.dethrottle_object.muted=true;
-  */
   main_obj.state.dethrottle_stage=1;
+  main_obj.state.dethrottle_ready=false;
   aa.debugLog("pre-dethrotle");
+  }
+ else
+  {
+  main_obj.state.dethrottle_ready=true;
   }
  envListenEvents(envEventProc);
  return true;
@@ -4843,19 +5210,19 @@ var aa=(function()
  function mainDethrottle ()
  {
  if(main_obj.state.dethrottle_object==null) { return true; }
- aa.debugLog("dethrottling stage = "+main_obj.state.dethrottle_stage);
- if(main_obj.state.dethrottle_stage==1)
+ if(main_obj.state.dethrottle_stage<1)      { return true; }
+ //console.log("dethrottling stage = "+main_obj.state.dethrottle_stage);
+ if(main_obj.state.dethrottle_stage==4)
   {
-  /*
+  main_obj.state.dethrottle_ready=true
   main_obj.state.dethrottle_object.loop=true;
   main_obj.state.dethrottle_object.muted=false;
-  main_obj.state.dethrottle_object.play();
-  main_obj.state.dethrottle_object.volume=0.004;
-  main_obj.state.dethrottle_object.muted=true;
-  */
-  main_obj.state.dethrottle_stage=2;
-  aa.debugLog("dethrottling");
+//  main_obj.state.dethrottle_object.play();
+  main_obj.state.dethrottle_object.volume=0.000;
+  //main_obj.state.dethrottle_object.muted=true;
+  //aa.debugLog("dethrottling");
   }
+ main_obj.state.dethrottle_stage++;
  return true;
  }
 
@@ -4924,6 +5291,10 @@ var aa=(function()
 
  main_obj.state.cycle++;
  mainWorkerStep();
+ if(main_obj.state.dethrottle_stage>1&&main_obj.state.dethrottle_stage<5)
+  {
+  mainDethrottle();
+  }
  main_obj.state.proc();
  msr=aa.timerMsRunning()/1000;
  main_obj.state.speed_got=parseInt(main_obj.state.cycle/msr);
@@ -4945,11 +5316,43 @@ var aa=(function()
   clearTimeout(main_obj.state.thread_id);
   main_obj.state.thread_id=0;
   mainProc();
-  mainRun();
+  if(main_obj.state.is_running==false)
+   {
+   //console.log("is_running="+main_obj.state.is_running+" is_exiting="+main_obj.state.is_exiting);
+   if(main_obj.state.is_exiting==true) alert(aa.debugLineNumber());
+   }
+  if(main_obj.state.is_exiting==true)
+   {
+   //console.log("is_running="+main_obj.state.is_running+" is_exiting="+main_obj.state.is_exiting);
+   if(main_obj.state.is_running==false) alert(aa.debugLineNumber());
+   main_obj.state.is_running=false;
+   }
+  if(main_obj.state.is_running==true)
+   {
+   mainRun();
+   }
+  else
+   {
+   window.dispatchEvent(new Event('beforeunload'));
+   window.dispatchEvent(new Event('unload'));
+   aa.envListenEvents(null);
+   aa.handleGlobalKill();
+   aa.handleGlobalDump();
+   console.log(JSON.stringify(aa.debugMemoryUsage(),0,2));
+   }
   },main_obj.state.speed_to);
  return true;
  }
 
+
+
+ function mainExit (code)
+ {
+ if(main_obj.state.is_running!=true) { return false; }
+ if(main_obj.state.is_exiting!=false) { return true; }
+ main_obj.state.is_exiting=true;
+ return true;
+ }
 
 
 
@@ -5070,6 +5473,8 @@ var aa=(function()
  timerTimeoutSet:timerTimeoutSet,
  timerTimeoutReset:timerTimeoutReset,
  timerTimeoutTest:timerTimeoutTest,
+ timerRaterInit:timerRaterInit,
+ timerRaterUpdate:timerRaterUpdate,
 
  numRand:numRand,
  numFixed:numFixed,
@@ -5111,6 +5516,7 @@ var aa=(function()
 
  envInfoGet:envInfoGet,
  envBrowserArg:envBrowserArg,
+ envListenEvents:envListenEvents,
  envDisplayGet:envDisplayGet,
  envDisplayCompare:envDisplayCompare,
  envZoomFix:envZoomFix,
@@ -5132,6 +5538,7 @@ var aa=(function()
  handleNext:handleNext,
  handleText:handleText,
  handleGlobalDump:handleGlobalDump,
+ handleGlobalKill:handleGlobalKill,
 
 
  queueCreate:queueCreate,
@@ -5146,7 +5553,7 @@ var aa=(function()
  touchStart:touchStart,
  touchPeek:touchPeek,
  touchRead:touchRead,
- touchProcess:touchProcess,
+ //touchProcess:touchProcess,
  touchStatus:touchStatus,
 
  mouseStart:mouseStart,
@@ -5210,7 +5617,13 @@ var aa=(function()
  guiAreaAdjust:guiAreaAdjust,
  guiRgbaSet:guiRgbaSet,
  guiRgbaAdjust:guiRgbaAdjust,
+ guiRgbaToHsva:guiRgbaToHsva,
  guiRgbaToString:guiRgbaToString,
+ guiHsvaSet:guiHsvaSet,
+ guiHsvaAdjust:guiHsvaAdjust,
+ guiHsvaToRgba:guiHsvaToRgba,
+ guiUpdateAreaInit:guiUpdateAreaInit,
+ guiUpdateAreaAdd:guiUpdateAreaAdd,
 
 
  mediaDeviceDetect:mediaDeviceDetect,
@@ -5280,6 +5693,7 @@ var aa=(function()
  mainWorkerAdd:mainWorkerAdd,
  mainWorkerRemove:mainWorkerRemove,
  mainRun:mainRun,
+ mainExit:mainExit,
  mainProcSet:mainProcSet,
  mainSpeedSet:mainSpeedSet,
  mainStageAdjust:mainStageAdjust,

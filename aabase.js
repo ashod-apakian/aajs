@@ -2581,7 +2581,7 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
- function guiCreate (type)
+ function guiCreate (type,id)
  {
  var s,h,obj;
 
@@ -2602,10 +2602,12 @@ changedTouches: A list of information for every finger involved in the event
   if((h=handleUse(gui_obj.handef,s))==0)  { return 0;   }
   obj.type=type;
   obj.vars={};
-  obj.id=type+"id"+s;
+  if(id) {  obj.id=id;           }
+  else   {  obj.id=type+"id"+s;  }
   obj.ctx=null;
   obj.dom=document.createElement(type);
   obj.dom.id=obj.id;
+  //obj.dom.setAttribute("id",obj.id);
   if(type=="video")
    {
    obj.dom.muted=true;
@@ -2685,15 +2687,26 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
- function guiIdSet (handle,id)
+ function guiIdFind (id)
  {
- var obj;
+ var obj,s,c;
 
- if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- obj.id=id;
- obj.dom.setAttribute("id",obj.id);
- return true;
+ c=0;
+ for(s=0;s<gui_obj.handef.slots;s++)
+  {
+  if(c>=gui_obj.handef.count) { break; }
+  obj=gui_obj.handef.array[s];
+  if(obj.in_use!=true) { continue;   }
+  if(obj.id==id)
+   {
+   return obj.self_handle;
+   }
+  c++;
+  }
+ return 0;
  }
+
+
 
 
 
@@ -2772,13 +2785,28 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
- function guiSizeFix (handle,x,y,wid,hit,hq)
+ function guiSizeFix (handle,x,y,wid,hit,hq,dv)
  {
- var group,dpr,w,h,ww,wh;
+ var group,dpr,odpr,w,h,ww,wh;
 
  if((group=guiGroupGet(handle))==null) { return false; }
  dpr=window.devicePixelRatio||1;
+ odpr=dpr;
  if(!hq) { dpr=1; }
+ //if(dpr>2) { dpr/=2; }
+ //dpr/=4;
+ //if((dpr/2)>1) { dpr/=2; }
+ if(dv>1)
+  {
+  if(dpr>dv)
+   {
+   dpr=dv;
+   }
+  //if((dpr/dv)>1) { dpr/=dv; }
+  }
+ if(dpr>odpr) { dpr=odpr; }
+
+ aa.debugLog("dpr="+dpr);
  if(group.obj.type=="canvas")
   {
   ww=document.documentElement.clientWidth||window.innerWidth||body.clientWidth;
@@ -3030,7 +3058,7 @@ changedTouches: A list of information for every finger involved in the event
  if(obj.type!="canvas")                             { return false; }
  obj.ctx.beginPath();
  if(fcl) { obj.ctx.fillStyle=fcl; }
- obj.ctx.fillRect(x,y,w,h);
+ obj.ctx.fillRect(x,y,w,h);//0,0,1,1);//x,y,10,10);//w,h);
  obj.ctx.closePath();
  return true;
  }
@@ -3084,7 +3112,11 @@ changedTouches: A list of information for every finger involved in the event
  if(slw) { obj.ctx.lineWidth=slw; }
  if(sc&&slw)  { obj.ctx.strokeStyle=sc; obj.ctx.strokeText(text,rec.x,rec.y);  }
 
- if(fc)  { obj.ctx.fillStyle=fc;   obj.ctx.fillText(text,rec.x,rec.y);    }
+ if(fc)
+  {
+  obj.ctx.fillStyle=fc;
+  obj.ctx.fillText(text,rec.x,rec.y);
+  }
  return true;
  }
 
@@ -3617,7 +3649,17 @@ changedTouches: A list of information for every finger involved in the event
  obj={};
  obj.type="updatearea";
  obj.state=0;
+ obj.is_fin=false;
  obj.rect=guiRectSet(0,0,0,0);
+ return obj;
+ }
+
+
+
+ function guiUpdateAreaFin (obj)
+ {
+ if(obj.type!="updatearea") { return null; }
+ obj.is_fin=true;
  return obj;
  }
 
@@ -3658,6 +3700,9 @@ changedTouches: A list of information for every finger involved in the event
   }
  return obj;
  }
+
+
+
 
 
 /*-----------------------------------------------------------------------*/
@@ -5424,6 +5469,102 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
+
+ function mainPluginLoad (url,id)
+ {
+ var obj,p,s,scr,e,mat,so;
+
+ obj={};
+ obj.type="plugin";
+ obj.head=document.head;
+ obj.state=0;
+ obj.api=null;
+ obj.api_count=null;
+ obj.api_procs=null;
+ obj.script=document.createElement('script');
+ obj.script.type='text/javascript';
+ obj.script.defer=true;
+ obj.script.id=id;
+ obj.script.src=url+"?"+aa.numRand(10000000);
+
+ function _pluginErrorHandler(event)
+  {
+  event.preventDefault();
+  obj.state=3;
+  };
+ window.addEventListener('error',_pluginErrorHandler);
+
+ obj.script.onload=function(event)
+  {
+  for(p=0;p<event.path.length;p++)
+   {
+   if(obj.state==1) { break; }
+   if(typeof event.path[p]==='object')
+    {
+    if(event.path[p].scripts)
+     {
+     for(e=0;e<event.path[p].scripts.length;e++)
+      {
+      if((so=aa.stringIndexOf(true,event.path[p].scripts[e].src,obj.script.src,0))<0) { continue; }
+      obj.state=1;
+      break;
+      }
+     }
+    }
+   }
+  if(obj.state==1)
+   {
+   function _getAllProcs(object)
+    {
+    return Object.getOwnPropertyNames(object).filter(function(property) {  return typeof object[property]=='function';  });
+    }
+   obj.api=pluginEntry();
+   obj.api_procs=_getAllProcs(obj.api);
+   obj.api_count=obj.api_procs.length;
+   obj.state=2;
+   }
+  else
+   {
+   obj.state=3;
+   }
+  };
+ obj.head.appendChild(obj.script);
+ return obj;
+ }
+
+
+
+
+
+ function mainPluginFree (obj)
+ {
+ var elem,res,eid;
+
+ if(obj.type!="plugin") { return false; }
+ elem=document.getElementById(obj.script.id);
+ elem.parentNode.removeChild(elem);
+ obj.type="";
+ obj.state=0;
+ obj.api=null;
+ obj.api_count=null;
+ obj.api_procs=null;
+ obj.head={};
+ obj.script={};
+ delete obj.api;
+ delete obj.api_count;
+ delete obj.api_procs;
+ delete obj.head;
+ delete obj.script;
+ delete obj.state;
+ delete obj.type;
+ obj={};
+ return true;
+ }
+
+
+
+
+
 /*-----------------------------------------------------------------------*/
 
 
@@ -5582,7 +5723,7 @@ changedTouches: A list of information for every finger involved in the event
  guiDestroy:guiDestroy,
  guiGet:guiGet,
  guiGroupGet:guiGroupGet,
- guiIdSet:guiIdSet,
+ guiIdFind:guiIdFind,
  guiParentSet:guiParentSet,
  guiSizeSet:guiSizeSet,
  guiCssAreaSet:guiCssAreaSet,
@@ -5623,6 +5764,7 @@ changedTouches: A list of information for every finger involved in the event
  guiHsvaAdjust:guiHsvaAdjust,
  guiHsvaToRgba:guiHsvaToRgba,
  guiUpdateAreaInit:guiUpdateAreaInit,
+ guiUpdateAreaFin:guiUpdateAreaFin,
  guiUpdateAreaAdd:guiUpdateAreaAdd,
 
 
@@ -5701,6 +5843,8 @@ changedTouches: A list of information for every finger involved in the event
  mainStageGet:mainStageGet,
  mainCycleGet:mainCycleGet,
  mainCyclePulse:mainCyclePulse,
+ mainPluginLoad:mainPluginLoad,
+ mainPluginFree:mainPluginFree,
  };
 
 

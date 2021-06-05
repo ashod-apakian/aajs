@@ -1,16 +1,5 @@
 //'use strict';
 
-
- var deathro="data:audio/mpeg;base64,/+MgxAASoXLFVUFIADCADMDgB/ykAYxjGMYxwhCEIe5oEDEIQz+\
-              EIf3NGTigUCgUCgUIEDCNufggQQtAgha5GKwTBMAAGAwSWRhcVvXRg+/dEDvLv//BBUMMMMMMM\
-              MMMMK+IiXmCXmL/4yLEEBdxmvGVhZgCTo+PyAizRAUrf50qEFEoh8Ov+MsJWGqQ7gNihkX9vSS\
-              E3gDNDbA+EDZcGjCC1Oip0alpPitiWNVGZOkmcN3/66wnd//iEsCtP//san5ZCIArr7////EKm\
-              Zv///7/4yDEDhaKHmBXwUAAVlV2uSRVtVrYWFqZm/4VaKFjhBAFAAh8SDUGpuwscuzfzXKr///\
-              //1w3qzNzwULDAaXBk7WCo8NVnfU+WDgifVyobBV38GluBo7/EqpMQU1FMy45OKqqqqqqqv/jI\
-              sQOAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\
-              qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg==";
-
-
 var aa=(function()
  {
  var   handle_obj={};
@@ -598,6 +587,7 @@ var aa=(function()
  var obj;
  obj={};
  obj.type="rater";
+ obj.started=false;
  obj.tik=timerTikNow(true);
  obj.elapsed=0;
  obj.hits=0;
@@ -609,6 +599,11 @@ var aa=(function()
  function timerRaterUpdate (obj,hits)
  {
  if(obj.type!="rater") { return null; }
+ if(obj.started==false)
+  {
+  obj.started=true;
+  obj.tik=timerTikNow(true);
+  }
  obj.hits+=hits;
  obj.elapsed=timerTikElapsed(true,obj.tik);
  obj.hz=obj.hits/(obj.elapsed/1000);
@@ -1109,6 +1104,23 @@ var aa=(function()
 
 
 
+
+ function stringParms (name)
+ {
+ var txt,a;
+
+ txt=name+"(";
+ for(a=1;a<arguments.length;a++)
+  {
+  if(a>1) { txt+=","; }
+  txt+=arguments[a];
+  }
+ txt+=")";
+ return txt;
+ }
+
+
+
 /*-----------------------------------------------------------------------*/
 
 
@@ -1262,10 +1274,17 @@ var aa=(function()
  switch(event.type)
   {
   case "click":
-  case "tap":
-  case "touchend":
+//  console.log(event.type);
   if(aa.main_state.dethrottle_stage==1)  {   aa.mainDethrottle();    }
   break;
+
+  /*
+  case "touchend":
+  case "tap":
+  console.log(event.type);
+  break;
+*/
+
 
   case "visibilitychange":
   case "webkitvisibilitychange":
@@ -1313,9 +1332,9 @@ var aa=(function()
   window.removeEventListener("focus",env_obj.event_proc,false);
   window.removeEventListener("blur",env_obj.event_proc,false);
   window.removeEventListener("wheel",env_obj.event_proc,false);
-  document.body.removeEventListener("touchend",env_obj.event_proc,false);
+//  document.body.removeEventListener("touchend",env_obj.event_proc,false);
   document.body.removeEventListener("click",env_obj.event_proc,false);
-  document.body.removeEventListener("tap",env_obj.event_proc,false);
+//  document.body.removeEventListener("tap",env_obj.event_proc,false);
   document.body.removeEventListener("mousemove",env_obj.event_proc,false);
   document.removeEventListener("visibilitychange",env_obj.event_proc,false);
   document.removeEventListener("mozvisibilitychange",env_obj.event_proc,false);
@@ -1334,14 +1353,16 @@ var aa=(function()
   window.addEventListener("focus",function(event)             { env_obj.event_proc(event);  },false);
   window.addEventListener("blur",function(event)              { env_obj.event_proc(event);  },false);
   window.addEventListener("wheel",function(event)             { env_obj.event_proc(event);  });
-  document.body.addEventListener("touchend",function(event)             { env_obj.event_proc(event);  });
+  //document.body.addEventListener("touchcancel",function(event)             { env_obj.event_proc(event);  });
+//  document.body.addEventListener("touchend",function(event)             { env_obj.event_proc(event);  });
   document.body.addEventListener("click",function(event)             { env_obj.event_proc(event);  });
-  document.body.addEventListener("tap",function(event)               { env_obj.event_proc(event);  });
+//  document.body.addEventListener("tap",function(event)               { env_obj.event_proc(event);  });
   document.body.addEventListener("mousemove",function(event)         { env_obj.event_proc(event);  });//   audio.play()})
   document.addEventListener("visibilitychange",function(event)       { env_obj.event_proc(event);  });
   document.addEventListener("mozvisibilitychange",function(event)    { env_obj.event_proc(event);  });
   document.addEventListener("webkitvisibilitychange",function(event) { env_obj.event_proc(event);  });
   document.addEventListener("msvisibilitychange",function(event)     { env_obj.event_proc(event);  });
+  console.log("listening");
   }
  return true;
  }
@@ -1362,10 +1383,10 @@ var aa=(function()
  docelem=doc.documentElement;
  ori=(screen.orientation||{}).type||screen.mozOrientation||screen.msOrientation;
  body=doc.getElementsByTagName('body')[0];
- disp.win_wid=docelem.clientWidth||win.innerWidth||body.clientWidth;
- disp.win_hit=docelem.clientHeight||win.innerHeight||body.clientHeight;
- disp.win_wid=win.innerWidth||docelem.clientWidth;
- disp.win_hit=win.innerHeight||docelem.clientHeight;
+ disp.win_wid=docelem.clientWidth||win.innerWidth||document.body.clientWidth;
+ disp.win_hit=docelem.clientHeight||win.innerHeight||document.body.clientHeight;
+ //disp.win_wid=win.innerWidth||docelem.clientWidth;
+ //disp.win_hit=win.innerHeight||docelem.clientHeight;
 
  disp.scr_wid=screen.width;
  disp.scr_hit=screen.height;
@@ -1428,8 +1449,8 @@ var aa=(function()
    doc=document;
    docelem=doc.documentElement;
    body=doc.getElementsByTagName('body')[0];
-   wid=(docelem.clientWidth||win.innerWidth||body.clientWidth);
-   hit=(docelem.clientHeight||win.innerHeight||body.clientHeight);
+   wid=(docelem.clientWidth||win.innerWidth||document.body.clientWidth);
+   hit=(docelem.clientHeight||win.innerHeight||document.body.clientHeight);
    }
   viewport.content="initial-scale=1";
   viewport.content="width="+(wid);
@@ -2613,9 +2634,13 @@ changedTouches: A list of information for every finger involved in the event
    obj.dom.muted=true;
    obj.dom.autoplay=false;
    obj.dom.controls=false;
+   obj.dom.loop=false;
    obj.dom.srcObject=null;
    obj.dom.src=null;
    }
+  //fill,contain,cover,none,scale-down,
+  //if(type=="video")   {   obj.dom.style.objectFit="cover";   }
+  //else                {   obj.dom.style.objectFit="fill";   }
   obj.dom.style.objectFit="fill";
   obj.dom.style.position="absolute";
   obj.dom.style.zIndex=1000;
@@ -2793,30 +2818,15 @@ changedTouches: A list of information for every finger involved in the event
  dpr=window.devicePixelRatio||1;
  odpr=dpr;
  if(!hq) { dpr=1; }
- //if(dpr>2) { dpr/=2; }
- //dpr/=4;
- //if((dpr/2)>1) { dpr/=2; }
- if(dv>1)
-  {
-  if(dpr>dv)
-   {
-   dpr=dv;
-   }
-  //if((dpr/dv)>1) { dpr/=dv; }
-  }
+ if(dv>1&&dv<=dpr)  {  dpr=dv;  }
  if(dpr>odpr) { dpr=odpr; }
-
- aa.debugLog("dpr="+dpr);
  if(group.obj.type=="canvas")
   {
-  ww=document.documentElement.clientWidth||window.innerWidth||body.clientWidth;
-  wh=document.documentElement.clientHeight||window.innerHeight||body.clientHeight;
+  ww=document.documentElement.clientWidth||window.innerWidth||document.body.clientWidth;
+  wh=document.documentElement.clientHeight||window.innerHeight||document.body.clientHeight;
   w=Math.floor(wid*dpr);
   h=Math.floor(hit*dpr);
-//  if(w>=ww) { w=ww; }
-//  if(h>=wh) { h=wh; }
   guiSizeSet(handle,w,h);
-  //aa.debugLog(w+" "+h);
   }
  else
   {
@@ -2876,6 +2886,7 @@ changedTouches: A list of information for every finger involved in the event
  ctx.shadowOffsetY=0;
  ctx.textAlign="left";
  ctx.textBaseline="top";
+ aa.guiCanvasSmoothingSet(handle,false,null,null,null,null);
  return true;
  }
 
@@ -3044,7 +3055,8 @@ changedTouches: A list of information for every finger involved in the event
  if(obj.type!="canvas")                             { return false; }
  if(bcl) { obj.ctx.strokeStyle=bcl; }
  if(blw) { obj.ctx.lineWidth=blw;   }
- obj.ctx.strokeRect(x,y,w-blw,h-blw);
+ //obj.ctx.strokeRect(x,y,w-blw,h-blw);
+ obj.ctx.strokeRect(x,y,w,h);
  return true;
  }
 
@@ -3152,6 +3164,15 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
+
+ function guiCssOpacitySet (handle,opacity)
+ {
+ var obj;
+
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ obj.dom.style.opacity=opacity;
+ return true;
+ }
 
 
  function guiCssDisplaySet (handle,pos,zindex,opacity,display)
@@ -3374,7 +3395,8 @@ changedTouches: A list of information for every finger involved in the event
 
  function guiRgbaString (r,g,b,a)
  {
- return("rgba("+r+","+g+","+b+","+a+")");
+ return(aa.stringParms("rgb",r,g,b,a));
+ //return("rgba("+r+","+g+","+b+","+a+")");
  }
 
 
@@ -3969,6 +3991,7 @@ changedTouches: A list of information for every finger involved in the event
  if((obj=handleCheck(media_obj.handef,handle))==null) { return false; }
  if(dhandle!=null)
   {
+  //console.log("dwd");
   if((dobj=aa.guiGet(dhandle))==null)          { return false; }
   dobj.dom.srcObject=null;
   dobj.dom.srcObject=obj.output_media_stream;
@@ -3976,6 +3999,7 @@ changedTouches: A list of information for every finger involved in the event
   dobj.prev_time=-1;
   //console.log(obj.output_media_stream);
   isplaying=dobj.dom.currentTime>0&&!dobj.dom.paused&&!dobj.dom.ended&&dobj.dom.readyState>2;
+  //console.log("isp="+isplaying);
   if(!isplaying) { dobj.dom.play();  }
   }
  else
@@ -5203,10 +5227,8 @@ changedTouches: A list of information for every finger involved in the event
  state.proc=null;
  state.thread_id=0;
  state.worker_array=[];
- state.dethrottle_url=null;
  state.dethrottle_stage=0;
  state.dethrottle_ready=false;
- state.dethrottle_object=null;
  main_obj.state=state;
  main_obj.vars=vars;
  main_obj.vars.app={};
@@ -5217,7 +5239,7 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
- function mainStart (ver,spd,mainproc,dturl)
+ function mainStart (ver,spd,mainproc,dtmode)
  {
  if(main_obj.state.is_running!=false) { return false; }
  //if(conclr) { console.clear(); }
@@ -5231,14 +5253,10 @@ changedTouches: A list of information for every finger involved in the event
  main_obj.state.is_running=true;
  main_obj.state.stage=0;
  mainWorkerAdd("socketYield",socketYield,1);
- if(dturl)
+ if(dtmode>0)
   {
-  if(dturl===true) { main_obj.state.dethrottle_url=deathro; }
-  else             { main_obj.state.dethrottle_url=dturl;   }
-  main_obj.state.dethrottle_object=new Audio(main_obj.state.dethrottle_url);
-  main_obj.state.dethrottle_object.autoplay=false;
-  main_obj.state.dethrottle_object.muted=true;
-  main_obj.state.dethrottle_stage=1;
+  if(dtmode>2) { dtmode=2; }
+  main_obj.state.dethrottle_stage=dtmode;
   main_obj.state.dethrottle_ready=false;
   aa.debugLog("pre-dethrotle");
   }
@@ -5252,20 +5270,120 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
+
+ function mainThrottleFix (workerscript)
+ {
+ if(!/MSIE 10/i.test (navigator.userAgent))
+  {
+  try
+   {
+   var blob=new Blob
+   (["var fakeIdToId={};\
+   onmessage=function (event) \
+    {\
+    var data=event.data,name=data.name,fakeId=data.fakeId,time;\
+    if(data.hasOwnProperty('time')) {	time=data.time; }\
+    switch(name) \
+     {\
+     case 'setInterval':	 fakeIdToId[fakeId]=setInterval(function () {postMessage({fakeId:fakeId});},time); break;\
+     case 'clearInterval': if(fakeIdToId.hasOwnProperty (fakeId))     {clearInterval(fakeIdToId[fakeId]); delete fakeIdToId[fakeId]; } break;\
+     case 'setTimeout': 	 fakeIdToId[fakeId]=setTimeout(function ()  {postMessage({fakeId:fakeId}); if(fakeIdToId.hasOwnProperty (fakeId)) { delete fakeIdToId[fakeId];}},time); break;\
+     case 'clearTimeout':	 if(fakeIdToId.hasOwnProperty (fakeId))     {clearTimeout(fakeIdToId[fakeId]); delete fakeIdToId[fakeId]; } break;\
+     }\
+    }"]);
+   workerscript=window.URL.createObjectURL(blob);
+   console.log("blob good");
+   }
+  catch(error)
+   {
+   console.log("use non blob (file) copy of blob");
+   return false;
+   }
+  }
+  var worker,fakeIdToCallback={},lastFakeId=0,maxFakeId=0x7FFFFFFF;
+  if(typeof (Worker)!=='undefined')
+   {
+   function getFakeId()
+    {
+    do { if(lastFakeId==maxFakeId) { lastFakeId=0; } else { lastFakeId++; }  }  while(fakeIdToCallback.hasOwnProperty(lastFakeId));
+    return lastFakeId;
+    }
+   try
+    {
+    worker=new Worker(workerscript);
+    window.setInterval=function(callback,time/* , parameters */)
+     {
+     var fakeId=getFakeId();
+     fakeIdToCallback[fakeId]={callback:callback,parameters:Array.prototype.slice.call(arguments,2)};
+     worker.postMessage ({name:'setInterval',fakeId:fakeId,time:time});
+     return fakeId;
+     };
+    window.clearInterval=function(fakeId)
+     {
+     if(fakeIdToCallback.hasOwnProperty(fakeId))
+      {
+      delete fakeIdToCallback[fakeId];
+      worker.postMessage({name:'clearInterval',fakeId:fakeId});
+      }
+     };
+    window.setTimeout=function(callback,time/* , parameters */)
+     {
+     var fakeId=getFakeId();
+     fakeIdToCallback[fakeId]={callback:callback,parameters:Array.prototype.slice.call(arguments,2),isTimeout:true};
+     worker.postMessage({name:'setTimeout',fakeId:fakeId,time:time});
+     return fakeId;
+     };
+    window.clearTimeout=function(fakeId)
+     {
+     if(fakeIdToCallback.hasOwnProperty(fakeId))
+      {
+      delete fakeIdToCallback[fakeId];
+      worker.postMessage({name:'clearTimeout',fakeId:fakeId});
+      }
+     };
+    worker.onmessage=function(event)
+     {
+     var data=event.data,fakeId=data.fakeId,request,parameters,callback;
+     if(fakeIdToCallback.hasOwnProperty(fakeId))
+      {
+      request=fakeIdToCallback[fakeId];
+      callback=request.callback;
+      parameters=request.parameters;
+      if(request.hasOwnProperty('isTimeout')&&request.isTimeout) { delete fakeIdToCallback[fakeId]; }
+      }
+     if(typeof (callback)==='string')
+      {
+      try {callback=new Function (callback);}
+      catch(error) { console.log('Error parsing callback code string: ',error); }
+      }
+     if(typeof (callback)==='function') { callback.apply(window,parameters); }
+     };
+    worker.onerror=function(event)
+     {
+     console.log(event);
+     };
+    }
+   catch(error) { console.log ('Initialisation failed'); console.error(error); }
+   }
+ else
+  {
+  return false;
+  }
+ return true;
+ }
+
+
+
+
  function mainDethrottle ()
  {
- if(main_obj.state.dethrottle_object==null) { return true; }
  if(main_obj.state.dethrottle_stage<1)      { return true; }
  //console.log("dethrottling stage = "+main_obj.state.dethrottle_stage);
  if(main_obj.state.dethrottle_stage==4)
   {
   main_obj.state.dethrottle_ready=true
-  main_obj.state.dethrottle_object.loop=true;
-  main_obj.state.dethrottle_object.muted=false;
-//  main_obj.state.dethrottle_object.play();
-  main_obj.state.dethrottle_object.volume=0.000;
-  //main_obj.state.dethrottle_object.muted=true;
-  //aa.debugLog("dethrottling");
+  aa.mainThrottleFix(null);
+  aa.debugLog("dethrottling");
   }
  main_obj.state.dethrottle_stage++;
  return true;
@@ -5336,10 +5454,7 @@ changedTouches: A list of information for every finger involved in the event
 
  main_obj.state.cycle++;
  mainWorkerStep();
- if(main_obj.state.dethrottle_stage>1&&main_obj.state.dethrottle_stage<5)
-  {
-  mainDethrottle();
-  }
+ if(main_obj.state.dethrottle_stage>1&&main_obj.state.dethrottle_stage<5) {  mainDethrottle();  }
  main_obj.state.proc();
  msr=aa.timerMsRunning()/1000;
  main_obj.state.speed_got=parseInt(main_obj.state.cycle/msr);
@@ -5478,8 +5593,9 @@ changedTouches: A list of information for every finger involved in the event
  obj.type="plugin";
  obj.head=document.head;
  obj.state=0;
+ obj.ready=false;
+ obj.res=null;
  obj.api=null;
- obj.api_count=null;
  obj.api_procs=null;
  obj.script=document.createElement('script');
  obj.script.type='text/javascript';
@@ -5490,6 +5606,8 @@ changedTouches: A list of information for every finger involved in the event
  function _pluginErrorHandler(event)
   {
   event.preventDefault();
+  obj.ready=true;
+  obj.res="err";
   obj.state=3;
   };
  window.addEventListener('error',_pluginErrorHandler);
@@ -5516,15 +5634,21 @@ changedTouches: A list of information for every finger involved in the event
    {
    function _getAllProcs(object)
     {
-    return Object.getOwnPropertyNames(object).filter(function(property) {  return typeof object[property]=='function';  });
+    return Object.getOwnPropertyNames(object).filter(function(property)
+     {
+     return typeof object[property]=='function';
+     });
     }
    obj.api=pluginEntry();
    obj.api_procs=_getAllProcs(obj.api);
-   obj.api_count=obj.api_procs.length;
+   obj.ready=true;
+   obj.res="ok";
    obj.state=2;
    }
   else
    {
+   obj.ready=true;
+   obj.res="err";
    obj.state=3;
    }
   };
@@ -5545,17 +5669,19 @@ changedTouches: A list of information for every finger involved in the event
  elem.parentNode.removeChild(elem);
  obj.type="";
  obj.state=0;
+ obj.ready=false;
+ obj.res=null;
  obj.api=null;
- obj.api_count=null;
  obj.api_procs=null;
  obj.head={};
  obj.script={};
  delete obj.api;
- delete obj.api_count;
  delete obj.api_procs;
  delete obj.head;
  delete obj.script;
  delete obj.state;
+ delete obj.ready;
+ delete obj.res;
  delete obj.type;
  obj={};
  return true;
@@ -5653,6 +5779,7 @@ changedTouches: A list of information for every finger involved in the event
  stringBase64ToUint8:stringBase64ToUint8,
  stringSplitter:stringSplitter,
  stringTime:stringTime,
+ stringParms:stringParms,
 
 
  envInfoGet:envInfoGet,
@@ -5745,6 +5872,7 @@ changedTouches: A list of information for every finger involved in the event
  guiCanvasLine:guiCanvasLine,
  guiCanvasText:guiCanvasText,
  guiCanvasRounded:guiCanvasRounded,
+ guiCssOpacitySet:guiCssOpacitySet,
  guiCssDisplaySet:guiCssDisplaySet,
  guiCssOutlineSet:guiCssOutlineSet,
  guiRectsGet:guiRectsGet,
@@ -5831,6 +5959,7 @@ changedTouches: A list of information for every finger involved in the event
  main_vars:main_obj.vars,
  main_state:main_obj.state,
  mainStart:mainStart,
+ mainThrottleFix:mainThrottleFix,
  mainDethrottle:mainDethrottle,
  mainWorkerAdd:mainWorkerAdd,
  mainWorkerRemove:mainWorkerRemove,

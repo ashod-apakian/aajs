@@ -5303,7 +5303,7 @@ changedTouches: A list of information for every finger involved in the event
   var worker,fakeIdToCallback={},lastFakeId=0,maxFakeId=0x7FFFFFFF;
   if(typeof (Worker)!=='undefined')
    {
-   function getFakeId()
+   function _getFakeId()
     {
     do { if(lastFakeId==maxFakeId) { lastFakeId=0; } else { lastFakeId++; }  }  while(fakeIdToCallback.hasOwnProperty(lastFakeId));
     return lastFakeId;
@@ -5313,7 +5313,7 @@ changedTouches: A list of information for every finger involved in the event
     worker=new Worker(workerscript);
     window.setInterval=function(callback,time/* , parameters */)
      {
-     var fakeId=getFakeId();
+     var fakeId=_getFakeId();
      fakeIdToCallback[fakeId]={callback:callback,parameters:Array.prototype.slice.call(arguments,2)};
      worker.postMessage ({name:'setInterval',fakeId:fakeId,time:time});
      return fakeId;
@@ -5328,7 +5328,7 @@ changedTouches: A list of information for every finger involved in the event
      };
     window.setTimeout=function(callback,time/* , parameters */)
      {
-     var fakeId=getFakeId();
+     var fakeId=_getFakeId();
      fakeIdToCallback[fakeId]={callback:callback,parameters:Array.prototype.slice.call(arguments,2),isTimeout:true};
      worker.postMessage({name:'setTimeout',fakeId:fakeId,time:time});
      return fakeId;

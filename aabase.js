@@ -1,3 +1,11 @@
+/**
+ aaJS, (c) by, Ashod Apakian
+ Third party credits:
+ jesusgollonet easing functions
+ Ruslan Tushov dethrottling
+ raysan5 rayicons
+**/
+
 //'use strict';
 
 var aa=(function()
@@ -223,7 +231,6 @@ var aa=(function()
   {
   ths=handle_obj.state.handle_array[i];
   if(ths.count==0) { continue; }
-  //aa.debugLog(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
   console.log(" base="+ths.base+" usage="+ths.count+" of "+ths.slots+"  "+ths.type);
   }
  }
@@ -549,9 +556,6 @@ var aa=(function()
 
 
 
-
-
-
  function timerTimeoutSet (to)
  {
  var tmo={};
@@ -699,6 +703,30 @@ var aa=(function()
  return txt;
  }
 
+
+
+ function numBitGet(numb,bit)
+ {
+ return((numb>>bit)%2!=0)
+ }
+
+
+ function numBitSet(numb,bit)
+ {
+ return numb|1<<bit;
+ }
+
+
+ function numBitClear(numb,bit)
+ {
+ return numb&~(1<<bit);
+ }
+
+
+ function numBitToggle(numb,bit)
+ {
+ return numBitGet(numb,bit)?numBitClear(numb,bit):numBitSet(numb,bit);
+ }
 
 
 /*-----------------------------------------------------------------------*/
@@ -1275,6 +1303,7 @@ var aa=(function()
   {
   case "click":
 //  console.log(event.type);
+  aa.main_state.click_count++;
   if(aa.main_state.dethrottle_stage==1)  {   aa.mainDethrottle();    }
   break;
 
@@ -1362,7 +1391,7 @@ var aa=(function()
   document.addEventListener("mozvisibilitychange",function(event)    { env_obj.event_proc(event);  });
   document.addEventListener("webkitvisibilitychange",function(event) { env_obj.event_proc(event);  });
   document.addEventListener("msvisibilitychange",function(event)     { env_obj.event_proc(event);  });
-  console.log("listening");
+  ///console.log("listening");
   }
  return true;
  }
@@ -1893,14 +1922,6 @@ changedTouches: A list of information for every finger involved in the event
  touch_obj.state.event_counter=0;
 
 
- /**
- t=10;
- touch_obj.state.finger={};
- touch_obj.state.finger.max_tracks=t;
- touch_obj.state.finger.track_count=0;
- touch_obj.state.finger.event_track=dataArray2DCreate(t);
- */
-
  touch_obj.init();
  document.body.style.touchAction="none";
  document.getElementById('bodid').addEventListener('tap',function(event)
@@ -2049,77 +2070,6 @@ changedTouches: A list of information for every finger involved in the event
  }
 
 
-
- /**
- function touchProcess (msg)
- {
- var obj,s,i,t,trk,mt,tc,empty,used,trx;
-
- if(touch_obj.state.is_started!=true) { return null; }
- if(msg.what=="pointerup"||msg.what=="pointermove"||msg.what=="pointerup")
-  {
-  }
- mt=touch_obj.state.finger.max_tracks;
- tc=touch_obj.state.finger.track_count;
- empty=0;
- used=0;
- for(t=0;t<mt;t++)
-  {
-  trk=touch_obj.state.finger.event_track[t];
-  if(trk.length==0)     { continue; }
-  used++;
-  trx=trk[trk.length-1];
-  if(trx.what=="touchend") { empty++; }
-  }
- if(used>0&&empty==used)
-  {
-  for(t=0;t<mt;t++) {  touch_obj.state.finger.event_track[t]=[];   }
-  }
- i=0;
- for(s=0;;s++)
-  {
-  if(msg.changedTouches[s]==undefined) { break;  }
-  obj={};
-  obj.ec=msg.ec;
-  obj.id=msg.changedTouches[s].identifier;
-  obj.what=msg.what;
-  obj.stamp=msg.timeStamp;
-  obj.cx=msg.changedTouches[s].clientX;
-  obj.cy=msg.changedTouches[s].clientY;
-  obj.sx=msg.changedTouches[s].screenX;
-  obj.sy=msg.changedTouches[s].screenY;
-  obj.rx=msg.changedTouches[s].radiusX;
-  obj.ry=msg.changedTouches[s].radiusY;
-  obj.ra=msg.changedTouches[s].rotationAngle;
-  for(t=0;t<mt;t++)
-   {
-   trk=touch_obj.state.finger.event_track[t];
-   if(trk.length==0)     { continue; }
-   if(trk[0].id==obj.id) { break; }
-   }
-  if(t==mt)
-   {
-   for(t=0;t<mt;t++)
-    {
-    trk=touch_obj.state.finger.event_track[t];
-    if(trk.length==0)     { break; }
-    }
-   if(t==mt) { aa.debugAlert(); }
-   }
-  trk[trk.length]=obj;
-  }
- tc=0;
- for(t=0;t<mt;t++)
-  {
-  trk=touch_obj.state.finger.event_track[t];
-  if(trk.length==0)     { continue; }
-  tc++;
-  }
- touch_obj.state.finger.track_count=tc;
- return touch_obj.state.finger;
- }
-
-*/
 
 
  function touchStatus ()
@@ -2589,6 +2539,212 @@ changedTouches: A list of information for every finger involved in the event
 
 /*-----------------------------------------------------------------------*/
 
+ var guiRayIcon=
+ [
+ 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000, // 000 NONE
+ 0x3ff80000,0x2f082008,0x2042207e,0x40027fc2,0x40024002,0x40024002,0x40024002,0x00007ffe, // 001 FOLDER_FILE_OPEN
+ 0x3ffe0000,0x44226422,0x400247e2,0x5ffa4002,0x57ea500a,0x500a500a,0x40025ffa,0x00007ffe, // 002 FILE_SAVE_CLASSIC
+ 0x00000000,0x0042007e,0x40027fc2,0x40024002,0x41024002,0x44424282,0x793e4102,0x00000100, // 003 FOLDER_OPEN
+ 0x00000000,0x0042007e,0x40027fc2,0x40024002,0x41024102,0x44424102,0x793e4282,0x00000000, // 004 FOLDER_SAVE
+ 0x3ff00000,0x201c2010,0x20042004,0x21042004,0x24442284,0x21042104,0x20042104,0x00003ffc, // 005 FILE_OPEN
+ 0x3ff00000,0x201c2010,0x20042004,0x21042004,0x21042104,0x22842444,0x20042104,0x00003ffc, // 006 FILE_SAVE
+ 0x3ff00000,0x201c2010,0x00042004,0x20041004,0x20844784,0x00841384,0x20042784,0x00003ffc, // 007 FILE_EXPORT
+ 0x3ff00000,0x201c2010,0x20042004,0x20042004,0x22042204,0x22042f84,0x20042204,0x00003ffc, // 008 FILE_NEW
+ 0x3ff00000,0x201c2010,0x20042004,0x20042004,0x25042884,0x25042204,0x20042884,0x00003ffc, // 009 FILE_DELETE
+ 0x3ff00000,0x201c2010,0x20042004,0x20042ff4,0x20042ff4,0x20042ff4,0x20042004,0x00003ffc, // 010 FILETYPE_TEXT
+ 0x3ff00000,0x201c2010,0x27042004,0x244424c4,0x26442444,0x20642664,0x20042004,0x00003ffc, // 011 FILETYPE_AUDIO
+ 0x3ff00000,0x201c2010,0x26042604,0x20042004,0x35442884,0x2414222c,0x20042004,0x00003ffc, // 012 FILETYPE_IMAGE
+ 0x3ff00000,0x201c2010,0x20c42004,0x22442144,0x22442444,0x20c42144,0x20042004,0x00003ffc, // 013 FILETYPE_PLAY
+ 0x3ff00000,0x3ffc2ff0,0x3f3c2ff4,0x3dbc2eb4,0x3dbc2bb4,0x3f3c2eb4,0x3ffc2ff4,0x00002ff4, // 014 FILETYPE_VIDEO
+ 0x3ff00000,0x201c2010,0x21842184,0x21842004,0x21842184,0x21842184,0x20042184,0x00003ffc, // 015 FILETYPE_INFO
+ 0x0ff00000,0x381c0810,0x28042804,0x28042804,0x28042804,0x28042804,0x20102ffc,0x00003ff0, // 016 FILE_COPY
+ 0x00000000,0x701c0000,0x079c1e14,0x55a000f0,0x079c00f0,0x701c1e14,0x00000000,0x00000000, // 017 FILE_CUT
+ 0x01c00000,0x13e41bec,0x3f841004,0x204420c4,0x20442044,0x20442044,0x207c2044,0x00003fc0, // 018 FILE_PASTE
+ 0x00000000,0x3aa00fe0,0x2abc2aa0,0x2aa42aa4,0x20042aa4,0x20042004,0x3ffc2004,0x00000000, // 019 CURSOR_HAND
+ 0x00000000,0x003c000c,0x030800c8,0x30100c10,0x10202020,0x04400840,0x01800280,0x00000000, // 020 CURSOR_POINTER
+ 0x00000000,0x00180000,0x01f00078,0x03e007f0,0x07c003e0,0x04000e40,0x00000000,0x00000000, // 021 CURSOR_CLASSIC
+ 0x00000000,0x04000000,0x11000a00,0x04400a80,0x01100220,0x00580088,0x00000038,0x00000000, // 022 PENCIL
+ 0x04000000,0x15000a00,0x50402880,0x14102820,0x05040a08,0x015c028c,0x007c00bc,0x00000000, // 023 PENCIL_BIG
+ 0x01c00000,0x01400140,0x01400140,0x0ff80140,0x0ff80808,0x0aa80808,0x0aa80aa8,0x00000ff8, // 024 BRUSH_CLASSIC
+ 0x1ffc0000,0x5ffc7ffe,0x40004000,0x00807f80,0x01c001c0,0x01c001c0,0x01c001c0,0x00000080, // 025 BRUSH_PAINTER
+ 0x00000000,0x00800000,0x01c00080,0x03e001c0,0x07f003e0,0x036006f0,0x000001c0,0x00000000, // 026 WATER_DROP
+ 0x00000000,0x3e003800,0x1f803f80,0x0c201e40,0x02080c10,0x00840104,0x00380044,0x00000000, // 027 COLOR_PICKER
+ 0x00000000,0x07800300,0x1fe00fc0,0x3f883fd0,0x0e021f04,0x02040402,0x00f00108,0x00000000, // 028 RUBBER
+ 0x00c00000,0x02800140,0x08200440,0x20081010,0x2ffe3004,0x03f807fc,0x00e001f0,0x00000040, // 029 COLOR_BUCKET
+ 0x00000000,0x21843ffc,0x01800180,0x01800180,0x01800180,0x01800180,0x03c00180,0x00000000, // 030 TEXT_T
+ 0x00800000,0x01400180,0x06200340,0x0c100620,0x1ff80c10,0x380c1808,0x70067004,0x0000f80f, // 031 TEXT_A
+ 0x78000000,0x50004000,0x00004800,0x03c003c0,0x03c003c0,0x00100000,0x0002000a,0x0000000e, // 032 SCALE
+ 0x75560000,0x5e004002,0x54001002,0x41001202,0x408200fe,0x40820082,0x40820082,0x00006afe, // 033 RESIZE
+ 0x00000000,0x3f003f00,0x3f003f00,0x3f003f00,0x00400080,0x001c0020,0x001c001c,0x00000000, // 034 FILTER_POINT
+ 0x6d800000,0x00004080,0x40804080,0x40800000,0x00406d80,0x001c0020,0x001c001c,0x00000000, // 035 FILTER_BILINEAR
+ 0x40080000,0x1ffe2008,0x14081008,0x11081208,0x10481088,0x10081028,0x10047ff8,0x00001002, // 036 CROP
+ 0x00100000,0x3ffc0010,0x2ab03550,0x22b02550,0x20b02150,0x20302050,0x2000fff0,0x00002000, // 037 CROP_ALPHA
+ 0x40000000,0x1ff82000,0x04082808,0x01082208,0x00482088,0x00182028,0x35542008,0x00000002, // 038 SQUARE_TOGGLE
+ 0x00000000,0x02800280,0x06c006c0,0x0ea00ee0,0x1e901eb0,0x3e883e98,0x7efc7e8c,0x00000000, // 039 SIMMETRY
+ 0x01000000,0x05600100,0x1d480d50,0x7d423d44,0x3d447d42,0x0d501d48,0x01000560,0x00000100, // 040 SIMMETRY_HORIZONTAL
+ 0x01800000,0x04200240,0x10080810,0x00001ff8,0x00007ffe,0x0ff01ff8,0x03c007e0,0x00000180, // 041 SIMMETRY_VERTICAL
+ 0x00000000,0x010800f0,0x02040204,0x02040204,0x07f00308,0x1c000e00,0x30003800,0x00000000, // 042 LENS
+ 0x00000000,0x061803f0,0x08240c0c,0x08040814,0x0c0c0804,0x23f01618,0x18002400,0x00000000, // 043 LENS_BIG
+ 0x00000000,0x00000000,0x1c7007c0,0x638e3398,0x1c703398,0x000007c0,0x00000000,0x00000000, // 044 EYE_ON
+ 0x00000000,0x10002000,0x04700fc0,0x610e3218,0x1c703098,0x001007a0,0x00000008,0x00000000, // 045 EYE_OFF
+ 0x00000000,0x00007ffc,0x40047ffc,0x10102008,0x04400820,0x02800280,0x02800280,0x00000100, // 046 FILTER_TOP
+ 0x00000000,0x40027ffe,0x10082004,0x04200810,0x02400240,0x02400240,0x01400240,0x000000c0, // 047 FILTER
+ 0x00800000,0x00800080,0x00000080,0x3c9e0000,0x00000000,0x00800080,0x00800080,0x00000000, // 048 TARGET_POINT
+ 0x00800000,0x00800080,0x00800080,0x3f7e01c0,0x008001c0,0x00800080,0x00800080,0x00000000, // 049 TARGET_SMALL
+ 0x00800000,0x00800080,0x03e00080,0x3e3e0220,0x03e00220,0x00800080,0x00800080,0x00000000, // 050 TARGET_BIG
+ 0x01000000,0x04400280,0x01000100,0x43842008,0x43849ab2,0x01002008,0x04400100,0x01000280, // 051 TARGET_MOVE
+ 0x01000000,0x04400280,0x01000100,0x41042108,0x41049ff2,0x01002108,0x04400100,0x01000280, // 052 CURSOR_MOVE
+ 0x781e0000,0x500a4002,0x04204812,0x00000240,0x02400000,0x48120420,0x4002500a,0x0000781e, // 053 CURSOR_SCALE
+ 0x00000000,0x20003c00,0x24002800,0x01000200,0x00400080,0x00140024,0x003c0004,0x00000000, // 054 CURSOR_SCALE_RIGHT
+ 0x00000000,0x0004003c,0x00240014,0x00800040,0x02000100,0x28002400,0x3c002000,0x00000000, // 055 CURSOR_SCALE_LEFT
+ 0x00000000,0x00100020,0x10101fc8,0x10001020,0x10001000,0x10001000,0x00001fc0,0x00000000, // 056 UNDO
+ 0x00000000,0x08000400,0x080813f8,0x00080408,0x00080008,0x00080008,0x000003f8,0x00000000, // 057 REDO
+ 0x00000000,0x3ffc0000,0x20042004,0x20002000,0x20402000,0x3f902020,0x00400020,0x00000000, // 058 REREDO
+ 0x00000000,0x3ffc0000,0x20042004,0x27fc2004,0x20202000,0x3fc82010,0x00200010,0x00000000, // 059 MUTATE
+ 0x00000000,0x0ff00000,0x10081818,0x11801008,0x10001180,0x18101020,0x00100fc8,0x00000020, // 060 ROTATE
+ 0x00000000,0x04000200,0x240429fc,0x20042204,0x20442004,0x3f942024,0x00400020,0x00000000, // 061 REPEAT
+ 0x00000000,0x20001000,0x22104c0e,0x00801120,0x11200040,0x4c0e2210,0x10002000,0x00000000, // 062 SHUFFLE
+ 0x7ffe0000,0x50024002,0x44024802,0x41024202,0x40424082,0x40124022,0x4002400a,0x00007ffe, // 063 EMPTYBOX
+ 0x00800000,0x03e00080,0x08080490,0x3c9e0808,0x08080808,0x03e00490,0x00800080,0x00000000, // 064 TARGET
+ 0x00800000,0x00800080,0x00800080,0x3ffe01c0,0x008001c0,0x00800080,0x00800080,0x00000000, // 065 TARGET_SMALL_FILL
+ 0x00800000,0x00800080,0x03e00080,0x3ffe03e0,0x03e003e0,0x00800080,0x00800080,0x00000000, // 066 TARGET_BIG_FILL
+ 0x01000000,0x07c00380,0x01000100,0x638c2008,0x638cfbbe,0x01002008,0x07c00100,0x01000380, // 067 TARGET_MOVE_FILL
+ 0x01000000,0x07c00380,0x01000100,0x610c2108,0x610cfffe,0x01002108,0x07c00100,0x01000380, // 068 CURSOR_MOVE_FILL
+ 0x781e0000,0x6006700e,0x04204812,0x00000240,0x02400000,0x48120420,0x700e6006,0x0000781e, // 069 CURSOR_SCALE_FILL
+ 0x00000000,0x38003c00,0x24003000,0x01000200,0x00400080,0x000c0024,0x003c001c,0x00000000, // 070 CURSOR_SCALE_RIGHT
+ 0x00000000,0x001c003c,0x0024000c,0x00800040,0x02000100,0x30002400,0x3c003800,0x00000000, // 071 CURSOR_SCALE_LEFT
+ 0x00000000,0x00300020,0x10301ff8,0x10001020,0x10001000,0x10001000,0x00001fc0,0x00000000, // 072 UNDO_FILL
+ 0x00000000,0x0c000400,0x0c081ff8,0x00080408,0x00080008,0x00080008,0x000003f8,0x00000000, // 073 REDO_FILL
+ 0x00000000,0x3ffc0000,0x20042004,0x20002000,0x20402000,0x3ff02060,0x00400060,0x00000000, // 074 REREDO_FILL
+ 0x00000000,0x3ffc0000,0x20042004,0x27fc2004,0x20202000,0x3ff82030,0x00200030,0x00000000, // 075 MUTATE_FILL
+ 0x00000000,0x0ff00000,0x10081818,0x11801008,0x10001180,0x18301020,0x00300ff8,0x00000020, // 076 ROTATE_FILL
+ 0x00000000,0x06000200,0x26042ffc,0x20042204,0x20442004,0x3ff42064,0x00400060,0x00000000, // 077 REPEAT_FILL
+ 0x00000000,0x30001000,0x32107c0e,0x00801120,0x11200040,0x7c0e3210,0x10003000,0x00000000, // 078 SHUFFLE_FILL
+ 0x00000000,0x30043ffc,0x24042804,0x21042204,0x20442084,0x20142024,0x3ffc200c,0x00000000, // 079 EMPTYBOX_SMALL
+ 0x00000000,0x20043ffc,0x20042004,0x20042004,0x20042004,0x20042004,0x3ffc2004,0x00000000, // 080 BOX
+ 0x00000000,0x23c43ffc,0x23c423c4,0x200423c4,0x20042004,0x20042004,0x3ffc2004,0x00000000, // 081 BOX_TOP
+ 0x00000000,0x3e043ffc,0x3e043e04,0x20043e04,0x20042004,0x20042004,0x3ffc2004,0x00000000, // 082 BOX_TOP_RIGHT
+ 0x00000000,0x20043ffc,0x20042004,0x3e043e04,0x3e043e04,0x20042004,0x3ffc2004,0x00000000, // 083 BOX_RIGHT
+ 0x00000000,0x20043ffc,0x20042004,0x20042004,0x3e042004,0x3e043e04,0x3ffc3e04,0x00000000, // 084 BOX_BOTTOM_RIGHT
+ 0x00000000,0x20043ffc,0x20042004,0x20042004,0x23c42004,0x23c423c4,0x3ffc23c4,0x00000000, // 085 BOX_BOTTOM
+ 0x00000000,0x20043ffc,0x20042004,0x20042004,0x207c2004,0x207c207c,0x3ffc207c,0x00000000, // 086 BOX_BOTTOM_LEFT
+ 0x00000000,0x20043ffc,0x20042004,0x207c207c,0x207c207c,0x20042004,0x3ffc2004,0x00000000, // 087 BOX_LEFT
+ 0x00000000,0x207c3ffc,0x207c207c,0x2004207c,0x20042004,0x20042004,0x3ffc2004,0x00000000, // 088 BOX_TOP_LEFT
+ 0x00000000,0x20043ffc,0x20042004,0x23c423c4,0x23c423c4,0x20042004,0x3ffc2004,0x00000000, // 089 BOX_CIRCLE_MASK
+ 0x7ffe0000,0x40024002,0x47e24182,0x4ff247e2,0x47e24ff2,0x418247e2,0x40024002,0x00007ffe, // 090 BOX_CENTER
+ 0x7fff0000,0x40014001,0x40014001,0x49555ddd,0x4945495d,0x400149c5,0x40014001,0x00007fff, // 091 POT
+ 0x7ffe0000,0x53327332,0x44ce4cce,0x41324332,0x404e40ce,0x48125432,0x4006540e,0x00007ffe, // 092 ALPHA_MULTIPLY
+ 0x7ffe0000,0x53327332,0x44ce4cce,0x41324332,0x5c4e40ce,0x44124432,0x40065c0e,0x00007ffe, // 093 ALPHA_CLEAR
+ 0x7ffe0000,0x42fe417e,0x42fe417e,0x42fe417e,0x42fe417e,0x42fe417e,0x42fe417e,0x00007ffe, // 094 DITHERING
+ 0x07fe0000,0x1ffa0002,0x7fea000a,0x402a402a,0x5b2a512a,0x5128552a,0x40205128,0x00007fe0, // 095 MIPMAPS
+ 0x00000000,0x1ff80000,0x12481248,0x12481ff8,0x1ff81248,0x12481248,0x00001ff8,0x00000000, // 096 BOX_GRID
+ 0x12480000,0x7ffe1248,0x12481248,0x12487ffe,0x7ffe1248,0x12481248,0x12487ffe,0x00001248, // 097 GRID
+ 0x00000000,0x1c380000,0x1c3817e8,0x08100810,0x08100810,0x17e81c38,0x00001c38,0x00000000, // 098 BOX_CORNERS_SMALL
+ 0x700e0000,0x700e5ffa,0x20042004,0x20042004,0x20042004,0x20042004,0x5ffa700e,0x0000700e, // 099 BOX_CORNERS_BIG
+ 0x3f7e0000,0x21422142,0x21422142,0x00003f7e,0x21423f7e,0x21422142,0x3f7e2142,0x00000000, // 100 FOUR_BOXES
+ 0x00000000,0x3bb80000,0x3bb83bb8,0x3bb80000,0x3bb83bb8,0x3bb80000,0x3bb83bb8,0x00000000, // 101 GRID_FILL
+ 0x7ffe0000,0x7ffe7ffe,0x77fe7000,0x77fe77fe,0x777e7700,0x777e777e,0x777e777e,0x0000777e, // 102 BOX_MULTISIZE
+ 0x781e0000,0x40024002,0x00004002,0x01800000,0x00000180,0x40020000,0x40024002,0x0000781e, // 103 ZOOM_SMALL
+ 0x781e0000,0x40024002,0x00004002,0x03c003c0,0x03c003c0,0x40020000,0x40024002,0x0000781e, // 104 ZOOM_MEDIUM
+ 0x781e0000,0x40024002,0x07e04002,0x07e007e0,0x07e007e0,0x400207e0,0x40024002,0x0000781e, // 105 ZOOM_BIG
+ 0x781e0000,0x5ffa4002,0x1ff85ffa,0x1ff81ff8,0x1ff81ff8,0x5ffa1ff8,0x40025ffa,0x0000781e, // 106 ZOOM_ALL
+ 0x00000000,0x2004381c,0x00002004,0x00000000,0x00000000,0x20040000,0x381c2004,0x00000000, // 107 ZOOM_CENTER
+ 0x00000000,0x1db80000,0x10081008,0x10080000,0x00001008,0x10081008,0x00001db8,0x00000000, // 108 BOX_DOTS_SMALL
+ 0x35560000,0x00002002,0x00002002,0x00002002,0x00002002,0x00002002,0x35562002,0x00000000, // 109 BOX_DOTS_BIG
+ 0x7ffe0000,0x40024002,0x48124ff2,0x49924812,0x48124992,0x4ff24812,0x40024002,0x00007ffe, // 110 BOX_CONCENTRIC
+ 0x00000000,0x10841ffc,0x10841084,0x1ffc1084,0x10841084,0x10841084,0x00001ffc,0x00000000, // 111 BOX_GRID_BIG
+ 0x00000000,0x00000000,0x10000000,0x04000800,0x01040200,0x00500088,0x00000020,0x00000000, // 112 OK_TICK
+ 0x00000000,0x10080000,0x04200810,0x01800240,0x02400180,0x08100420,0x00001008,0x00000000, // 113 CROSS
+ 0x00000000,0x02000000,0x00800100,0x00200040,0x00200010,0x00800040,0x02000100,0x00000000, // 114 ARROW_LEFT
+ 0x00000000,0x00400000,0x01000080,0x04000200,0x04000800,0x01000200,0x00400080,0x00000000, // 115 ARROW_RIGHT
+ 0x00000000,0x00000000,0x00000000,0x08081004,0x02200410,0x00800140,0x00000000,0x00000000, // 116 ARROW_BOTTOM
+ 0x00000000,0x00000000,0x01400080,0x04100220,0x10040808,0x00000000,0x00000000,0x00000000, // 117 ARROW_TOP
+ 0x00000000,0x02000000,0x03800300,0x03e003c0,0x03e003f0,0x038003c0,0x02000300,0x00000000, // 118 ARROW_LEFT_FILL
+ 0x00000000,0x00400000,0x01c000c0,0x07c003c0,0x07c00fc0,0x01c003c0,0x004000c0,0x00000000, // 119 ARROW_RIGHT_FILL
+ 0x00000000,0x00000000,0x00000000,0x0ff81ffc,0x03e007f0,0x008001c0,0x00000000,0x00000000, // 120 ARROW_BOTTOM_FILL
+ 0x00000000,0x00000000,0x01c00080,0x07f003e0,0x1ffc0ff8,0x00000000,0x00000000,0x00000000, // 121 ARROW_TOP_FILL
+ 0x00000000,0x18a008c0,0x32881290,0x24822686,0x26862482,0x12903288,0x08c018a0,0x00000000, // 122 AUDIO
+ 0x00000000,0x04800780,0x004000c0,0x662000f0,0x08103c30,0x130a0e18,0x0000318e,0x00000000, // 123 FX
+ 0x00000000,0x00800000,0x08880888,0x2aaa0a8a,0x0a8a2aaa,0x08880888,0x00000080,0x00000000, // 124 WAVE
+ 0x00000000,0x00600000,0x01080090,0x02040108,0x42044204,0x24022402,0x00001800,0x00000000, // 125 WAVE_SINUS
+ 0x00000000,0x07f80000,0x04080408,0x04080408,0x04080408,0x7c0e0408,0x00000000,0x00000000, // 126 WAVE_SQUARE
+ 0x00000000,0x00000000,0x00a00040,0x22084110,0x08021404,0x00000000,0x00000000,0x00000000, // 127 WAVE_TRIANGULAR
+ 0x00000000,0x00000000,0x04200000,0x01800240,0x02400180,0x00000420,0x00000000,0x00000000, // 128 CROSS_SMALL
+ 0x00000000,0x18380000,0x12281428,0x10a81128,0x112810a8,0x14281228,0x00001838,0x00000000, // 129 PLAYER_PREVIOUS
+ 0x00000000,0x18000000,0x11801600,0x10181060,0x10601018,0x16001180,0x00001800,0x00000000, // 130 PLAYER_PLAY_BACK
+ 0x00000000,0x00180000,0x01880068,0x18080608,0x06081808,0x00680188,0x00000018,0x00000000, // 131 PLAYER_PLAY
+ 0x00000000,0x1e780000,0x12481248,0x12481248,0x12481248,0x12481248,0x00001e78,0x00000000, // 132 PLAYER_PAUSE
+ 0x00000000,0x1ff80000,0x10081008,0x10081008,0x10081008,0x10081008,0x00001ff8,0x00000000, // 133 PLAYER_STOP
+ 0x00000000,0x1c180000,0x14481428,0x15081488,0x14881508,0x14281448,0x00001c18,0x00000000, // 134 PLAYER_NEXT
+ 0x00000000,0x03c00000,0x08100420,0x10081008,0x10081008,0x04200810,0x000003c0,0x00000000, // 135 PLAYER_RECORD
+ 0x00000000,0x0c3007e0,0x13c81818,0x14281668,0x14281428,0x1c381c38,0x08102244,0x00000000, // 136 MAGNET
+ 0x07c00000,0x08200820,0x3ff80820,0x23882008,0x21082388,0x20082108,0x1ff02008,0x00000000, // 137 LOCK_CLOSE
+ 0x07c00000,0x08000800,0x3ff80800,0x23882008,0x21082388,0x20082108,0x1ff02008,0x00000000, // 138 LOCK_OPEN
+ 0x01c00000,0x0c180770,0x3086188c,0x60832082,0x60034781,0x30062002,0x0c18180c,0x01c00770, // 139 CLOCK
+ 0x0a200000,0x1b201b20,0x04200e20,0x04200420,0x04700420,0x0e700e70,0x0e700e70,0x04200e70, // 140 TOOLS
+ 0x01800000,0x3bdc318c,0x0ff01ff8,0x7c3e1e78,0x1e787c3e,0x1ff80ff0,0x318c3bdc,0x00000180, // 141 GEAR
+ 0x01800000,0x3ffc318c,0x1c381ff8,0x781e1818,0x1818781e,0x1ff81c38,0x318c3ffc,0x00000180, // 142 GEAR_BIG
+ 0x00000000,0x08080ff8,0x08081ffc,0x0aa80aa8,0x0aa80aa8,0x0aa80aa8,0x08080aa8,0x00000ff8, // 143 BIN
+ 0x00000000,0x00000000,0x20043ffc,0x08043f84,0x04040f84,0x04040784,0x000007fc,0x00000000, // 144 HAND_POINTER
+ 0x00000000,0x24400400,0x00001480,0x6efe0e00,0x00000e00,0x24401480,0x00000400,0x00000000, // 145 LASER
+ 0x00000000,0x03c00000,0x08300460,0x11181118,0x11181118,0x04600830,0x000003c0,0x00000000, // 146 COIN
+ 0x00000000,0x10880080,0x06c00810,0x366c07e0,0x07e00240,0x00001768,0x04200240,0x00000000, // 147 EXPLOSION
+ 0x00000000,0x3d280000,0x2528252c,0x3d282528,0x05280528,0x05e80528,0x00000000,0x00000000, // 148 1UP
+ 0x01800000,0x03c003c0,0x018003c0,0x0ff007e0,0x0bd00bd0,0x0a500bd0,0x02400240,0x02400240, // 149 PLAYER
+ 0x01800000,0x03c003c0,0x118013c0,0x03c81ff8,0x07c003c8,0x04400440,0x0c080478,0x00000000, // 150 PLAYER_JUMP
+ 0x3ff80000,0x30183ff8,0x30183018,0x3ff83ff8,0x03000300,0x03c003c0,0x03e00300,0x000003e0, // 151 KEY
+ 0x3ff80000,0x3ff83ff8,0x33983ff8,0x3ff83398,0x3ff83ff8,0x00000540,0x0fe00aa0,0x00000fe0, // 152 DEMON
+ 0x00000000,0x0ff00000,0x20041008,0x25442004,0x10082004,0x06000bf0,0x00000300,0x00000000, // 153 TEXT_POPUP
+ 0x00000000,0x11440000,0x07f00be8,0x1c1c0e38,0x1c1c0c18,0x07f00e38,0x11440be8,0x00000000, // 154 GEAR_EX
+ 0x00000000,0x20080000,0x0c601010,0x07c00fe0,0x07c007c0,0x0c600fe0,0x20081010,0x00000000, // 155 CRACK
+ 0x00000000,0x20080000,0x0c601010,0x04400fe0,0x04405554,0x0c600fe0,0x20081010,0x00000000, // 156 CRACK_POINTS
+ 0x00000000,0x00800080,0x01c001c0,0x1ffc3ffe,0x03e007f0,0x07f003e0,0x0c180770,0x00000808, // 157 STAR
+ 0x0ff00000,0x08180810,0x08100818,0x0a100810,0x08180810,0x08100818,0x08100810,0x00001ff8, // 158 DOOR
+ 0x0ff00000,0x08100810,0x08100810,0x10100010,0x4f902010,0x10102010,0x08100010,0x00000ff0, // 159 EXIT
+ 0x00040000,0x001f000e,0x0ef40004,0x12f41284,0x0ef41214,0x10040004,0x7ffc3004,0x10003000, // 160 MODE_2D
+ 0x78040000,0x501f600e,0x0ef44004,0x12f41284,0x0ef41284,0x10140004,0x7ffc300c,0x10003000, // 161 MODE_3D
+ 0x7fe00000,0x50286030,0x47fe4804,0x44224402,0x44224422,0x241275e2,0x0c06140a,0x000007fe, // 162 CUBE
+ 0x7fe00000,0x5ff87ff0,0x47fe4ffc,0x44224402,0x44224422,0x241275e2,0x0c06140a,0x000007fe, // 163 CUBE_FACE_TOP
+ 0x7fe00000,0x50386030,0x47fe483c,0x443e443e,0x443e443e,0x241e75fe,0x0c06140e,0x000007fe, // 164 CUBE_FACE_LEFT
+ 0x7fe00000,0x50286030,0x47fe4804,0x47fe47fe,0x47fe47fe,0x27fe77fe,0x0ffe17fe,0x000007fe, // 165 CUBE_FACE_FRONT
+ 0x7fe00000,0x50286030,0x47fe4804,0x44224402,0x44224422,0x3ff27fe2,0x0ffe1ffa,0x000007fe, // 166 CUBE_FACE_BOTTOM
+ 0x7fe00000,0x70286030,0x7ffe7804,0x7c227c02,0x7c227c22,0x3c127de2,0x0c061c0a,0x000007fe, // 167 CUBE_FACE_RIGHT
+ 0x7fe00000,0x7fe87ff0,0x7ffe7fe4,0x7fe27fe2,0x7fe27fe2,0x24127fe2,0x0c06140a,0x000007fe, // 168 CUBE_FACE_BACK
+ 0x00000000,0x2a0233fe,0x22022602,0x22022202,0x2a022602,0x00a033fe,0x02080110,0x00000000, // 169 CAMERA
+ 0x00000000,0x200c3ffc,0x000c000c,0x3ffc000c,0x30003000,0x30003000,0x3ffc3004,0x00000000, // 170 SPECIAL
+ 0x00000000,0x0022003e,0x012201e2,0x0100013e,0x01000100,0x79000100,0x4f004900,0x00007800, // 171 LINK_NET
+ 0x00000000,0x44007c00,0x45004600,0x00627cbe,0x00620022,0x45007cbe,0x44004600,0x00007c00, // 172 LINK_BOXES
+ 0x00000000,0x0044007c,0x0010007c,0x3f100010,0x3f1021f0,0x3f100010,0x3f0021f0,0x00000000, // 173 LINK_MULTI
+ 0x00000000,0x0044007c,0x00440044,0x0010007c,0x00100010,0x44107c10,0x440047f0,0x00007c00, // 174 LINK
+ 0x00000000,0x0044007c,0x00440044,0x0000007c,0x00000010,0x44007c10,0x44004550,0x00007c00, // 175 LINK_BROKE
+ 0x02a00000,0x22a43ffc,0x20042004,0x20042ff4,0x20042ff4,0x20042ff4,0x20042004,0x00003ffc, // 176 TEXT_NOTES
+ 0x3ffc0000,0x20042004,0x245e27c4,0x27c42444,0x2004201e,0x201e2004,0x20042004,0x00003ffc, // 177 NOTEBOOK
+ 0x00000000,0x07e00000,0x04200420,0x24243ffc,0x24242424,0x24242424,0x3ffc2424,0x00000000, // 178 SUITCASE
+ 0x00000000,0x0fe00000,0x08200820,0x40047ffc,0x7ffc5554,0x40045554,0x7ffc4004,0x00000000, // 179 SUITCASE_ZIP
+ 0x00000000,0x20043ffc,0x3ffc2004,0x13c81008,0x100813c8,0x10081008,0x1ff81008,0x00000000, // 180 MAILBOX
+ 0x00000000,0x40027ffe,0x5ffa5ffa,0x5ffa5ffa,0x40025ffa,0x03c07ffe,0x1ff81ff8,0x00000000, // 181 MONITOR
+ 0x0ff00000,0x6bfe7ffe,0x7ffe7ffe,0x68167ffe,0x08106816,0x08100810,0x0ff00810,0x00000000, // 182 PRINTER
+ 0x3ff80000,0xfffe2008,0x870a8002,0x904a888a,0x904a904a,0x870a888a,0xfffe8002,0x00000000, // 183 PHOTO_CAMERA
+ 0x0fc00000,0xfcfe0cd8,0x8002fffe,0x84428382,0x84428442,0x80028382,0xfffe8002,0x00000000, // 184 PHOTO_CAMERA_FLASH
+ 0x00000000,0x02400180,0x08100420,0x20041008,0x23c42004,0x22442244,0x3ffc2244,0x00000000, // 185 HOUSE
+ 0x00000000,0x1c700000,0x3ff83ef8,0x3ff83ff8,0x0fe01ff0,0x038007c0,0x00000100,0x00000000, // 186 HEART
+ 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x80000000,0xe000c000, // 187 CORNER
+ 0x00000000,0x14001c00,0x15c01400,0x15401540,0x155c1540,0x15541554,0x1ddc1554,0x00000000, // 188 VERTICAL_BARS
+ 0x00000000,0x03000300,0x1b001b00,0x1b601b60,0x1b6c1b60,0x1b6c1b6c,0x1b6c1b6c,0x00000000, // 189 VERTICAL_BARS_FILL
+ 0x00000000,0x00000000,0x403e7ffe,0x7ffe403e,0x7ffe0000,0x43fe43fe,0x00007ffe,0x00000000, // 190 LIFE_BARS
+ 0x7ffc0000,0x43844004,0x43844284,0x43844004,0x42844284,0x42844284,0x40044384,0x00007ffc, // 191 INFO
+ 0x40008000,0x10002000,0x04000800,0x01000200,0x00400080,0x00100020,0x00040008,0x00010002, // 192 CROSSLINE
+ 0x00000000,0x1ff01ff0,0x18301830,0x1f001830,0x03001f00,0x00000300,0x03000300,0x00000000, // 193 HELP
+ 0x3ff00000,0x2abc3550,0x2aac3554,0x2aac3554,0x2aac3554,0x2aac3554,0x2aac3554,0x00003ffc, // 194 FILETYPE_ALPHA
+ 0x3ff00000,0x201c2010,0x22442184,0x28142424,0x29942814,0x2ff42994,0x20042004,0x00003ffc, // 195 FILETYPE_HOME
+ 0x07fe0000,0x04020402,0x7fe20402,0x44224422,0x44224422,0x402047fe,0x40204020,0x00007fe0, // 196 LAYERS_VISIBLE
+ 0x07fe0000,0x04020402,0x7c020402,0x44024402,0x44024402,0x402047fe,0x40204020,0x00007fe0, // 197 LAYERS
+ 0x00000000,0x40027ffe,0x7ffe4002,0x40024002,0x40024002,0x40024002,0x7ffe4002,0x00000000, // 198 WINDOW
+ ];
+
+
+/*-----------------------------------------------------------------------*/
+
 
  function guiObjInit ()
  {
@@ -2599,6 +2755,14 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
+
+
+
+//       fill: this is the default value which stretches the image to fit the content box, regardless of its aspect-ratio.
+//    contain: increases or decreases the size of the image to fill the box whilst preserving its aspect-ratio.
+//      cover: the image will fill the height and width of its box, once again maintaining its aspect ratio but often cropping the image in the process.
+//       none: image will ignore the height and width of the parent and retain its original size.
+// scale-down: the image will compare the difference between none and contain in order to find the smallest concrete object size.
 
 
 
@@ -2643,7 +2807,7 @@ changedTouches: A list of information for every finger involved in the event
   //else                {   obj.dom.style.objectFit="fill";   }
   obj.dom.style.objectFit="fill";
   obj.dom.style.position="absolute";
-  obj.dom.style.zIndex=1000;
+  obj.dom.style.zIndex=1000; // higher zi is on top
   obj.dom.style.opacity=1.0;
   obj.dom.style.display="none";
   document.body.appendChild(obj.dom);
@@ -2706,6 +2870,7 @@ changedTouches: A list of information for every finger involved in the event
  grp.dom=guiGet(grp.han,"dom");
  grp.css=guiGet(grp.han,"css");
  grp.ctx=guiGet(grp.han,"ctx");
+ grp.vars=grp.obj.vars;
  return grp;
  }
 
@@ -3142,7 +3307,7 @@ changedTouches: A list of information for every finger involved in the event
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
  rec=aa.guiRectSet(x,y,w,h);
- if(lw) { obj.ctx.lineWidth=lw; obj.ctx.lineJoin="round"; }
+ if(lw) { obj.ctx.lineWidth=lw; } //obj.ctx.lineJoin="round"; }
  if(fc) { obj.ctx.fillStyle=fc; }
  if(bc) { obj.ctx.strokeStyle=bc; }
  rad={tl:radius,tr:radius,br:radius,bl:radius};
@@ -3164,6 +3329,59 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
+ function guiCanvasTriangle (handle,x1,y1,x2,y2,x3,y3,lw,bc,fc)
+ {
+ var grp;
+
+ if((grp=aa.guiGroupGet(handle))==null) { return false; }
+ if(lw) { grp.ctx.lineWidth=lw;  } // grp.ctx.lineJoin="round";
+ if(fc) { grp.ctx.fillStyle=fc; }
+ if(bc) { grp.ctx.strokeStyle=bc; }
+ grp.ctx.beginPath();
+ grp.ctx.moveTo(x1,y1);
+ grp.ctx.lineTo(x2,y2);
+ grp.ctx.lineTo(x3,y3);
+ grp.ctx.closePath();
+ if(fc) { grp.ctx.fill(); }
+ if(bc) { grp.ctx.stroke(); }
+ return true;
+ }
+
+
+
+
+ function guiCanvasRayIcon (handle,x,y,w,h,idx,cl)
+ {
+ var grp,wd,hd,i,k,xx,yy,py,pls;
+
+ if((grp=aa.guiGroupGet(handle))==null) { return false; }
+ if(idx<0||idx>=199) { return false; }
+ if((w%16)!=0) { return false; }
+ if((h%16)!=0) { return false; }
+ if(grp.ctx.scale_factor>1.0) { pls=1; }
+ else                         { pls=0; }
+ wd=parseInt(w/16);
+ hd=parseInt(h/16);
+ py=0;
+ for(i=0;i<16*16/32;i++)
+  {
+  for(k=0;k<32;k++)
+   {
+   if(aa.numBitGet(guiRayIcon[8*idx+i],k))
+    {
+    xx=x+(k%16)*wd;
+    yy=y+py*hd;
+    aa.guiCanvasFill(handle,xx,yy,wd+pls,hd+pls,cl);
+    }
+   if((k==15)||(k==31)) { py++; }
+   }
+  }
+ return true;
+ }
+
+
+
+
 
  function guiCssOpacitySet (handle,opacity)
  {
@@ -3175,15 +3393,16 @@ changedTouches: A list of information for every finger involved in the event
  }
 
 
+
  function guiCssDisplaySet (handle,pos,zindex,opacity,display)
  {
  var obj;
 
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- if(pos)     { obj.dom.style.position=pos;  }
- if(zindex)  { obj.dom.style.zIndex=zindex; }
- if(opacity) { obj.dom.style.opacity=opacity; }
- if(display) { obj.dom.style.display=display; }
+ if(pos)        { obj.dom.style.position=pos;  }
+ if(zindex)     { obj.dom.style.zIndex=zindex; }
+ if(opacity>=0) { obj.dom.style.opacity=opacity; }
+ if(display)    { obj.dom.style.display=display; }
  return true;
  }
 
@@ -3827,7 +4046,6 @@ changedTouches: A list of information for every finger involved in the event
     obj.state.detect_obj.ray[obj.state.detect_obj.devix]=device;
     if(device.getCapabilities) { obj.state.detect_obj.cap[obj.state.detect_obj.devix]=device.getCapabilities(); }
     else                       { obj.state.detect_obj.cap[obj.state.detect_obj.devix]=null;  }
-    //console.log( navigator.mediaDevices.getSupportedConstraints());
     obj.state.detect_obj.devix++;
     });
    obj.state.detect_obj.res="ok";
@@ -3853,7 +4071,6 @@ changedTouches: A list of information for every finger involved in the event
    obj.state.detect_obj.ready=true;
    aa.mainWorkerRemove("media.Detect");
    obj.state.detect_stage=266;
-
    break;
    }
   obj.state.detect_state="ready";
@@ -3942,6 +4159,8 @@ changedTouches: A list of information for every finger involved in the event
   obj=media_obj.handef.array[i];
   if(obj.in_use!=false) { continue; }
   h=handleUse(media_obj.handef,i)
+  obj.is_recording=false;
+  obj.is_attached=false;
   obj.v_contraints=vconstraints;
   obj.a_contraints=aconstraints;
   obj.avc={};
@@ -3953,9 +4172,11 @@ changedTouches: A list of information for every finger involved in the event
   obj.stream=null;
   obj.a_stream=null;
   obj.v_stream=null;
+  obj.attached_handle=0;
   obj.output_media_stream=null;
   obj.output_tracks=[];
   obj.stage=100;
+  obj.recorder={};
   return h;
   }
  return 0;
@@ -3976,6 +4197,8 @@ changedTouches: A list of information for every finger involved in the event
  }
 
 
+
+
  function mediaGet (handle)
  {
  return(handleCheck(media_obj.handef,handle));
@@ -3991,19 +4214,22 @@ changedTouches: A list of information for every finger involved in the event
  if((obj=handleCheck(media_obj.handef,handle))==null) { return false; }
  if(dhandle!=null)
   {
-  //console.log("dwd");
+  if(obj.is_attached==true) { alert("already attached");}
   if((dobj=aa.guiGet(dhandle))==null)          { return false; }
+  obj.is_atteched=true;
+  obj.attached_handle=dhandle;
   dobj.dom.srcObject=null;
   dobj.dom.srcObject=obj.output_media_stream;
   dobj.frame_number=0;
   dobj.prev_time=-1;
-  //console.log(obj.output_media_stream);
   isplaying=dobj.dom.currentTime>0&&!dobj.dom.paused&&!dobj.dom.ended&&dobj.dom.readyState>2;
-  //console.log("isp="+isplaying);
   if(!isplaying) { dobj.dom.play();  }
   }
  else
   {
+  if(obj.is_attached!=true) { alert("not attached");}
+  obj.is_atteched=false;
+  obj.attached_handle=0;
   dobj.dom.srcObject=null;
   dobj.frame_number=0;
   dobj.prev_time=-1;
@@ -4029,9 +4255,6 @@ changedTouches: A list of information for every finger involved in the event
    obj.stream=stream;
    obj.a_stream=stream.getAudioTracks()[0];
    obj.v_stream=stream.getVideoTracks()[0];
-   //console.log(obj.a_stream);
-   //console.log(obj.a_stream.getSettings());
-   //console.log(obj.a_stream.getConstraints());
    })
   .catch(function(error)
    {
@@ -4048,9 +4271,6 @@ changedTouches: A list of information for every finger involved in the event
   if(obj.a_contraints)   {   obj.output_tracks=obj.output_tracks.concat(obj.a_stream);   }
   if(typeof MediaStream!=='undefined')   {   obj.output_media_stream=new MediaStream(obj.output_tracks);   }
   else                                   {   obj.output_media_stream=obj.stream;  alert("3611"); }
-  //console.log(obj.a_stream.getCapabilities());
-  //console.log(obj.output_media_stream.getAudioTracks());//.sampleRate);
-  //console.log(obj.a_stream);
   obj.stage=300;
   break;
 
@@ -4059,6 +4279,115 @@ changedTouches: A list of information for every finger involved in the event
   }
  return false;
  }
+
+
+
+
+
+ function mediaRecorderStart (handle,abps,vbps)
+ {
+ var obj,options;//,options={mimeType:'video/webm;codecs=h264'};
+ //var options={audioBitsPerSecond:128000,videoBitsPerSecond:3000000,mimeType:'video/webm;codecs=h264'}
+ options={audioBitsPerSecond:abps,videoBitsPerSecond:vbps,mimeType:'video/webm;codecs=vp8'}
+
+ if((obj=handleCheck(media_obj.handef,handle))==null) { return false; }
+ if(obj.is_recording==true) { alert("already recording"); return false; }
+ obj.is_recording=true;
+ obj.recorder={};
+ obj.recorder.mr=new MediaRecorder(obj.stream,options);
+ obj.recorder.is_stopping=false;
+ obj.recorder.is_stop=false;
+ obj.recorder.is_start=false;
+ obj.recorder.is_error=false;
+ obj.recorder.tik=aa.timerMsRunning();
+ obj.recorder.elapsed=0;
+ obj.recorder.dat=[];
+ obj.recorder.mr.ondataavailable=function(e)
+  {
+  obj.recorder.dat.push(e.data);
+  }
+ obj.recorder.mr.onstop=function(e)           {  obj.recorder.is_stop=true;     }
+ obj.recorder.mr.onstart=function(e)          {  obj.recorder.is_start=true;    }
+ obj.recorder.mr.onerror=function(e)          {  obj.recorder.is_error=true;    }
+ obj.recorder.mr.start(1000);
+ return true;
+ }
+
+
+
+
+
+
+ function mediaRecorderStop (handle)
+ {
+ var obj;
+
+ if((obj=handleCheck(media_obj.handef,handle))==null) { return false; }
+ if(obj.is_recording!=true) { alert("not recording"); return false; }
+ if(obj.recorder.is_stopping==true) { alert("already stopping"); return false; }
+ obj.recorder.is_stopping=true;
+ obj.recorder.mr.stop();
+ return true;
+ }
+
+
+
+
+
+ function mediaRecorderStatus (handle)
+ {
+ var obj;
+
+ if((obj=handleCheck(media_obj.handef,handle))==null) { return false; }
+ if(obj.is_recording!=true) { alert("not recording"); return false; }
+ if(obj.recorder.is_stopping==true)
+  {
+  if(obj.recorder.is_stop!=true) { return false; }
+  return true;
+  }
+ obj.recorder.elapsed=aa.timerMsRunning()-obj.recorder.tik;
+ return true;
+ }
+
+
+
+
+
+ function mediaRecorderRead (handle)
+ {
+ var obj;
+
+ if((obj=handleCheck(media_obj.handef,handle))==null) { return false; }
+ if(obj.is_recording!=true) { alert("not recording");   return false; }
+ if(obj.recorder.is_stop!=true) { alert("read no stop"); return false; }
+ obj.recorder.recordedBlob=new Blob(obj.recorder.dat);
+  //  grp.dom.src=URL.createObjectURL(recordedBlob);  //  grp.dom.play();
+
+ obj.recorder.reader={};
+ obj.recorder.reader.is_error=false;
+ obj.recorder.reader.is_loadend=false;
+ obj.recorder.reader.is_load=false;
+ obj.recorder.reader.fr=new FileReader();
+ obj.recorder.reader.fr.onerror=function()
+  {
+  obj.recorder.reader.is_error=true;
+  }
+ obj.recorder.reader.fr.onloadend=function()
+  {
+  obj.recorder.reader.is_loadend=true;
+  }
+ obj.recorder.reader.fr.onload=function()
+  {
+  obj.recorder.reader.ara=obj.recorder.reader.fr.result;
+  obj.recorder.reader.is_load=true;
+  }
+ obj.recorder.reader.fr.readAsArrayBuffer(obj.recorder.recordedBlob);
+ return true;
+ }
+
+
+
+
 
 
 
@@ -4096,16 +4425,18 @@ changedTouches: A list of information for every finger involved in the event
   obj.is_open=false;
   obj.is_closed=false;
   obj.is_error=false;
-  obj.is_direct=true;
+  obj.is_direct=false;///true;
   obj.vars={};
   obj.socket=new WebSocket(obj.url);
   obj.socket.binaryType='arraybuffer';
+  //obj.socket.binaryType='blob';
   obj.socket.onopen=function()  { obj.is_open=true;   }
-  obj.socket.onclose=function() { aa.debugLog("close");  obj.is_closed=true; }
+  obj.socket.onclose=function() { aa.debugLog("sock.close");  obj.is_closed=true; }
   obj.socket.onerror=function() { aa.debugLog("errse");  obj.is_error=true;  }
   obj.socket.onmessage=function(data)
    {
-   //aa.debugLog(data.target.binaryType+"  "+data.srcElement.binaryType);
+///   console.log(data.data);
+    //aa.debugLog(data.target.binaryType+"  "+data.srcElement.binaryType);
    queueWrite(obj.rcve_queue_handle,data.data);
    }
   return h;
@@ -4203,6 +4534,7 @@ changedTouches: A list of information for every finger involved in the event
  if(info.xmit_queue_status.msgs_queued>0&&info.is_open==true&&info.is_closed==false)
   {
   msg=queueRead(obj.xmit_queue_handle);
+  //obj.socket.send(msg,{binary: true, mask: false});
   obj.socket.send(msg,{ binary: true });
   socketStatus(handle);
   }
@@ -4296,7 +4628,6 @@ changedTouches: A list of information for every finger involved in the event
    peer.vars={};
    obj.peer_array[p]=peer;
    }
-  //console.log("room create "+h+" "+maxpeers);
   return h;
   }
  return 0;
@@ -5252,6 +5583,7 @@ changedTouches: A list of information for every finger involved in the event
  main_obj.state.proc=mainproc;
  main_obj.state.is_running=true;
  main_obj.state.stage=0;
+ main_obj.state.click_count=0;
  mainWorkerAdd("socketYield",socketYield,1);
  if(dtmode>0)
   {
@@ -5285,14 +5617,14 @@ changedTouches: A list of information for every finger involved in the event
     if(data.hasOwnProperty('time')) {	time=data.time; }\
     switch(name) \
      {\
-     case 'setInterval':	 fakeIdToId[fakeId]=setInterval(function () {postMessage({fakeId:fakeId});},time); break;\
-     case 'clearInterval': if(fakeIdToId.hasOwnProperty (fakeId))     {clearInterval(fakeIdToId[fakeId]); delete fakeIdToId[fakeId]; } break;\
-     case 'setTimeout': 	 fakeIdToId[fakeId]=setTimeout(function ()  {postMessage({fakeId:fakeId}); if(fakeIdToId.hasOwnProperty (fakeId)) { delete fakeIdToId[fakeId];}},time); break;\
-     case 'clearTimeout':	 if(fakeIdToId.hasOwnProperty (fakeId))     {clearTimeout(fakeIdToId[fakeId]); delete fakeIdToId[fakeId]; } break;\
+     case 'setInterval':	 fakeIdToId[fakeId]=setInterval(function() {postMessage({fakeId:fakeId});},time); break;\
+     case 'clearInterval': if(fakeIdToId.hasOwnProperty(fakeId))     {clearInterval(fakeIdToId[fakeId]); delete fakeIdToId[fakeId]; } break;\
+     case 'setTimeout': 	 fakeIdToId[fakeId]=setTimeout(function()  {postMessage({fakeId:fakeId}); if(fakeIdToId.hasOwnProperty(fakeId)) { delete fakeIdToId[fakeId];} },time); break;\
+     case 'clearTimeout':	 if(fakeIdToId.hasOwnProperty(fakeId))     {clearTimeout(fakeIdToId[fakeId]); delete fakeIdToId[fakeId]; } break;\
      }\
     }"]);
    workerscript=window.URL.createObjectURL(blob);
-   console.log("blob good");
+   ///console.log("blob good");
    }
   catch(error)
    {
@@ -5311,11 +5643,11 @@ changedTouches: A list of information for every finger involved in the event
    try
     {
     worker=new Worker(workerscript);
-    window.setInterval=function(callback,time/* , parameters */)
+    window.setInterval=function(callback,time)
      {
      var fakeId=_getFakeId();
      fakeIdToCallback[fakeId]={callback:callback,parameters:Array.prototype.slice.call(arguments,2)};
-     worker.postMessage ({name:'setInterval',fakeId:fakeId,time:time});
+     worker.postMessage({name:'setInterval',fakeId:fakeId,time:time});
      return fakeId;
      };
     window.clearInterval=function(fakeId)
@@ -5326,7 +5658,7 @@ changedTouches: A list of information for every finger involved in the event
       worker.postMessage({name:'clearInterval',fakeId:fakeId});
       }
      };
-    window.setTimeout=function(callback,time/* , parameters */)
+    window.setTimeout=function(callback,time)
      {
      var fakeId=_getFakeId();
      fakeIdToCallback[fakeId]={callback:callback,parameters:Array.prototype.slice.call(arguments,2),isTimeout:true};
@@ -5353,7 +5685,7 @@ changedTouches: A list of information for every finger involved in the event
       }
      if(typeof (callback)==='string')
       {
-      try {callback=new Function (callback);}
+      try {callback=new Function(callback);}
       catch(error) { console.log('Error parsing callback code string: ',error); }
       }
      if(typeof (callback)==='function') { callback.apply(window,parameters); }
@@ -5382,8 +5714,8 @@ changedTouches: A list of information for every finger involved in the event
  if(main_obj.state.dethrottle_stage==4)
   {
   main_obj.state.dethrottle_ready=true
-  aa.mainThrottleFix(null);
-  aa.debugLog("dethrottling");
+  ///aa.mainThrottleFix(null);
+  console.log("dethrottling");
   }
  main_obj.state.dethrottle_stage++;
  return true;
@@ -5483,7 +5815,7 @@ changedTouches: A list of information for every finger involved in the event
    }
   if(main_obj.state.is_exiting==true)
    {
-   //console.log("is_running="+main_obj.state.is_running+" is_exiting="+main_obj.state.is_exiting);
+   ///console.log("is_running="+main_obj.state.is_running+" is_exiting="+main_obj.state.is_exiting);
    if(main_obj.state.is_running==false) alert(aa.debugLineNumber());
    main_obj.state.is_running=false;
    }
@@ -5585,9 +5917,10 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
+
  function mainPluginLoad (url,id)
  {
- var obj,p,s,scr,e,mat,so;
+ var obj,p,s,scr,e,mat,so,ep;
 
  obj={};
  obj.type="plugin";
@@ -5603,6 +5936,20 @@ changedTouches: A list of information for every finger involved in the event
  obj.script.id=id;
  obj.script.src=url+"?"+aa.numRand(10000000);
 
+ function _eventPath(evt)
+  {
+  var path=(evt.composedPath&&evt.composedPath())||evt.path,target=evt.target;
+  if(path!=null) {  return(path.indexOf(window)<0)?path.concat(window):path; }
+  if(target===window) { return [window]; }
+  function _getParents(node,memo)
+   {
+   memo=memo||[]; var pn=node.parentNode;
+   if(!pn) { return memo; }
+   return _getParents(pn,memo.concat(pn));
+   }
+  return [target].concat(_getParents(target),window);
+  }
+
  function _pluginErrorHandler(event)
   {
   event.preventDefault();
@@ -5614,16 +5961,17 @@ changedTouches: A list of information for every finger involved in the event
 
  obj.script.onload=function(event)
   {
-  for(p=0;p<event.path.length;p++)
+  ep=_eventPath(event);
+  for(p=0;p<ep.length;p++)
    {
    if(obj.state==1) { break; }
-   if(typeof event.path[p]==='object')
+   if(typeof ep[p]==='object')
     {
-    if(event.path[p].scripts)
+    if(ep[p].scripts)
      {
-     for(e=0;e<event.path[p].scripts.length;e++)
+     for(e=0;e<ep[p].scripts.length;e++)
       {
-      if((so=aa.stringIndexOf(true,event.path[p].scripts[e].src,obj.script.src,0))<0) { continue; }
+      if((so=aa.stringIndexOf(true,ep[p].scripts[e].src,obj.script.src,0))<0) { continue; }
       obj.state=1;
       break;
       }
@@ -5634,10 +5982,7 @@ changedTouches: A list of information for every finger involved in the event
    {
    function _getAllProcs(object)
     {
-    return Object.getOwnPropertyNames(object).filter(function(property)
-     {
-     return typeof object[property]=='function';
-     });
+    return Object.getOwnPropertyNames(object).filter(function(property) { return typeof object[property]=='function'; });
     }
    obj.api=pluginEntry();
    obj.api_procs=_getAllProcs(obj.api);
@@ -5655,6 +6000,7 @@ changedTouches: A list of information for every finger involved in the event
  obj.head.appendChild(obj.script);
  return obj;
  }
+
 
 
 
@@ -5751,6 +6097,11 @@ changedTouches: A list of information for every finger involved in the event
  numIntToHex:numIntToHex,
  numRound:numRound,
  numFloatFormat:numFloatFormat,
+ numBitGet:numBitGet,
+ numBitSet:numBitSet,
+ numBitClear:numBitClear,
+ numBitToggle:numBitToggle,
+
 
  dataArray2DCreate:dataArray2DCreate,
  dataObjectApxSize:dataObjectApxSize,
@@ -5821,7 +6172,6 @@ changedTouches: A list of information for every finger involved in the event
  touchStart:touchStart,
  touchPeek:touchPeek,
  touchRead:touchRead,
- //touchProcess:touchProcess,
  touchStatus:touchStatus,
 
  mouseStart:mouseStart,
@@ -5872,6 +6222,8 @@ changedTouches: A list of information for every finger involved in the event
  guiCanvasLine:guiCanvasLine,
  guiCanvasText:guiCanvasText,
  guiCanvasRounded:guiCanvasRounded,
+ guiCanvasTriangle:guiCanvasTriangle,
+ guiCanvasRayIcon:guiCanvasRayIcon,
  guiCssOpacitySet:guiCssOpacitySet,
  guiCssDisplaySet:guiCssDisplaySet,
  guiCssOutlineSet:guiCssOutlineSet,
@@ -5905,6 +6257,10 @@ changedTouches: A list of information for every finger involved in the event
  mediaGet:mediaGet,
  mediaAttach:mediaAttach,
  mediaStatus:mediaStatus,
+ mediaRecorderStart:mediaRecorderStart,
+ mediaRecorderStop:mediaRecorderStop,
+ mediaRecorderStatus:mediaRecorderStatus,
+ mediaRecorderRead:mediaRecorderRead,
 
  socketCreate:socketCreate,
  socketDestroy:socketDestroy,

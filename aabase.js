@@ -19,8 +19,7 @@ var aa=(function()
  var   string_obj={};
  var      env_obj={};
  var    queue_obj={};
- var    touch_obj={};
- var    mouse_obj={};
+ var  pointer_obj={};
  var keyboard_obj={};
  var  storage_obj={};
  var      gui_obj={};
@@ -49,8 +48,7 @@ var aa=(function()
  stringObjInit();
  envObjInit();
  queueObjInit();
- touchObjInit();
- mouseObjInit();
+ pointerObjInit();
  keyboardObjInit();
  storageObjInit();
  guiObjInit();
@@ -1302,17 +1300,12 @@ var aa=(function()
  switch(event.type)
   {
   case "click":
-//  console.log(event.type);
+  case "tap":
+  console.log(event.type);
   aa.main_state.click_count++;
   if(aa.main_state.dethrottle_stage==1)  {   aa.mainDethrottle();    }
   break;
 
-  /*
-  case "touchend":
-  case "tap":
-  console.log(event.type);
-  break;
-*/
 
 
   case "visibilitychange":
@@ -1361,9 +1354,9 @@ var aa=(function()
   window.removeEventListener("focus",env_obj.event_proc,false);
   window.removeEventListener("blur",env_obj.event_proc,false);
   window.removeEventListener("wheel",env_obj.event_proc,false);
-//  document.body.removeEventListener("touchend",env_obj.event_proc,false);
+  //document.body.removeEventListener("touchend",env_obj.event_proc,false);
   document.body.removeEventListener("click",env_obj.event_proc,false);
-//  document.body.removeEventListener("tap",env_obj.event_proc,false);
+  document.body.removeEventListener("tap",env_obj.event_proc,false);
   document.body.removeEventListener("mousemove",env_obj.event_proc,false);
   document.removeEventListener("visibilitychange",env_obj.event_proc,false);
   document.removeEventListener("mozvisibilitychange",env_obj.event_proc,false);
@@ -1382,10 +1375,9 @@ var aa=(function()
   window.addEventListener("focus",function(event)             { env_obj.event_proc(event);  },false);
   window.addEventListener("blur",function(event)              { env_obj.event_proc(event);  },false);
   window.addEventListener("wheel",function(event)             { env_obj.event_proc(event);  });
-  //document.body.addEventListener("touchcancel",function(event)             { env_obj.event_proc(event);  });
-//  document.body.addEventListener("touchend",function(event)             { env_obj.event_proc(event);  });
+  //  document.body.addEventListener("touchend",function(event)             { env_obj.event_proc(event);  });
   document.body.addEventListener("click",function(event)             { env_obj.event_proc(event);  });
-//  document.body.addEventListener("tap",function(event)               { env_obj.event_proc(event);  });
+  document.body.addEventListener("tap",function(event)               { env_obj.event_proc(event);  });
   document.body.addEventListener("mousemove",function(event)         { env_obj.event_proc(event);  });//   audio.play()})
   document.addEventListener("visibilitychange",function(event)       { env_obj.event_proc(event);  });
   document.addEventListener("mozvisibilitychange",function(event)    { env_obj.event_proc(event);  });
@@ -1713,411 +1705,105 @@ var aa=(function()
 
 
 
-/*-----------------------------------------------------------------------*/
-
-/*
-       touches: A list of information for every finger currently touching the screen
- targetTouches: Like touches, but is filtered to only the information for finger touches that started out within the same node
-changedTouches: A list of information for every finger involved in the event
-
-=When I put a finger down, all three lists will have the same information.
- It will be in changedTouches because putting the finger down is what caused the event
-
-=When I put a second finger down, touches will have two items, one for each finger.
- targetTouches will have two items only if the finger was placed in the same node as the first finger.
- changedTouches will have the information related to the second finger, because it’s what caused the event
-*If I put two fingers down at exactly the same time, it’s possible to have two items in changedTouches, one for each finger
-
-=If I move my fingers, the only list that will change is changedTouches and will
- contain information related to as many fingers as have moved (at least one).
-
-=When I lift a finger, it will be removed from touches, targetTouches and will appear in changedTouches since it’s what caused the event
-
-=Removing my last finger will leave touches and targetTouches empty, and changedTouches will contain information for the last finger
-*/
-
-
- function touchObjInit ()
- {
- var state,Tap,utils;
-
- if(Object.keys(touch_obj).length!=0) { return; }
- state={};
- Tap={};
- utils={};
- state.is_started=false;
- touch_obj.state=state;
- touch_obj.Tap=Tap;
- touch_obj.utils=utils;
- touch_obj.eventMatrix=null;
- touch_obj.attachDeviceEvent=null;
- touch_obj.init=null;
- touch_obj.handlers=null;
- touch_obj.deviceEvents=null;
- touch_obj.coords={};
- touch_obj.is_init=true;
-// touch_obj.state.is_started=false;
- }
-
-
-
-
-
- function touchStart ()
- {
- var i,evnt,preventDefault;
- var obj,j,k,typ,eve,t;
-
- if(touch_obj.state.is_started==true) { return false; }
-
- touch_obj.utils.attachEvent=function(element,eventName,callback)
-  {
-  //eventName either touchStart,touchMove,touchEnd
-  //              or pointerDown,pointerMove,pointerUp
-  if('addEventListener' in window) {  return element.addEventListener(eventName,callback,false);        }
-  };
-
- touch_obj.utils.fireFakeEvent=function(e,eventName)
-  {
-  // eventname is Tap
-  // e is either pointerevent, or touchevent
-  if(document.createEvent)
-   {
-   ///###  console.log("about to dispatch, after utils.createevent "+eventName);
-   return e.target.dispatchEvent(touch_obj.utils.createEvent(e,eventName));
-   }
-  };
-
- touch_obj.utils.createEvent=function(olde,name)
-  {
-  // name is tap
-  // olde is either pointerevent or touchevent
-  if(document.createEvent)
-   {
-   ///###   console.log("utils.createEvent "+name+" now creating HTMLevent");
-   evnt=window.document.createEvent('HTMLEvents');
-   evnt.initEvent(name,true,true);//true);
-   evnt.olde=olde;
-   evnt.eventName=name;
-   return evnt;
-   }
-  aa.debugAlert();
-  };
-
- touch_obj.utils.getRealEvent=function(e)
-  {
-  // e is either touchevent or pointerevet
-  return e;
-  };
-
- touch_obj.eventMatrix=
-  [
-  {test:('propertyIsEnumerable' in window||'hasOwnProperty' in document)&&(window.propertyIsEnumerable('ontouchstart')||document.hasOwnProperty('ontouchstart')||window.hasOwnProperty('ontouchstart')),
-   events: { start: 'touchstart', move: 'touchmove', end: 'touchend'  }   },
-
-  {test:window.navigator.msPointerEnabled,
-   events: { start: 'MSPointerDown',move: 'MSPointerMove',end: 'MSPointerUp' }   },
-
-  {test:(window.navigator.pointerEnabled||window.PointerEvent),
-   events: { start: 'pointerdown', move: 'pointermove', end: 'pointerup'  }   }
-  ];
-
- touch_obj.Tap.options=
-  {
-  eventName: 'tap',fingerMaxOffset: 12
-  };
-
- touch_obj.attachDeviceEvent=function(eventName)
-  {
-  // this seems only be called once
-  return touch_obj.utils.attachEvent(document.documentElement,touch_obj.deviceEvents[eventName],touch_obj.handlers[eventName]);
-  };
-
- touch_obj.handlers=
-  {
-  start: function(e)
-   {
-   ///### aa.debugLog("touch_obj.handler start ",e);
-   e=touch_obj.utils.getRealEvent(e);
-   touch_obj.coords.start=[e.pageX,e.pageY];
-   touch_obj.coords.offset=[0,0];
-   if(!touch_obj.utils.fireFakeEvent(e,touch_obj.Tap.options.eventName))
-    {
-    if(window.navigator.msPointerEnabled||window.navigator.pointerEnabled||window.PointerEvent)
-     {
-     preventDefault=function(clickEvent)  {  clickEvent.preventDefault();    e.target.removeEventListener('click',preventDefault);       };
-     e.target.addEventListener('click',preventDefault,false);
-     }
-    e.preventDefault();
-    }
-   },
-  move: function(e)
-   {
-   if(!touch_obj.coords.start&&!touch_obj.coords.move) {                return false;            }
-   ///### aa.debugLog("touch_obj.handler move ",e);
-   e=touch_obj.utils.getRealEvent(e);
-   touch_obj.coords.move=[e.pageX,e.pageY];
-   touch_obj.coords.offset=[Math.abs(touch_obj.coords.move[0]-touch_obj.coords.start[0]),Math.abs(touch_obj.coords.move[1]-touch_obj.coords.start[1])];
-   if(!touch_obj.utils.fireFakeEvent(e,touch_obj.Tap.options.eventName))
-    {
-    if(window.navigator.msPointerEnabled||window.navigator.pointerEnabled||window.PointerEvent)
-     {
-     preventDefault=function(clickEvent)     {    clickEvent.preventDefault();    e.target.removeEventListener('click',preventDefault);    };
-     e.target.addEventListener('click',preventDefault,false);
-     }
-    e.preventDefault();
-    }
-   },
-  end: function(e)
-   {
-   ///### aa.debugLog("touch_obj.handler end ",e);
-   e=touch_obj.utils.getRealEvent(e);
-   if(!touch_obj.utils.fireFakeEvent(e,touch_obj.Tap.options.eventName))
-    {
-    if(window.navigator.msPointerEnabled||window.navigator.pointerEnabled||window.PointerEvent)
-     {
-     preventDefault=function(clickEvent)    {    clickEvent.preventDefault();      e.target.removeEventListener('click',preventDefault);    };
-     e.target.addEventListener('click',preventDefault,false);
-     }
-    e.preventDefault();
-    }
-   touch_obj.coords={};
-   },
-  click: function(e)
-   {
-   ///### aa.debugLog("touch_obj.handler click ",e);
-   if(!touch_obj.utils.fireFakeEvent(e,touch_obj.Tap.options.eventName)) {    return e.preventDefault();  }
-   }
-  };
-
- touch_obj.init=function()
-  {
-  ///### aa.debugLog(">>touch_obj.init, only calleed once. eventmatrix.len="+touch_obj.eventMatrix.length);
-  for(i=0;i<touch_obj.eventMatrix.length;i++)
-   {
-   if(touch_obj.eventMatrix[i].test)
-    {
-    ///### aa.debugLog("eventmatrix["+i+"].test true");
-    touch_obj.deviceEvents=touch_obj.eventMatrix[i].events;
-    touch_obj.attachDeviceEvent('start');
-    touch_obj.attachDeviceEvent('move');
-    touch_obj.attachDeviceEvent('end');
-    break;
-    }
-   }
-  if(i==touch_obj.eventMatrix.length)
-   {
-   ///### aa.debugLog("all eventmatrix failed, so attaching click");
-   return touch_obj.utils.attachEvent(document.documentElement,'click',touch_obj.handlers.click);
-   }
-  return;
-  };
-
-
-
- touch_obj.state.is_started=true;
- ///touch_obj.state.event_count=0;
- touch_obj.state.event_queue_handle=queueCreate();
- touch_obj.state.event_queue_status=queueStatus(touch_obj.state.event_queue_handle);
- touch_obj.state.event_counter=0;
-
-
- touch_obj.init();
- document.body.style.touchAction="none";
- document.getElementById('bodid').addEventListener('tap',function(event)
-  {
-  typ=event.type;
-  eve=event;
-  obj={};
-  obj.ec=touch_obj.state.event_counter;
-  ///obj.type=typ;
-  ///obj.eventName=eve.eventName;
-  ///obj.eventPhase=eve.eventPhase;
-  obj.what=eve.olde.type;
-  obj.altKey=eve.olde.altKey;
-  obj.ctrlKey=eve.olde.ctrlKey;
-  obj.shiftKey=eve.olde.shiftKey;
-  obj.timeStamp=eve.olde.timeStamp;
-  ///obj.which=eve.olde.which;
-  ///obj.srcElementId=eve.olde.srcElement.id;
-  ///obj.targetId=eve.olde.target.id;
-  //obj.x=null;
-  //obj.y=null;
-  //if(eve.olde.x) { obj.x=eve.olde.x; }
-  //if(eve.olde.y) { obj.y=eve.olde.y; }
-  obj.changedTouchesLen=0;
-  obj.changedTouches=[];
-  if(eve.olde.changedTouches)
-   {
-   obj.changedTouchesLen=eve.olde.changedTouches.length;
-   k=obj.changedTouchesLen;
-   for(j=0;j<5;j++)
-    {
-    if(j<k)
-     {
-     obj.changedTouches[j]={};
-     obj.changedTouches[j].ec=eve.olde.changedTouches[j].ec;//touch_obj.state.event_counter;//eve.olde.changedTouches[j].ec;
-     obj.changedTouches[j].clientX=eve.olde.changedTouches[j].clientX;
-     obj.changedTouches[j].clientY=eve.olde.changedTouches[j].clientY;
-    obj.changedTouches[j].force=eve.olde.changedTouches[j].force;
-     obj.changedTouches[j].identifier=eve.olde.changedTouches[j].identifier;
-    obj.changedTouches[j].pageX=eve.olde.changedTouches[j].pageX;
-    obj.changedTouches[j].pageY=eve.olde.changedTouches[j].pageY;
-    obj.changedTouches[j].radiusX=eve.olde.changedTouches[j].radiusX;
-    obj.changedTouches[j].radiusY=eve.olde.changedTouches[j].radiusY;
-    obj.changedTouches[j].rotationAngle=eve.olde.changedTouches[j].rotationAngle;
-    obj.changedTouches[j].screenX=eve.olde.changedTouches[j].screenX;
-    obj.changedTouches[j].screenY=eve.olde.changedTouches[j].screenY;
-     ///obj.changedTouches[j].targetId=eve.olde.changedTouches[j].targetId;
-     }
-    }
-   }
-
-  obj.targetTouchesLen=0;
-  obj.targetTouches=[];
-  if(eve.olde.targetTouches)
-   {
-   obj.targetTouchesLen=eve.olde.targetTouches.length;
-   k=obj.targetTouchesLen;
-   for(j=0;j<5;j++)
-    {
-    if(j<k)
-     {
-     obj.targetTouches[j]={};
-     obj.targetTouches[j].ec=eve.olde.targetTouches[j].ec;//touch_obj.state.event_counter;//eve.olde.ec;//targetTouches[j].ec;
-     obj.targetTouches[j].clientX=eve.olde.targetTouches[j].clientX;
-     obj.targetTouches[j].clientY=eve.olde.targetTouches[j].clientY;
-    obj.targetTouches[j].force=eve.olde.targetTouches[j].force;
-     obj.targetTouches[j].identifier=eve.olde.targetTouches[j].identifier;
-    obj.targetTouches[j].pageX=eve.olde.targetTouches[j].pageX;
-    obj.targetTouches[j].pageY=eve.olde.targetTouches[j].pageY;
-    obj.targetTouches[j].radiusX=eve.olde.targetTouches[j].radiusX;
-    obj.targetTouches[j].radiusY=eve.olde.targetTouches[j].radiusY;
-     obj.targetTouches[j].rotationAngle=eve.olde.targetTouches[j].rotationAngle;
-     obj.targetTouches[j].screenX=eve.olde.targetTouches[j].screenX;
-      obj.targetTouches[j].screenY=eve.olde.targetTouches[j].screenY;
-     ///obj.targetTouches[j].targetId=eve.olde.targetTouches[j].targetId;
-     }
-    }
-   }
-
-
-  obj.touchesLen=0;
-  obj.touches=[];
-  if(eve.olde.touches)
-   {
-   obj.touchesLen=eve.olde.touches.length;
-   k=obj.touchesLen;
-   for(j=0;j<5;j++)
-    {
-    if(j<k)
-     {
-     obj.touches[j]={};
-     obj.touches[j].ec=eve.olde.touches[j].ec;
-     obj.touches[j].clientX=eve.olde.touches[j].clientX;
-     obj.touches[j].clientY=eve.olde.touches[j].clientY;
-    obj.touches[j].force=eve.olde.touches[j].force;
-     obj.touches[j].identifier=eve.olde.touches[j].identifier;
-    obj.touches[j].pageX=eve.olde.touches[j].pageX;
-    obj.touches[j].pageY=eve.olde.touches[j].pageY;
-    obj.touches[j].radiusX=eve.olde.touches[j].radiusX;
-    obj.touches[j].radiusY=eve.olde.touches[j].radiusY;
-    obj.touches[j].rotationAngle=eve.olde.touches[j].rotationAngle;
-    obj.touches[j].screenX=eve.olde.touches[j].screenX;
-    obj.touches[j].screenY=eve.olde.touches[j].screenY;
-     ///obj.touches[j].targetId=eve.olde.touches[j].targetId;
-     }
-    }
-   }
-  ///touch_obj.state.event_count++;
-  delete obj.changedTouchesLen;
-  delete obj.touchesLen;
-  delete obj.targetTouchesLen;
-  queueWrite(touch_obj.state.event_queue_handle,obj);
-  touch_obj.state.event_queue_status=queueStatus(touch_obj.state.event_queue_handle);
-  touch_obj.state.event_counter++;
-  obj={};
-  event.preventDefault();
-  event.stopPropagation();
-  },false);//false);
- return true;
- }
-
-
-
-
-
- function touchPeek (ofs)
- {
- var msg;
-
- if(touch_obj.state.is_started!=true) { return null; }
- msg=queuePeek(touch_obj.state.event_queue_handle,ofs);
- return msg;
- }
-
-
-
-
- function touchRead ()
- {
- var msg;
-
- if(touch_obj.state.is_started!=true) { return null; }
- msg=queueRead(touch_obj.state.event_queue_handle);
- touch_obj.state.event_queue_status=queueStatus(touch_obj.state.event_queue_handle);
- return msg;
- }
-
-
-
-
- function touchStatus ()
- {
- var info;
-
- if(touch_obj.state.is_started!=true) { return null; }
- touch_obj.state.event_queue_status=queueStatus(touch_obj.state.event_queue_handle);
- info={};
- info.msgs_queued=touch_obj.state.event_queue_status.msgs_queued;
- info.msgs_total=touch_obj.state.event_queue_status.msgs_total;
- return info;
- }
-
-
-
-
 
 /*-----------------------------------------------------------------------*/
 
 
-
-
- function mouseObjInit ()
+ function pointerObjInit ()
  {
  var state;
 
- if(Object.keys(mouse_obj).length!=0) { return; }
+ if(Object.keys(pointer_obj).length!=0) { return; }
  state={};
  state.is_started=false;
- mouse_obj.state=state;
- mouse_obj.is_init=true;
+ pointer_obj.state=state;
+ pointer_obj.is_init=true;
  }
 
 
 
 
-
- function mouseStart ()
+ function pointerStart ()
  {
- if(mouse_obj.state.is_started!=false) { return false; }
- mouse_obj.state.is_started=true;
- mouse_obj.state.event_count=0;
- mouse_obj.state.event_queue_handle=queueCreate();
- mouse_obj.state.event_queue_status=queueStatus(mouse_obj.state.event_queue_handle);
- document.addEventListener('mousedown',function(event)  { mouseOnEvent("mousedown",event); });
- document.addEventListener('mousemove',function(event)  { mouseOnEvent("mousemove",event); });
- document.addEventListener('mouseup',function(event)    { mouseOnEvent("mouseup",event);   });
+ if(pointer_obj.state.is_started!=false) { return false; }
+ pointer_obj.state.is_started=true;
+ pointer_obj.state.event_count=0;
+ pointer_obj.state.event_queue_handle=aa.queueCreate();
+ pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
+ document.onpointerover=function(event)      { pointerOnEvent("pointerover",event); }
+ document.onpointerenter=function(event)     { pointerOnEvent("pointerenter",event); }
+ document.onpointerdown=function(event)      { pointerOnEvent("pointerdown",event); }
+ document.onpointermove=function(event)      { pointerOnEvent("pointermove",event); }
+ document.onpointerup=function(event)        { pointerOnEvent("pointerup",event); }
+ document.onpointercancel=function(event)    { pointerOnEvent("pointercancel",event); }
+ document.onpointerout=function(event)       { pointerOnEvent("pointerout",event); }
+ document.onpointerleave=function(event)     { pointerOnEvent("pointerleave",event); }
+ document.gotpointercapture=function(event)  { pointerOnEvent("pointercapture",event); }
+ document.lostpointercapture=function(event) { pointerOnEvent("pointerrelease",event); }
+ return true;
+ }
+
+
+
+ function pointerOnEvent (name,ev)
+ {
+ var msg;
+
+ msg={};
+ msg.name=name;
+ msg.event=ev;
+
+ /*
+  msg.altKey=false
+ msg.altitudeAngle=1.5707963267948966
+ msg.azimuthAngle=0
+ msg.bubbles=true
+ msg.button=-1
+ msg.buttons=0
+ msg.cancelBubble=false
+ msg.cancelable=true
+ msg.clientX=0
+ msg.clientY=539.97509765625
+ msg.composed=true
+ msg.ctrlKey=false
+ msg.currentTarget=null
+ msg.defaultPrevented=false
+ msg.detail=0
+ msg.eventPhase=0
+ msg.fromElement=null
+ msg.height=1
+ msg.isPrimary=true
+ msg.isTrusted=true
+ msg.layerX=0
+ msg.layerY=539
+ msg.metaKey=false
+ msg.movementX=-36
+ msg.movementY=-3
+ msg.offsetX=0
+ msg.offsetY=539.9751137487619
+ msg.pageX=0
+ msg.pageY=539.97509765625
+ msg.pointerId=1
+ msg.pointerType="mouse"
+ msg.pressure=0
+ msg.relatedTarget=null
+ msg.returnValue=true
+ msg.screenX=874
+ msg.screenY=472
+ msg.shiftKey=false
+ msg.sourceCapabilities=null
+ msg.tangentialPressure=0
+ msg.tiltX=0
+ msg.tiltY=0
+ //msg.timeStamp=1872.1599999989849
+ msg.toElement=null
+ msg.twist=0
+ msg.type="pointermove"
+ msg.which=0
+ msg.width=1
+ */
+ aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
+ pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
  return true;
  }
 
@@ -2125,97 +1811,41 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
-
- function mouseOnEvent (name,ev)
+ function pointerPeek (ofs)
  {
  var msg;
 
- if(name=="mousedown"||ev.type=="mousedown")
-  {
-  aa.debugLog(name);
-  aa.debugLog(ev);
-  }
-
- //aa.debugLog(name+" "+ev.type,JSON.stringify(ev,0,2));
- if(name=="mousedown")  {  mouse_obj.state.event_count++;  }
- else
- if(name=="mousemove")  {  mouse_obj.state.event_count++;  }
- else
- if(name=="mouseup")    {  mouse_obj.state.event_count++;  }
- msg={};
- msg.name=name;
- msg.time_stamp=ev.timeStamp;
- msg.x=ev.x;
- msg.y=ev.y;
- msg.page_x=ev.pageX;
- msg.page_y=ev.pageY;
- msg.offset_x=ev.offsetX;
- msg.offset_y=ev.offsetY;
- msg.alt_key=ev.altKey;
- msg.ctrl_key=ev.ctrlKey;
- msg.shift_key=ev.shiftKey;
- queueWrite(mouse_obj.state.event_queue_handle,msg);
- mouse_obj.state.event_queue_status=queueStatus(mouse_obj.state.event_queue_handle);
- }
-
-
-
-
-
- function mousePeek (ofs)
- {
- var msg;
-
- if(mouse_obj.state.is_started!=true) { return null; }
- msg=queuePeek(mouse_obj.state.event_queue_handle,ofs);
+ if(pointer_obj.state.is_started!=true) { return null; }
+ msg=aa.queuePeek(pointer_obj.state.event_queue_handle,ofs);
  return msg;
  }
 
 
 
 
- function mouseRead ()
+ function pointerRead ()
  {
  var msg;
 
- if(mouse_obj.state.is_started!=true) { return null; }
- msg=queueRead(mouse_obj.state.event_queue_handle);
- mouse_obj.state.event_queue_status=queueStatus(mouse_obj.state.event_queue_handle);
+ if(pointer_obj.state.is_started!=true) { return null; }
+ msg=aa.queueRead(pointer_obj.state.event_queue_handle);
+ pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
  return msg;
  }
 
 
 
- function mouseStatus ()
+ function pointerStatus ()
  {
  var info;
 
- if(mouse_obj.state.is_started!=true) { return null; }
- mouse_obj.state.event_queue_status=queueStatus(mouse_obj.state.event_queue_handle);
+ if(pointer_obj.state.is_started!=true) { return null; }
+ pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
  info={};
- info.msgs_queued=mouse_obj.state.event_queue_status.msgs_queued;
- info.msgs_total=mouse_obj.state.event_queue_status.msgs_total;
+ info.msgs_queued=pointer_obj.state.event_queue_status.msgs_queued;
+ info.msgs_total=pointer_obj.state.event_queue_status.msgs_total;
  return info;
  }
-
-
-
- function mouseCursorGet ()
- {
- return(document.body.style.cursor);
- }
-
-
-
-
- function mouseCursorSet (style)
- {
- var prev=mouseCursorGet();
- if(style==null) {  document.body.style.cursor="default";  }
- else            {  document.body.style.cursor=style;      }
- return prev;
- }
-
 
 
 
@@ -2256,8 +1886,8 @@ changedTouches: A list of information for every finger involved in the event
  keyboard_obj.state.event_count=0;
  keyboard_obj.state.hit_map=[];
  for(i=0;i<256;i++) { keyboard_obj.state.hit_map[i]=0; }
- keyboard_obj.state.event_queue_handle=queueCreate();
- keyboard_obj.state.event_queue_status=queueStatus(keyboard_obj.state.event_queue_handle);
+ keyboard_obj.state.event_queue_handle=aa.queueCreate();
+ keyboard_obj.state.event_queue_status=aa.queueStatus(keyboard_obj.state.event_queue_handle);
  document.addEventListener('keyup',function(event)    { keyboardOnEvent("keyup",event);    });
  document.addEventListener('keydown',function(event)  { keyboardOnEvent("keydown",event);  });
  document.addEventListener('keypress',function(event) { keyboardOnEvent("keypress",event); });
@@ -2281,8 +1911,8 @@ changedTouches: A list of information for every finger involved in the event
  msg.alt_key=ev.altKey;
  msg.ctrl_key=ev.ctrlKey;
  msg.shift_key=ev.shiftKey;
- queueWrite(keyboard_obj.state.event_queue_handle,msg);
- keyboard_obj.state.event_queue_status=queueStatus(keyboard_obj.state.event_queue_handle);
+ aa.queueWrite(keyboard_obj.state.event_queue_handle,msg);
+ keyboard_obj.state.event_queue_status=aa.queueStatus(keyboard_obj.state.event_queue_handle);
  if(name=="keydown")
   {
   if(keyboard_obj.state.hit_map[kc]==0)
@@ -2311,7 +1941,7 @@ changedTouches: A list of information for every finger involved in the event
  var msg;
 
  if(keyboard_obj.state.is_started!=true) { return null; }
- msg=queuePeek(keyboard_obj.state.event_queue_handle,ofs);
+ msg=aa.queuePeek(keyboard_obj.state.event_queue_handle,ofs);
  return msg;
  }
 
@@ -2323,8 +1953,8 @@ changedTouches: A list of information for every finger involved in the event
  var msg;
 
  if(keyboard_obj.state.is_started!=true) { return null; }
- msg=queueRead(keyboard_obj.state.event_queue_handle);
- keyboard_obj.state.event_queue_status=queueStatus(keyboard_obj.state.event_queue_handle);
+ msg=aa.queueRead(keyboard_obj.state.event_queue_handle);
+ keyboard_obj.state.event_queue_status=aa.queueStatus(keyboard_obj.state.event_queue_handle);
  return msg;
  }
 
@@ -2338,7 +1968,7 @@ changedTouches: A list of information for every finger involved in the event
  var i,j,info,len;
 
  if(keyboard_obj.state.is_started!=true) { return null; }
- keyboard_obj.state.event_queue_status=queueStatus(keyboard_obj.state.event_queue_handle);
+ keyboard_obj.state.event_queue_status=aa.queueStatus(keyboard_obj.state.event_queue_handle);
  info={};
  info.down_count=keyboard_obj.state.down_count;
  info.event_count=keyboard_obj.state.event_count;
@@ -2778,6 +2408,7 @@ changedTouches: A list of information for every finger involved in the event
   case "img":
   case "table": case "tr": case "td":
   case "div": case "span": case "p":
+  case "source":
   break;
   }
  for(s=0;s<gui_obj.handef.slots;s++)
@@ -2799,10 +2430,10 @@ changedTouches: A list of information for every finger involved in the event
    obj.dom.autoplay=false;
    obj.dom.controls=false;
    obj.dom.loop=false;
-   obj.dom.srcObject=null;
-   obj.dom.src=null;
+   ///obj.dom.srcObject=null;
+ //  obj.dom.src=null;
+   //obj.dom.setAttribute('src',null);
    }
-  //fill,contain,cover,none,scale-down,
   //if(type=="video")   {   obj.dom.style.objectFit="cover";   }
   //else                {   obj.dom.style.objectFit="fill";   }
   obj.dom.style.objectFit="fill";
@@ -2810,9 +2441,7 @@ changedTouches: A list of information for every finger involved in the event
   obj.dom.style.zIndex=1000; // higher zi is on top
   obj.dom.style.opacity=1.0;
   obj.dom.style.display="none";
-  document.body.appendChild(obj.dom);
-  obj.parent_handle=0;
-  //aa.guiParentSet(h,0);
+  aa.guiParentAdd(h,0);
   if(type=="canvas")
    {
    obj.ctx=document.getElementById(obj.id).getContext("2d");
@@ -2901,7 +2530,8 @@ changedTouches: A list of information for every finger involved in the event
 
 
 
- function guiParentSet (handle,phandle)
+ /*
+ function guiParentAdd (handle,nhandle)
  {
  var obj,pobj;
 
@@ -2919,10 +2549,97 @@ changedTouches: A list of information for every finger involved in the event
   }
  return true;
  }
+*/
+
+
+ function guiParentAdd    (handle,nhandle)
+ {
+ var obj,nobj;
+
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(nhandle==0)
+  {
+  document.body.appendChild(obj.dom);
+  obj.parent_handle=nhandle;
+  }
+ else
+  {
+  if((nobj=handleCheck(gui_obj.handef,nhandle))==null) { return false; }
+  obj.dom.appendChild(nobj.dom);
+  obj.parent_handle=nhandle;
+  }
+ return true;
+ }
+
+
+ function guiParentRemove (handle,nhandle)
+ {
+ var obj,pobj;
+
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(nhandle==0)
+  {
+  document.body.removeChild(obj.dom);
+  obj.parent_handle=nhandle;
+  }
+ else
+  {
+  if((nobj=handleCheck(gui_obj.handef,nhandle))==null) { return false; }
+  obj.dom.removeChild(nobj.dom);
+  obj.parent_handle=0;
+  }
+ return true;
+ }
+
+/*
+ if((pobj=handleCheck(gui_obj.handef,phandle))==null) { return false; }
+ pobj.dom.removeChild(obj.dom);
+ obj.parent_handle=0;
+
+ if(arguments.length==1||phandle==0||phandle==null)
+  {
+  pobj.dom.removeChild(obj.dom);
+  obj.parent_handle=0;
+  }
+ else
+  {
+  if((pobj=handleCheck(gui_obj.handef,phandle))==null) { return false; }
+  pobj.dom.appendChild(obj.dom);
+  obj.parent_handle=phandle;
+  }
+
+ return true;
+ }
 
 
 
 
+
+
+ function guiParentRemove (handle,nhandle)
+ {
+ var obj,pobj;
+
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if((pobj=handleCheck(gui_obj.handef,phandle))==null) { return false; }
+ pobj.dom.removeChild(obj.dom);
+ obj.parent_handle=0;
+/*
+ if(arguments.length==1||phandle==0||phandle==null)
+  {
+  pobj.dom.removeChild(obj.dom);
+  obj.parent_handle=0;
+  }
+ else
+  {
+  if((pobj=handleCheck(gui_obj.handef,phandle))==null) { return false; }
+  pobj.dom.appendChild(obj.dom);
+  obj.parent_handle=phandle;
+  }
+ return true;
+ }
+
+*/
 
 
  function guiSizeSet (handle,wid,hit)
@@ -3288,7 +3005,6 @@ changedTouches: A list of information for every finger involved in the event
  rec=aa.guiRectSet(x,y,mes.w,mes.h);
  if(slw) { obj.ctx.lineWidth=slw; }
  if(sc&&slw)  { obj.ctx.strokeStyle=sc; obj.ctx.strokeText(text,rec.x,rec.y);  }
-
  if(fc)
   {
   obj.ctx.fillStyle=fc;
@@ -6052,8 +5768,7 @@ changedTouches: A list of information for every finger involved in the event
  string_obj:string_obj,
  env_obj:env_obj,
  queue_obj:queue_obj,
- touch_obj:touch_obj,
- mouse_obj:mouse_obj,
+ pointer_obj:pointer_obj,
  keyboard_obj:keyboard_obj,
  storage_obj:storage_obj,
  gui_obj:gui_obj,
@@ -6169,17 +5884,12 @@ changedTouches: A list of information for every finger involved in the event
  queueDiscard:queueDiscard,
  queueStatus:queueStatus,
 
- touchStart:touchStart,
- touchPeek:touchPeek,
- touchRead:touchRead,
- touchStatus:touchStatus,
 
- mouseStart:mouseStart,
- mousePeek:mousePeek,
- mouseRead:mouseRead,
- mouseStatus:mouseStatus,
- mouseCursorGet:mouseCursorGet,
- mouseCursorSet:mouseCursorSet,
+ pointerStart:pointerStart,
+ pointerOnEvent:pointerOnEvent,
+ pointerPeek:pointerPeek,
+ pointerRead:pointerRead,
+ pointerStatus:pointerStatus,
 
  keyboardStart:keyboardStart,
  keyboardPeek:keyboardPeek,
@@ -6201,7 +5911,8 @@ changedTouches: A list of information for every finger involved in the event
  guiGet:guiGet,
  guiGroupGet:guiGroupGet,
  guiIdFind:guiIdFind,
- guiParentSet:guiParentSet,
+ guiParentAdd:guiParentAdd,
+ guiParentRemove:guiParentRemove,
  guiSizeSet:guiSizeSet,
  guiCssAreaSet:guiCssAreaSet,
  guiCssCordSet:guiCssCordSet,

@@ -855,7 +855,7 @@ var aa=(function()
  obj.object=null;
  obj.handle=0;
  obj.val=null;
- return objl
+ return obj;
  }
 
 
@@ -2472,6 +2472,7 @@ try {
  function envDisplayGet ()
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_env) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var sat,sar,sab,sal,toff;
  var swp,ori,ora,disp={};
  ori=(screen.orientation||{}).type||screen.mozOrientation||screen.msOrientation||window.orientation;
  ora=(screen.orientation||{}).angle;
@@ -2533,6 +2534,22 @@ try {
   }
  disp.wh_ratio=disp.win_wid/disp.win_hit;
  disp.hw_ratio=disp.win_hit/disp.win_wid;
+
+ sat=getComputedStyle(document.documentElement).getPropertyValue("--sat");
+ sar=getComputedStyle(document.documentElement).getPropertyValue("--sar");
+ sab=getComputedStyle(document.documentElement).getPropertyValue("--sab");
+ sal=getComputedStyle(document.documentElement).getPropertyValue("--sal");
+ toff=stringIndexOf(false,sat,"px",0,false);
+ sat=Number(sat.substring(0,toff));
+ toff=stringIndexOf(false,sar,"px",0,false);
+ sar=Number(sar.substring(0,toff));
+ toff=stringIndexOf(false,sab,"px",0,false);
+ sab=Number(sab.substring(0,toff));
+ toff=stringIndexOf(false,sal,"px",0,false);
+ sal=Number(sal.substring(0,toff));
+ disp.safety=guiRectSet(sal,sat,sar-sal,sab-sat);
+
+
  return disp;
  }
 
@@ -3766,6 +3783,8 @@ try {
    }
   }
 
+  obj.dom.style.touchAction="none";
+  obj.dom.style.pointerEvents="none";
 
 
    /*
@@ -4830,7 +4849,7 @@ try {
 
 
 
-
+/*
 
  function guiCanvasFontFix (font)
  {
@@ -4868,7 +4887,7 @@ try {
  gui_obj.font_fixes.push(fo);
  return yy;
  }
-
+*/
 
 
 
@@ -5081,6 +5100,20 @@ try {
  obj.ctx.closePath();
  return true;
  }
+
+
+
+ function guiCanvasFillBorder (handle,x,y,w,h,blw,bfl,fcl)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var obj;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(obj.type!="canvas")                             { return false; }
+ guiCanvasFill(handle,x,y,w,h,fcl);
+ guiCanvasBorder(handle,x,y,w,h,blw,bfl);
+ return true;
+ }
+
 
 
 
@@ -5411,7 +5444,7 @@ try {
  var obj,xx,yy,zz,dw,dh;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- aa.debugAlert();
+ ///aa.debugAlert();
  obj.ctx.save();
  if(lw) { obj.ctx.lineWidth=lw; }
  if(lc) { obj.ctx.strokeStyle=lc; }
@@ -6446,6 +6479,45 @@ try {
  }
 
 
+
+
+ function guiFontFix (font)
+ {
+ var han,grp,img,frm,y,x,z,yy,fi,fl,fo;
+ fl=gui_obj.font_fixes.length;
+// console.log("fl="+fl);
+ //console.log(font);
+ for(fi=0;fi<fl;fi++)
+  {
+  fo=gui_obj.font_fixes[fi];
+//  console.log(fi,fo);
+  if(fo.font==font) { return fo.fix; }
+  }
+ if((han=aa.guiCreate("canvas","aa_font_fixer",9000))==0)  { aa.debugAlert(); }
+ if((grp=aa.guiGroupGetById("aa_font_fixer"))==null) { aa.debugAlert(); }
+ aa.guiRetinaSet(han,0,0,30,200,null,null,false)
+ aa.guiCanvasText(han,10,10,0,0,aa.guiRgbaString(240,240,240,1),font,"`");
+ img=aa.guiCanvasImageGet(han,0,0,30,200);
+ frm=img.data;
+ yy=-1;
+ for(y=0;y<200;y++)
+  {
+  for(x=0;x<30;x++)
+   {
+   z=(y*30*4)+(x*4);
+   if((frm[z+0]>230)&&(frm[z+1]>230)&&(frm[z+2]>230)) { yy=y; break; }
+   }
+  if(yy!=-1) { break; }
+  }
+ aa.guiDestroy(han);
+ yy=-(yy-10);
+ if(yy===-0) { yy=0; }
+ fo={}
+ fo.font=font;
+ fo.fix=yy;
+ gui_obj.font_fixes.push(fo);
+ return yy;
+ }
 
 
 
@@ -9183,7 +9255,7 @@ try {
   msg=queueRead(obj.xmit_queue_handle);
   obj.socket.send(msg,{binary:true});
   info=socketStatus(handle);
-  if(info.buffered>obj.buffered_threshold) { console.log(info.buffered); break; }
+  if(info.buffered>obj.buffered_threshold) { console.log("info.buffered",info.buffered); break; }
   }
  if(go>=4)
   {
@@ -11189,6 +11261,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  obj.script.defer=true;
  obj.script.id=id;
  obj.script.src=url+"?"+aa.numRand(10000000);
+
  function _eventPath(evt)
   {
   var path=(evt.composedPath&&evt.composedPath())||evt.path,target=evt.target;
@@ -12004,7 +12077,6 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasTextMeasureAll:guiCanvasTextMeasureAll,
  guiUni:guiUni,
  guiCanvasAlphaSet:guiCanvasAlphaSet,
- guiCanvasFontFix:guiCanvasFontFix,
  guiCanvasImageGet:guiCanvasImageGet,
  guiCanvasImagePut:guiCanvasImagePut,
  guiCanvasImageDraw:guiCanvasImageDraw,
@@ -12015,6 +12087,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasFill:guiCanvasFill,
  guiCanvasFillFull:guiCanvasFillFull,
  guiCheckeredFill:guiCheckeredFill,
+ guiCanvasFillBorder:guiCanvasFillBorder,
  guiCanvasEllipseBorder:guiCanvasEllipseBorder,
  guiCanvasEllipseFill:guiCanvasEllipseFill,
  guiCanvasArcBorder:guiCanvasArcBorder,
@@ -12067,6 +12140,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiFontDelete:guiFontDelete,
  guiFontStatus:guiFontStatus,
  guiFontString:guiFontString,
+ guiFontFix:guiFontFix,
 
  guiWidgetNew:guiWidgetNew,
  guiWidgetDelete:guiWidgetDelete,

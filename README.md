@@ -1,3 +1,4 @@
+<pre>
 List of functions in aa_js
 
 
@@ -473,3 +474,5 @@ List of functions in aa_js
  function aaProfilerHashCode (str)
  function aaProfilerHit (name,count)
  function aaProfilerDump (minperc,maxperc,minhz,maxhz,dopathed,dostyle,dosummary)
+</pre>
+

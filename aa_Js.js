@@ -193,6 +193,60 @@ var aa=(function()
 
 /*-----------------------------------------------------------------------*/
 
+ function virtualLogNew (numlines)
+ {
+ var obj;
+ if(numlines<1) { return null; }
+ obj={};
+ obj.type="virtuallog";
+ obj.num_lines=numlines;
+ obj.line=aa.dataArrayCreate(obj.num_lines,"");
+ return obj;
+ }
+
+
+
+
+ function virtualLogDelete (obj)
+ {
+ if(obj.type!="virtuallog") { return false; }
+ obj={};
+ obj=null;
+ return true;
+ }
+
+
+
+
+ function virtualLogGet (obj,line)
+ {
+ if(obj.type!="virtuallog") { return false; }
+ if(line<0||line>=obj.num_lines) { return false; }
+ return obj.line[line];
+ }
+
+
+ function virtualLogSet (obj,line,lines,txt)
+ {
+ var till,j;
+ if(obj.type!="virtuallog") { return false; }
+ if(line<0||line>=obj.num_lines) { return false; }
+ if(lines==0) { return true; }
+ till=line+lines;
+ if(till>obj.num_lines) { return false; }
+ if(lines>1)
+  {
+  for(j=(line+1);j<till;j++)
+   {
+   obj.line[j-1]=obj.line[j];
+   }
+  }
+ obj.line[till-1]=txt;
+ return true;
+ }
+
+/*-----------------------------------------------------------------------*/
+
 
 
 
@@ -1377,6 +1431,14 @@ var aa=(function()
  {
  if(Object.keys(data_obj).length!=0) { return; }
  data_obj.is_init=true;
+ }
+
+
+ function dataArrayCreate (count,val)
+ {
+ var i,arr=[];
+ for(i=0;i<count;i++) { arr[i]=val; }
+ return arr;
  }
 
 
@@ -2953,7 +3015,7 @@ try {
  state.event_counter=0;
  pointer_obj.state=state;
  pointer_obj.is_init=true;
-
+ pointer_obj.coal_extra=0;
  }
 
 
@@ -3001,10 +3063,14 @@ try {
  function pointerOnEvent (name,ev)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_pointer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var msg;
+ var msg,evs,i;
 // console.log(ev);
+
+  //event.getCoalescedEvents();
+
  msg={};
  msg.ms=aa.timerMsRunning();
+ msg.stamp=ev.timeStamp;
  msg.counter=aa.pointer_obj.state.event_counter++;
  msg.event={};
  msg.event.pointerType=ev.pointerType;
@@ -3015,8 +3081,49 @@ try {
  msg.event.clientY=ev.clientY;
  msg.event.offsetX=ev.offsetX;
  msg.event.offsetY=ev.offsetY;
+ //console.log(msg.event.type);
  // ev.screenX , ev.screenY
  msg.event.pointerId=ev.pointerId;
+
+
+ /*
+ if(ev.type=="pointermove")
+  {
+  evs=ev.getCoalescedEvents();
+  if(evs.length>0)
+   {
+   for(i=0;i<evs.length;i++)
+    {
+    if(evs[i].timeStamp!=ev.timeStamp)
+     {
+     aa.pointer_obj.coal_extra++;
+     //console.log(i+"/"+evs.length+"evts="+ev.timeStamp+"  EVTS="+evs[i].timeStamp);
+     }
+    }
+   }
+  }
+  */
+
+
+
+ /*
+ if(ev.type=="pointermove")
+  {
+  evs=ev.getCoalescedEvents();
+  //console.log("evts="+ev.timeStamp+" coallen="+evs.length);
+  if(evs.length>0)
+   {
+   //console.log("evts="+ev.timeStamp+" coallen="+evs.length);
+   if(evs[0].timeStamp!=ev.timeStamp)
+    {
+    console.log("evts="+ev.timeStamp+" coallen="+evs.length);
+    for(i=0;i<evs.length;i++) {  console.log(i+"/"+evs.length+"=EVTS="+evs[i].timeStamp); }
+    }
+   }
+  //console.log("evsts="+evs.timeStamp);
+  }
+*/
+
  aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
  pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
  if(1) { ev.preventDefault(); }  //march
@@ -3508,7 +3615,7 @@ try {
  gui_obj.handef=handleDefine("gui",64);
  gui_obj.is_init=true;
  gui_obj.font_fixes=[];
- gui_obj.widget_ray=[];
+ //gui_obj.widget_ray=[];
  gui_obj.web_pal=[
   {"name":"INDIANRED",                 "hex":"#CD5C5C",    "rgb":[205,92,92,1.0],    "fam":["red","brown"]  },
   {"name":"LIGHTCORAL",                "hex":"#F08080",    "rgb":[240,128,128,1.0],  "fam":["red","pink","coral","light"]  },
@@ -3783,8 +3890,11 @@ try {
    }
   }
 
-  obj.dom.style.touchAction="none";
-  obj.dom.style.pointerEvents="none";
+  if(1) // burp
+   {
+   obj.dom.style.touchAction="none";
+   obj.dom.style.pointerEvents="none";
+   }
 
 
    /*
@@ -5940,7 +6050,7 @@ try {
 
 
 
-/**
+
  function guiRectAdjust (rec,xa,ya,wa,ha)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
@@ -5956,7 +6066,18 @@ try {
  return rec;
  }
 
- */
+
+
+
+ function guiRectCopy (rec)
+ {
+ var obj;
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ if(rec.type!="rect") { aa.debugAlert(); }
+ obj=guiRectSet(rec.x,rec.y,rec.w,rec.h);
+ return obj;
+ }
+
 
 
 
@@ -6524,7 +6645,7 @@ try {
 /*-----------------------------------------------------------------------*/
 
 
-
+/*
 
 
  function guiWidgetNew (cat,canvasid,uid,msgproc)
@@ -6583,7 +6704,7 @@ try {
  return reply;
  }
 
-
+*/
 
  /*
  function guiWidgetGather (canvasid)
@@ -7433,6 +7554,8 @@ try {
  iface_obj.fingers_dif=-1;
  iface_obj.is_disp_change=true;
 
+ if(0)
+  {
   document.getElementsByTagName("html")[0].style.touchAction="none";
   document.getElementsByTagName("html")[0].style.pointerEvents="none";
   document.getElementsByTagName("body")[0].style.touchAction="none";
@@ -7441,6 +7564,7 @@ try {
   document.getElementsByTagName("html")[0].pointerEvents="none";
   document.getElementsByTagName("body")[0].touchAction="none";
   document.getElementsByTagName("body")[0].pointerEvents="none";
+  }
 
  window.requestAnimationFrame(ifaceBlit);
  return true;
@@ -10942,7 +11066,8 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
   if(event.scale!==1) { event.preventDefault(); }  }, { passive: false });
  }
 
- if(1) //march pork
+ ///if(1) //march pork
+  if(1)// burp
   {
   document.body.style.touchAction="none";
   document.body.style.pointerEvents="none";
@@ -11065,7 +11190,8 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
    window.removeEventListener("touchend",mainClickProc);
    window.removeEventListener("click",mainClickProc);
    window.removeEventListener("tap",mainClickProc);
-   if(1) //march pork
+   //if(1) //march pork
+   if(1)// burp
     {
     document.body.style.touchAction="none";
     document.body.style.pointerEvents="none";
@@ -11843,6 +11969,10 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  main_obj:main_obj,
  ret:ret,
 
+ virtualLogNew:virtualLogNew,
+ virtualLogDelete:virtualLogDelete,
+ virtualLogGet:virtualLogGet,
+ virtualLogSet:virtualLogSet,
 
  debugSpeedTest:debugSpeedTest,
  debugLineNumber:debugLineNumber,
@@ -11909,6 +12039,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  numClamp:numClamp,
 
 
+ dataArrayCreate:dataArrayCreate,
  dataArray2DCreate:dataArray2DCreate,
  dataObjectApxSize:dataObjectApxSize,
  dataGlobalExists:dataGlobalExists,
@@ -12116,7 +12247,8 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiRgbaStringCommon:guiRgbaStringCommon,
  guiGridSet:guiGridSet,
  guiRectSet:guiRectSet,
- ///guiRectAdjust:guiRectAdjust,
+ guiRectAdjust:guiRectAdjust,
+ guiRectCopy:guiRectCopy,
  guiAreaSet:guiAreaSet,
  guiAreaAdjust:guiAreaAdjust,
  guiXyUvSet:guiXyUvSet,
@@ -12142,9 +12274,9 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiFontString:guiFontString,
  guiFontFix:guiFontFix,
 
- guiWidgetNew:guiWidgetNew,
- guiWidgetDelete:guiWidgetDelete,
- guiWidgetMsgSend:guiWidgetMsgSend,
+ //guiWidgetNew:guiWidgetNew,
+ //guiWidgetDelete:guiWidgetDelete,
+ //guiWidgetMsgSend:guiWidgetMsgSend,
  //guiWidgetGather:guiWidgetGather,
  //guiWidgetFontSet:guiWidgetFontSet,
  //guiWidgetRectSet:guiWidgetRectSet,

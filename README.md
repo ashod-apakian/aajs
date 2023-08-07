@@ -1,3 +1,7 @@
+
+https://github.com/ashod-apakian/aajs/wiki
+
+
 List of functions in aa_js
 ==========================
 

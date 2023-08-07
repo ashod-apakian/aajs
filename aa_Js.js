@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.73;
+ const aa_version=2.74;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -1185,6 +1185,21 @@ var aa=(function()
 
 
 
+ function timerUnixGet (how)
+ {
+ var d=Date.now();///1000)>>0);
+ switch(how)
+  {
+  case 0: return d;
+  case 1: return (d/1000)>>0;
+  case 2: return new Date(d);
+  case 3: return new Date(d).toGMTString();
+  case 4: return new Date(d).toISOString();
+  }
+ return 0;
+ }
+
+
 
 
 /*-----------------------------------------------------------------------*/
@@ -1249,6 +1264,17 @@ var aa=(function()
  }
 
 
+ function numPercentIsOf (numb,tota,totb)
+ {
+ var pca;
+ if(1&&aa_profiler.is_started&&aa_profile_group_num) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ pca=aa.numPercentIs(numb,tota);
+ pcb=aa.numPercentOf(pca,totb);
+ return pcb;
+ }
+
+
+
 
 
  function numPad(numb,width,z)
@@ -1272,6 +1298,12 @@ var aa=(function()
  }
 
 
+ function numIntToBinary (intg)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_num) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ return (intg>>>0).toString(2);
+ }
+
 
  function numPrecision(numb,precision)
  {
@@ -1284,6 +1316,14 @@ var aa=(function()
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_num) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  return Math.round(numb);
+ }
+
+
+ function numRoundPlaces (numb,places)
+ {
+ var n,p=Math.pow(10,places);
+ n=(Math.round((numb+Number.EPSILON)*p)/p);
+ return n.toFixed(places);
  }
 
 
@@ -1419,6 +1459,8 @@ var aa=(function()
  return min<max?numb<min?min:numb>max?max:numb:numb<max?max:numb>min?min:numb;
  // return numb<=min?min:numb>=max?max:numb; // faster ??
  }
+
+
 
 
 
@@ -2534,7 +2576,7 @@ try {
  function envDisplayGet ()
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_env) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var sat,sar,sab,sal,toff;
+ var sat,sar,sab,sal,toff,go;
  var swp,ori,ora,disp={};
  ori=(screen.orientation||{}).type||screen.mozOrientation||screen.msOrientation||window.orientation;
  ora=(screen.orientation||{}).angle;
@@ -2597,19 +2639,22 @@ try {
  disp.wh_ratio=disp.win_wid/disp.win_hit;
  disp.hw_ratio=disp.win_hit/disp.win_wid;
 
- sat=getComputedStyle(document.documentElement).getPropertyValue("--sat");
- sar=getComputedStyle(document.documentElement).getPropertyValue("--sar");
- sab=getComputedStyle(document.documentElement).getPropertyValue("--sab");
- sal=getComputedStyle(document.documentElement).getPropertyValue("--sal");
- toff=stringIndexOf(false,sat,"px",0,false);
- sat=Number(sat.substring(0,toff));
- toff=stringIndexOf(false,sar,"px",0,false);
- sar=Number(sar.substring(0,toff));
- toff=stringIndexOf(false,sab,"px",0,false);
- sab=Number(sab.substring(0,toff));
- toff=stringIndexOf(false,sal,"px",0,false);
- sal=Number(sal.substring(0,toff));
+ //for(go=0;go<2;go++)
+  {
+  sat=getComputedStyle(document.documentElement).getPropertyValue("--sat");
+  sar=getComputedStyle(document.documentElement).getPropertyValue("--sar");
+  sab=getComputedStyle(document.documentElement).getPropertyValue("--sab");
+  sal=getComputedStyle(document.documentElement).getPropertyValue("--sal");
+ toff=stringIndexOf(false,sat,"px",0,false); sat=Number(sat.substring(0,toff));
+ toff=stringIndexOf(false,sar,"px",0,false); sar=Number(sar.substring(0,toff));
+ toff=stringIndexOf(false,sab,"px",0,false); sab=Number(sab.substring(0,toff));
+ toff=stringIndexOf(false,sal,"px",0,false); sal=Number(sal.substring(0,toff));
+ disp.safety_sat=sat;
+ disp.safety_sar=sar;
+ disp.safety_sab=sab;
+ disp.safety_sal=sal;
  disp.safety=guiRectSet(sal,sat,sar-sal,sab-sat);
+  }
 
 
  return disp;
@@ -3064,12 +3109,99 @@ try {
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_pointer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var msg,evs,i;
+ var tsdif;
+ var curms,coal;
 // console.log(ev);
 
-  //event.getCoalescedEvents();
+
+ curms=aa.timerMsRunning();
+
+ /**
+ evs=event.getCoalescedEvents();
+
+
+
+ //console.log(evs.length);
+  for (coal=0;coal<evs.length;coal++)//let coal of evs)//coalescedEvents)
+  {
+  //console.log(coal);
+  console.log(evs[coal]);
 
  msg={};
- msg.ms=aa.timerMsRunning();
+ msg.ms=curms;//aa.timerMsRunning();
+ msg.stamp=evs[coal].timeStamp;
+ msg.counter=aa.pointer_obj.state.event_counter++;
+ msg.event={};
+ msg.event.pointerType=evs[coal].pointerType;
+ msg.event.type=evs[coal].type;
+ msg.event.pageX=evs[coal].pageX;
+ msg.event.pageY=evs[coal].pageY;
+ msg.event.clientX=evs[coal].clientX;
+ msg.event.clientY=evs[coal].clientY;
+ msg.event.offsetX=evs[coal].offsetX;
+ msg.event.offsetY=evs[coal].offsetY;
+ msg.event.pointerId=evs[coal].pointerId;
+ aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
+ pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
+ //if(1) { evs[coal].preventDefault(); }  //march
+ //return true;
+
+
+  //console.log(coalescedEvent);
+    // give it an offset so we can see the difference and color it red
+  ///  drawCircle(coalescedEvent.clientX + 20, coalescedEvent.clientY + 20, "red");
+  }
+if(1) { event.preventDefault(); }  //march
+
+
+ evs=event.getCoalescedEvents();
+ if(evs.length>1)
+  {
+  console.log("     ev.timeStamp="+ev.timeStamp);
+  for(i=0;i<evs.length;i++)
+   {
+   if(evs[i].timeStamp<ev.timeStamp)
+    {
+    //console.log(i+"/"+evs.length+" evs["+i+"].timeStamp="+evs[i].timeStamp+"  in the past");
+    tsdif=ev.timeStamp-evs[i].timeStamp;
+    console.log("ev.timestamp="+ev.timeStamp+"  evs.timestamp="+evs[i].timeStamp+"  tsdif="+tsdif);
+    msg={};
+    msg.ms=curms-(tsdif>>0);//aa.timerMsRunning();
+    msg.stamp=ev.timeStamp;
+    msg.counter=aa.pointer_obj.state.event_counter++;
+    msg.event={};
+    msg.event.pointerType=evs[i].pointerType;
+    msg.event.type=evs[i].type;
+    msg.event.pageX=evs[i].pageX;
+    msg.event.pageY=evs[i].pageY;
+    msg.event.clientX=evs[i].clientX;
+    msg.event.clientY=evs[i].clientY;
+    msg.event.offsetX=evs[i].offsetX;
+    msg.event.offsetY=evs[i].offsetY;
+    msg.event.pointerId=evs[i].pointerId;
+    aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
+    pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
+    }
+   else
+   if(evs[i].timeStamp>ev.timeStamp)
+    {
+    alert(i+"/"+evs.length+" evs["+i+"].timeStamp="+evs[i].timeStamp+"  in the future");
+    }
+   else
+   if(evs[i].timeStamp==ev.timeStamp)
+    {
+    //console.log(i+"/"+evs.length+" evs["+i+"].timeStamp="+evs[i].timeStamp+"  in the present");
+    }
+   }
+  }
+
+*/
+
+
+
+
+ msg={};
+ msg.ms=curms;//aa.timerMsRunning();
  msg.stamp=ev.timeStamp;
  msg.counter=aa.pointer_obj.state.event_counter++;
  msg.event={};
@@ -3081,9 +3213,13 @@ try {
  msg.event.clientY=ev.clientY;
  msg.event.offsetX=ev.offsetX;
  msg.event.offsetY=ev.offsetY;
- //console.log(msg.event.type);
- // ev.screenX , ev.screenY
  msg.event.pointerId=ev.pointerId;
+ aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
+ pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
+ if(1) { ev.preventDefault(); }  //march
+ return true;
+
+
 
 
  /*
@@ -3124,10 +3260,6 @@ try {
   }
 */
 
- aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
- pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
- if(1) { ev.preventDefault(); }  //march
- return true;
  }
 
 
@@ -3617,149 +3749,150 @@ try {
  gui_obj.font_fixes=[];
  //gui_obj.widget_ray=[];
  gui_obj.web_pal=[
-  {"name":"INDIANRED",                 "hex":"#CD5C5C",    "rgb":[205,92,92,1.0],    "fam":["red","brown"]  },
-  {"name":"LIGHTCORAL",                "hex":"#F08080",    "rgb":[240,128,128,1.0],  "fam":["red","pink","coral","light"]  },
-  {"name":"SALMON",                    "hex":"#FA8072",    "rgb":[250,128,114,1.0],  "fam":["red","pink","orange","salmon"]  },
-  {"name":"DARKSALMON",                "hex":"#E9967A",    "rgb":[233,150,122,1.0],  "fam":["red","pink","orange","salmon","dark"]  },
-  {"name":"LIGHTSALMON",               "hex":"#FFA07A",    "rgb":[255,160,122,1.0],  "fam":["red","pink","orange","salmon","light"]  },
-  {"name":"CRIMSON",                   "hex":"#DC143C",    "rgb":[220,20,60,1.0],    "fam":["red"]  },
-  {"name":"RED",    "hex":"#FF0000",    "rgb":[255,0,0,1.0],    "fam":["red"]  },
-  {"name":"DARKRED",    "hex":"#8B0000",    "rgb":[139,0,0,1.0],    "fam":["red","dark"]  },
-  {"name":"PINK",    "hex":"#FFC0CB",    "rgb":[255,192,203,1.0],    "fam":["pink"]  },
-  {"name":"LIGHTPINK",    "hex":"#FFB6C1",    "rgb":[255,182,193,1.0],    "fam":["pink","light"]  },
-  {"name":"HOTPINK",    "hex":"#FF69B4",    "rgb":[255,105,180,1.0],    "fam":["pink","hot"]  },
-  {"name":"DEEPPINK",    "hex":"#FF1493",    "rgb":[255,20,147,1.0],    "fam":["pink","deep"]  },
-  {"name":"MEDIUMVIOLETRED",    "hex":"#C71585",    "rgb":[199,21,133,1.0],    "fam":["pink","purple","violet","medium"]  },
-  {"name":"PALEVIOLETRED",             "hex":"#DB7093",    "rgb":[219,112,147,1.0],    "fam":["pink","pale","violet"]  },
-  {"name":"CORAL",    "hex":"#FF7F50",    "rgb":[255,127,80,1.0],    "fam":["orange","coral"]  },
-  {"name":"TOMATO",    "hex":"#FF6347",    "rgb":[255,99,71,1.0],    "fam":["orange","red"]  },
-  {"name":"ORANGERED",    "hex":"#FF4500",    "rgb":[255,69,0,1.0],    "fam":["orange","red"]  },
-  {"name":"DARKORANGE",    "hex":"#FF8C00",    "rgb":[255,140,0,1.0],    "fam":["orange","dark"]  },
-  {"name":"ORANGE",    "hex":"#FFA500",    "rgb":[255,165,0,1.0],    "fam":["orange"]  },
-  {"name":"GOLD",    "hex":"#FFD700",    "rgb":[255,215,0,1.0],    "fam":["yellow"]  },
-  {"name":"YELLOW",    "hex":"#FFFF00",    "rgb":[255,255,0,1.0],    "fam":["yellow"]  },
-  {"name":"LIGHTYELLOW",    "hex":"#FFFFE0",    "rgb":[255,255,224,1.0],    "fam":["yellow","light"]  },
-  {"name":"LEMONCHIFFON",    "hex":"#FFFACD",    "rgb":[255,250,205,1.0],    "fam":["yellow","lemon"]  },
-  {"name":"LIGHTGOLDENRODYELLOW",    "hex":"#FAFAD2",    "rgb":[250,250,210,1.0],    "fam":["yellow","light","goldenrod","tan"]  },
-  {"name":"PAPAYAWHIP",    "hex":"#FFEFD5",    "rgb":[255,239,213,1.0],    "fam":["pink","tan"]  },
-  {"name":"MOCCASIN",    "hex":"#FFE4B5",    "rgb":[255,228,181,1.0],    "fam":["pink","tan"]  },
-  {"name":"PEACHPUFF",    "hex":"#FFDAB9",    "rgb":[255,218,185,1.0],    "fam":["pink","orange","peach"]  },
-  {"name":"PALEGOLDENROD",    "hex":"#EEE8AA",    "rgb":[238,232,170,1.0],    "fam":["yellow","tan","pale","goldenrod"]  },
-  {"name":"KHAKI",    "hex":"#F0E68C",    "rgb":[240,230,140,1.0],    "fam":["yellow","tan","khaki"]  },
-  {"name":"DARKKHAKI",    "hex":"#BDB76B",    "rgb":[189,183,107,1.0],    "fam":["yellow","tan","khaki","dark"]  },
-  {"name":"LAVENDER",    "hex":"#E6E6FA",    "rgb":[230,230,250,1.0],    "fam":["purple"]  },
-  {"name":"THISTLE",    "hex":"#D8BFD8",    "rgb":[216,191,216,1.0],    "fam":["purple"]  },
-  {"name":"PLUM",    "hex":"#DDA0DD",    "rgb":[221,160,221,1.0],   "fam":["purple"]  },
-  {"name":"VIOLET",    "hex":"#EE82EE",    "rgb":[238,130,238,1.0],    "fam":["purple","violet","pink"]  },
-  {"name":"ORCHID",    "hex":"#DA70D6",    "rgb":[218,112,214,1.0],    "fam":["purple","orchid"]  },
-  {"name":"FUCHSIA",    "hex":"#FF00FF",    "rgb":[255,0,255,1.0],    "fam":["purple","pink"]  },
-  {"name":"MAGENTA",    "hex":"#FF00FF",    "rgb":[255,0,255,1.0],    "fam":["purple","pink","magenta"]  },
-  {"name":"MEDIUMORCHID",    "hex":"#BA55D3",    "rgb":[186,85,211,1.0],    "fam":["purple","orchid","medium"]  },
-  {"name":"MEDIUMPURPLE",    "hex":"#9370DB",    "rgb":[147,112,219,1.0],    "fam":["purple","medium"]  },
-  {"name":"REBECCAPURPLE",    "hex":"#663399",    "rgb":[102,51,153,1.0],    "fam":["purple","blue"]  },
-  {"name":"BLUEVIOLET",    "hex":"#8A2BE2",    "rgb":[138,43,226,1.0],    "fam":["purple","blue","violet"]  },
-  {"name":"DARKVIOLET",    "hex":"#9400D3",    "rgb":[148,0,211,1.0],    "fam":["purple","dark","violet"]  },
-  {"name":"DARKORCHID",                "hex":"#9932CC",    "rgb":[153,50,204,1.0],   "fam":["purple","dark","orchid"]  },
-  {"name":"DARKMAGENTA",               "hex":"#8B008B",    "rgb":[139,0,139,1.0],    "fam":["purple","dark","magenta"]  },
-  {"name":"PURPLE",                    "hex":"#800080",    "rgb":[128,0,128,1.0],    "fam":["purple"]  },
-  {"name":"INDIGO",                    "hex":"#4B0082",    "rgb":[75,0,130,1.0],     "fam":["purple","blue"]  },
-  {"name":"SLATEBLUE",                 "hex":"#6A5ACD",    "rgb":[106,90,205,1.0],   "fam":["purple","blue","slate"]  },
-  {"name":"DARKSLATEBLUE",             "hex":"#483D8B",    "rgb":[72,61,139,1.0],    "fam":["purple","blue","slate","dark"]  },
-  {"name":"MEDIUMSLATEBLUE",           "hex":"#7B68EE",    "rgb":[123,104,238,1.0],  "fam":["purple","blue","slate","medium"]  },
-  {"name":"GREENYELLOW",               "hex":"#ADFF2F",    "rgb":[173,255,47,1.0],   "fam":["green","yellow"]  },
-  {"name":"CHARTREUSE",                "hex":"#7FFF00",    "rgb":[127,255,0,1.0],    "fam":["green"]  },
-  {"name":"LAWNGREEN",                 "hex":"#7CFC00",    "rgb":[124,252,0,1.0],    "fam":["green"]  },
-  {"name":"LIME",                      "hex":"#00FF00",    "rgb":[0,255,0,1.0],      "fam":["green"]  },
-  {"name":"LIMEGREEN",                 "hex":"#32CD32",    "rgb":[50,205,50,1.0],    "fam":["green"]  },
-  {"name":"PALEGREEN",                 "hex":"#98FB98",    "rgb":[152,251,152,1.0],  "fam":["green","pale"]  },
-  {"name":"LIGHTGREEN",                "hex":"#90EE90",    "rgb":[144,238,144,1.0],  "fam":["green","light"]  },
-  {"name":"MEDIUMSPRINGGREEN",         "hex":"#00FA9A",    "rgb":[0,250,154,1.0],    "fam":["green","medium","spring"]  },
-  {"name":"SPRINGGREEN",    "hex":"#00FF7F",    "rgb":[0,255,127,1.0],    "fam":["green","spring"]  },
-  {"name":"MEDIUMSEAGREEN",    "hex":"#3CB371",    "rgb":[60,179,113,1.0],    "fam":["green","sea","medium"]  },
-  {"name":"SEAGREEN",    "hex":"#2E8B57",    "rgb":[46,139,87,1.0],    "fam":["green","sea"]  },
-  {"name":"FORESTGREEN",    "hex":"#228B22",    "rgb":[34,139,34,1.0],    "fam":["green","forest"]  },
-  {"name":"GREEN",    "hex":"#008000",    "rgb":[0,128,0,1.0],    "fam":["green"]  },
-  {"name":"DARKGREEN",    "hex":"#006400",    "rgb":[0,100,0,1.0],    "fam":["green","dark"]  },
-  {"name":"YELLOWGREEN",    "hex":"#9ACD32",    "rgb":[154,205,50,1.0],    "fam":["green","yellow"]  },
-  {"name":"OLIVEDRAB",    "hex":"#6B8E23",    "rgb":[107,142,35,1.0],   "fam":["green","olive"]  },
-  {"name":"OLIVE",    "hex":"#6B8E23",    "rgb":[128,128,0,1.0],    "fam":["green","olive"]  },
-  {"name":"DARKOLIVEGREEN",    "hex":"#556B2F",    "rgb":[85,107,47,1.0],    "fam":["green","olive","dark"]  },
-  {"name":"MEDIUMAQUAMARINE",    "hex":"#66CDAA",    "rgb":[102,205,170,1.0],    "fam":["green","blue","aquamarine","medium"]  },
-  {"name":"DARKSEAGREEN",    "hex":"#8FBC8B",    "rgb":[143,188,139,1.0],    "fam":["green","sea","dark"]  },
-  {"name":"LIGHTSEAGREEN",    "hex":"#20B2AA",    "rgb":[32,178,170,1.0],    "fam":["green","blue","sea","light"]  },
-  {"name":"DARKCYAN",    "hex":"#008B8B",    "rgb":[0,139,139,1.0],    "fam":["green","blue","cyan","dark"]  },
-  {"name":"TEAL",    "hex":"#008080",    "rgb":[0,128,128,1.0],    "fam":["green","blue"]  },
-  {"name":"AQUA",   "hex":"#00FFFF",    "rgb":[0,255,255,1.0],    "fam":["blue","aqua"]  },
-  {"name":"CYAN",    "hex":"#00FFFF",    "rgb":[0,255,255,1.0],    "fam":["blue","cyan"]  },
-  {"name":"LIGHTCYAN",    "hex":"#E0FFFF",    "rgb":[224,255,255,1.0],    "fam":["blue","cyan","light"]  },
-  {"name":"PALETURQUOISE",   "hex":"#AFEEEE",    "rgb":[175,238,238,1.0],    "fam":["blue","turquoise","pale"]  },
-  {"name":"AQUAMARINE",    "hex":"#7FFFD4",    "rgb":[127,255,212,1.0],    "fam":["blue","aquamarine"]  },
-  {"name":"TURQUOISE",    "hex":"#40E0D0",    "rgb":[64,224,208,1.0],    "fam":["blue","turquoise"]  },
-  {"name":"MEDIUMTURQUOISE",    "hex":"#48D1CC",    "rgb":[72,209,204,1.0],    "fam":["blue","turquoise","medium"]  },
-  {"name":"DARKTURQUOISE",    "hex":"#00CED1",    "rgb":[0,206,209,1.0],    "fam":["blue","turquoise","dark"]  },
-  {"name":"CADETBLUE",    "hex":"#5F9EA0",    "rgb":[95,158,160,1.0],    "fam":["blue","gray"]  },
-  {"name":"STEELBLUE",    "hex":"#4682B4",   "rgb":[70,130,180,1.0],    "fam":["blue","steel"]  },
-  {"name":"LIGHTSTEELBLUE",    "hex":"#B0C4DE",    "rgb":[176,196,222,1.0],    "fam":["blue","steel","light"]  },
-  {"name":"POWDERBLUE",    "hex":"#B0E0E6",    "rgb":[176,224,230,1.0],    "fam":["blue"]  },
-  {"name":"LIGHTBLUE",    "hex":"#ADD8E6",    "rgb":[173,216,230,1.0],    "fam":["blue","light"]  },
-  {"name":"SKYBLUE",    "hex":"#87CEEB",    "rgb":[135,206,235,1.0],    "fam":["blue","sky"]  },
-  {"name":"LIGHTSKYBLUE",    "hex":"#87CEFA",    "rgb":[135,206,250,1.0],    "fam":["blue","sky","light"]  },
-  {"name":"DEEPSKYBLUE",    "hex":"#00BFFF",    "rgb":[0,191,255,1.0],    "fam":["blue","sky","deep"]  },
-  {"name":"DODGERBLUE",    "hex":"#1E90FF",    "rgb":[30,144,255,1.0],    "fam":["blue"]  },
-  {"name":"CORNFLOWERBLUE",    "hex":"#6495ED",    "rgb":[100,149,237,1.0],    "fam":["blue"]  },
-  {"name":"ROYALBLUE",    "hex":"#4169E1",    "rgb":[65,105,225,1.0],    "fam":["blue"]  },
-  {"name":"BLUE",    "hex":"#0000FF",    "rgb":[0,0,255,1.0],    "fam":["blue"]  },
-  {"name":"MEDIUMBLUE",    "hex":"#0000CD",    "rgb":[0,0,205,1.0],    "fam":["blue","medium"]  },
-  {"name":"DARKBLUE",    "hex":"#00008B",    "rgb":[0,0,139,1.0],    "fam":["blue","dark"]  },
-  {"name":"NAVY",    "hex":"#00008B",    "rgb":[0,0,128,1.0],    "fam":["blue","dark"]  },
-  {"name":"MIDNIGHTBLUE",    "hex":"#191970",    "rgb":[25,25,112,1.0],    "fam":["blue","dark"]  },
-  {"name":"CORNSILK",    "hex":"#FFF8DC",    "rgb":[255,248,220,1.0],    "fam":["brown","tan"]  },
-  {"name":"BLANCHEDALMOND",    "hex":"#FFEBCD",   "rgb":[255,235,205,1.0],    "fam":["brown","tan"]  },
-  {"name":"BISQUE",    "hex":"#FFE4C4",    "rgb":[255,228,196,1.0],    "fam":["brown","tan"]  },
-  {"name":"NAVAJOWHITE",    "hex":"#FFDEAD",    "rgb":[255,222,173,1.0],    "fam":["brown","tan"]  },
-  {"name":"WHEAT",    "hex":"#F5DEB3",    "rgb":[245,222,179,1.0],    "fam":["brown","tan"]  },
-  {"name":"BURLYWOOD",    "hex":"#DEB887",    "rgb":[222,184,135,1.0],    "fam":["brown","tan"]  },
-  {"name":"TAN",    "hex":"#D2B48C",    "rgb":[210,180,140,1.0],    "fam":["brown","tan"]  },
-  {"name":"ROSYBROWN",    "hex":"#BC8F8F",    "rgb":[188,143,143,1.0],    "fam":["brown","tan"]  },
-  {"name":"SANDYBROWN",    "hex":"#F4A460",    "rgb":[244,164,96,1.0],    "fam":["brown","orange"]  },
-  {"name":"GOLDENROD",    "hex":"#DAA520",    "rgb":[218,165,32,1.0],    "fam":["brown","goldenrod","orange"]  },
-  {"name":"DARKGOLDENROD",    "hex":"#B8860B",    "rgb":[184,134,11,1.0],    "fam":["brown","orange","goldenrod","dark"]  },
-  {"name":"PERU",    "hex":"#CD853F",    "rgb":[205,133,63,1.0],    "fam":["brown","orange"]  },
-  {"name":"CHOCOLATE",    "hex":"#D2691E",    "rgb":[210,105,30,1.0],    "fam":["brown","orange"]  },
-  {"name":"SADDLEBROWN",    "hex":"#8B4513",    "rgb":[139,69,19,1.0],    "fam":["brown"]  },
-  {"name":"SIENNA",    "hex":"#A0522D",    "rgb":[160,82,45,1.0],    "fam":["brown"]  },
-  {"name":"BROWN",    "hex":"#A52A2A",    "rgb":[165,42,42,1.0],    "fam":["brown","red"]  },
-  {"name":"MAROON",    "hex":"#800000",    "rgb":[128,0,0,1.0],    "fam":["brown","red"]  },
-  {"name":"WHITE",    "hex":"#FFFFFF",    "rgb":[255,255,255,1.0],    "fam":["white"]  },
-  {"name":"SNOW",    "hex":"#FFFAFA",    "rgb":[255,250,250,1.0],    "fam":["white"]  },
-  {"name":"HONEYDEW",    "hex":"#F0FFF0",    "rgb":[240,255,240,1.0],    "fam":["white"]  },
-  {"name":"MINTCREAM",    "hex":"#F5FFFA",    "rgb":[245,255,250,1.0],    "fam":["white"]  },
-  {"name":"AZURE",    "hex":"#F0FFFF",    "rgb":[240,255,255,1.0],    "fam":["white"]  },
-  {"name":"ALICEBLUE",    "hex":"#F0F8FF",    "rgb":[240,248,255,1.0],    "fam":["white"]  },
-  {"name":"GHOSTWHITE",    "hex":"#F8F8FF",    "rgb":[248,248,255,1.0],    "fam":["white"]  },
-  {"name":"WHITESMOKE",    "hex":"#F5F5F5",    "rgb":[245,245,245,1.0],    "fam":["white"]  },
-  {"name":"SEASHELL",   "hex":"#FFF5EE",    "rgb":[255,245,238,1.0],    "fam":["white","pink"]  },
-  {"name":"BEIGE",    "hex":"#F5F5DC",    "rgb":[245,245,220,1.0],    "fam":["white","tan"]  },
-  {"name":"OLDLACE",    "hex":"#FDF5E6",    "rgb":[253,245,230,1.0],    "fam":["white","tan"]  },
-  {"name":"FLORALWHITE",    "hex":"#FDF5E6",    "rgb":[253,245,230,1.0],    "fam":["white","tan"]  },
-  {"name":"IVORY",    "hex":"#FFFFF0",    "rgb":[255,255,240,1.0],    "fam":["white","tan"]  },
-  {"name":"ANTIQUEWHITE",    "hex":"#FAEBD7",    "rgb":[250,235,215,1.0],    "fam":["white","tan"]  },
-  {"name":"LINEN",    "hex":"#FAF0E6",    "rgb":[250,240,230,1.0],    "fam":["white","tan"]  },
-  {"name":"LAVENDERBLUSH",    "hex":"#FFF0F5",    "rgb":[255,240,245,1.0],    "fam":["white","lavender","pink"]  },
-  {"name":"MISTYROSE",    "hex":"#FFE4E1",    "rgb":[255,228,225,1.0],    "fam":["white","pink"]  },
-  {"name":"GAINSBORO",    "hex":"#DCDCDC",    "rgb":[220,220,220,1.0],    "fam":["gray"]  },
-  {"name":"LIGHTGRAY",    "hex":"#D3D3D3",    "rgb":[211,211,211,1.0],    "fam":["gray","light"]  },
-  {"name":"SILVER",    "hex":"#C0C0C0",    "rgb":[192,192,192,1.0],    "fam":["gray"]  },
-  {"name":"DARKGRAY",    "hex":"#A9A9A9",    "rgb":[169,169,169,1.0],    "fam":["gray","dark"]  },
-  {"name":"GRAY",    "hex":"#808080",    "rgb":[128,128,128,1.0],    "fam":["gray"]  },
-  {"name":"DIMGRAY",    "hex":"#696969",    "rgb":[105,105,105,1.0],    "fam":["gray"]  },
-  {"name":"LIGHTSLATEGRAY",    "hex":"#778899",    "rgb":[119,136,153,1.0],    "fam":["gray","light","slate"]  },
-  {"name":"SLATEGRAY",    "hex":"#708090",    "rgb":[112,128,144,1.0],    "fam":["gray", "slate"]  },
-  {"name":"DARKSLATEGRAY",    "hex":"#2F4F4F",    "rgb":[47,79,79,1.0],    "fam":["gray", "slate","dark"]  },
-  {"name":"BLACK",        "hex":"#000000",    "rgb":[0,0,0,1.0],    "fam":["black"]  }
+  {"index":0,"name":"INDIANRED",                 "hex":"#CD5C5C",    "rgb":[205,92,92,1.0],    "fam":["red","brown"]  },
+  {"index":0,"name":"LIGHTCORAL",                "hex":"#F08080",    "rgb":[240,128,128,1.0],  "fam":["red","pink","coral","light"]  },
+  {"index":0,"name":"SALMON",                    "hex":"#FA8072",    "rgb":[250,128,114,1.0],  "fam":["red","pink","orange","salmon"]  },
+  {"index":0,"name":"DARKSALMON",                "hex":"#E9967A",    "rgb":[233,150,122,1.0],  "fam":["red","pink","orange","salmon","dark"]  },
+  {"index":0,"name":"LIGHTSALMON",               "hex":"#FFA07A",    "rgb":[255,160,122,1.0],  "fam":["red","pink","orange","salmon","light"]  },
+  {"index":0,"name":"CRIMSON",                   "hex":"#DC143C",    "rgb":[220,20,60,1.0],    "fam":["red"]  },
+  {"index":0,"name":"RED",    "hex":"#FF0000",    "rgb":[255,0,0,1.0],    "fam":["red"]  },
+  {"index":0,"name":"DARKRED",    "hex":"#8B0000",    "rgb":[139,0,0,1.0],    "fam":["red","dark"]  },
+  {"index":0,"name":"PINK",    "hex":"#FFC0CB",    "rgb":[255,192,203,1.0],    "fam":["pink"]  },
+  {"index":0,"name":"LIGHTPINK",    "hex":"#FFB6C1",    "rgb":[255,182,193,1.0],    "fam":["pink","light"]  },
+  {"index":0,"name":"HOTPINK",    "hex":"#FF69B4",    "rgb":[255,105,180,1.0],    "fam":["pink","hot"]  },
+  {"index":0,"name":"DEEPPINK",    "hex":"#FF1493",    "rgb":[255,20,147,1.0],    "fam":["pink","deep"]  },
+  {"index":0,"name":"MEDIUMVIOLETRED",    "hex":"#C71585",    "rgb":[199,21,133,1.0],    "fam":["pink","purple","violet","medium"]  },
+  {"index":0,"name":"PALEVIOLETRED",             "hex":"#DB7093",    "rgb":[219,112,147,1.0],    "fam":["pink","pale","violet"]  },
+  {"index":0,"name":"CORAL",    "hex":"#FF7F50",    "rgb":[255,127,80,1.0],    "fam":["orange","coral"]  },
+  {"index":0,"name":"TOMATO",    "hex":"#FF6347",    "rgb":[255,99,71,1.0],    "fam":["orange","red"]  },
+  {"index":0,"name":"ORANGERED",    "hex":"#FF4500",    "rgb":[255,69,0,1.0],    "fam":["orange","red"]  },
+  {"index":0,"name":"DARKORANGE",    "hex":"#FF8C00",    "rgb":[255,140,0,1.0],    "fam":["orange","dark"]  },
+  {"index":0,"name":"ORANGE",    "hex":"#FFA500",    "rgb":[255,165,0,1.0],    "fam":["orange"]  },
+  {"index":0,"name":"GOLD",    "hex":"#FFD700",    "rgb":[255,215,0,1.0],    "fam":["yellow"]  },
+  {"index":0,"name":"YELLOW",    "hex":"#FFFF00",    "rgb":[255,255,0,1.0],    "fam":["yellow"]  },
+  {"index":0,"name":"LIGHTYELLOW",    "hex":"#FFFFE0",    "rgb":[255,255,224,1.0],    "fam":["yellow","light"]  },
+  {"index":0,"name":"LEMONCHIFFON",    "hex":"#FFFACD",    "rgb":[255,250,205,1.0],    "fam":["yellow","lemon"]  },
+  {"index":0,"name":"LIGHTGOLDENRODYELLOW",    "hex":"#FAFAD2",    "rgb":[250,250,210,1.0],    "fam":["yellow","light","goldenrod","tan"]  },
+  {"index":0,"name":"PAPAYAWHIP",    "hex":"#FFEFD5",    "rgb":[255,239,213,1.0],    "fam":["pink","tan"]  },
+  {"index":0,"name":"MOCCASIN",    "hex":"#FFE4B5",    "rgb":[255,228,181,1.0],    "fam":["pink","tan"]  },
+  {"index":0,"name":"PEACHPUFF",    "hex":"#FFDAB9",    "rgb":[255,218,185,1.0],    "fam":["pink","orange","peach"]  },
+  {"index":0,"name":"PALEGOLDENROD",    "hex":"#EEE8AA",    "rgb":[238,232,170,1.0],    "fam":["yellow","tan","pale","goldenrod"]  },
+  {"index":0,"name":"KHAKI",    "hex":"#F0E68C",    "rgb":[240,230,140,1.0],    "fam":["yellow","tan","khaki"]  },
+  {"index":0,"name":"DARKKHAKI",    "hex":"#BDB76B",    "rgb":[189,183,107,1.0],    "fam":["yellow","tan","khaki","dark"]  },
+  {"index":0,"name":"LAVENDER",    "hex":"#E6E6FA",    "rgb":[230,230,250,1.0],    "fam":["purple"]  },
+  {"index":0,"name":"THISTLE",    "hex":"#D8BFD8",    "rgb":[216,191,216,1.0],    "fam":["purple"]  },
+  {"index":0,"name":"PLUM",    "hex":"#DDA0DD",    "rgb":[221,160,221,1.0],   "fam":["purple"]  },
+  {"index":0,"name":"VIOLET",    "hex":"#EE82EE",    "rgb":[238,130,238,1.0],    "fam":["purple","violet","pink"]  },
+  {"index":0,"name":"ORCHID",    "hex":"#DA70D6",    "rgb":[218,112,214,1.0],    "fam":["purple","orchid"]  },
+  {"index":0,"name":"FUCHSIA",    "hex":"#FF00FF",    "rgb":[255,0,255,1.0],    "fam":["purple","pink"]  },
+  {"index":0,"name":"MAGENTA",    "hex":"#FF00FF",    "rgb":[255,0,255,1.0],    "fam":["purple","pink","magenta"]  },
+  {"index":0,"name":"MEDIUMORCHID",    "hex":"#BA55D3",    "rgb":[186,85,211,1.0],    "fam":["purple","orchid","medium"]  },
+  {"index":0,"name":"MEDIUMPURPLE",    "hex":"#9370DB",    "rgb":[147,112,219,1.0],    "fam":["purple","medium"]  },
+  {"index":0,"name":"REBECCAPURPLE",    "hex":"#663399",    "rgb":[102,51,153,1.0],    "fam":["purple","blue"]  },
+  {"index":0,"name":"BLUEVIOLET",    "hex":"#8A2BE2",    "rgb":[138,43,226,1.0],    "fam":["purple","blue","violet"]  },
+  {"index":0,"name":"DARKVIOLET",    "hex":"#9400D3",    "rgb":[148,0,211,1.0],    "fam":["purple","dark","violet"]  },
+  {"index":0,"name":"DARKORCHID",                "hex":"#9932CC",    "rgb":[153,50,204,1.0],   "fam":["purple","dark","orchid"]  },
+  {"index":0,"name":"DARKMAGENTA",               "hex":"#8B008B",    "rgb":[139,0,139,1.0],    "fam":["purple","dark","magenta"]  },
+  {"index":0,"name":"PURPLE",                    "hex":"#800080",    "rgb":[128,0,128,1.0],    "fam":["purple"]  },
+  {"index":0,"name":"INDIGO",                    "hex":"#4B0082",    "rgb":[75,0,130,1.0],     "fam":["purple","blue"]  },
+  {"index":0,"name":"SLATEBLUE",                 "hex":"#6A5ACD",    "rgb":[106,90,205,1.0],   "fam":["purple","blue","slate"]  },
+  {"index":0,"name":"DARKSLATEBLUE",             "hex":"#483D8B",    "rgb":[72,61,139,1.0],    "fam":["purple","blue","slate","dark"]  },
+  {"index":0,"name":"MEDIUMSLATEBLUE",           "hex":"#7B68EE",    "rgb":[123,104,238,1.0],  "fam":["purple","blue","slate","medium"]  },
+  {"index":0,"name":"GREENYELLOW",               "hex":"#ADFF2F",    "rgb":[173,255,47,1.0],   "fam":["green","yellow"]  },
+  {"index":0,"name":"CHARTREUSE",                "hex":"#7FFF00",    "rgb":[127,255,0,1.0],    "fam":["green"]  },
+  {"index":0,"name":"LAWNGREEN",                 "hex":"#7CFC00",    "rgb":[124,252,0,1.0],    "fam":["green"]  },
+  {"index":0,"name":"LIME",                      "hex":"#00FF00",    "rgb":[0,255,0,1.0],      "fam":["green"]  },
+  {"index":0,"name":"LIMEGREEN",                 "hex":"#32CD32",    "rgb":[50,205,50,1.0],    "fam":["green"]  },
+  {"index":0,"name":"PALEGREEN",                 "hex":"#98FB98",    "rgb":[152,251,152,1.0],  "fam":["green","pale"]  },
+  {"index":0,"name":"LIGHTGREEN",                "hex":"#90EE90",    "rgb":[144,238,144,1.0],  "fam":["green","light"]  },
+  {"index":0,"name":"MEDIUMSPRINGGREEN",         "hex":"#00FA9A",    "rgb":[0,250,154,1.0],    "fam":["green","medium","spring"]  },
+  {"index":0,"name":"SPRINGGREEN",    "hex":"#00FF7F",    "rgb":[0,255,127,1.0],    "fam":["green","spring"]  },
+  {"index":0,"name":"MEDIUMSEAGREEN",    "hex":"#3CB371",    "rgb":[60,179,113,1.0],    "fam":["green","sea","medium"]  },
+  {"index":0,"name":"SEAGREEN",    "hex":"#2E8B57",    "rgb":[46,139,87,1.0],    "fam":["green","sea"]  },
+  {"index":0,"name":"FORESTGREEN",    "hex":"#228B22",    "rgb":[34,139,34,1.0],    "fam":["green","forest"]  },
+  {"index":0,"name":"GREEN",    "hex":"#008000",    "rgb":[0,128,0,1.0],    "fam":["green"]  },
+  {"index":0,"name":"DARKGREEN",    "hex":"#006400",    "rgb":[0,100,0,1.0],    "fam":["green","dark"]  },
+  {"index":0,"name":"YELLOWGREEN",    "hex":"#9ACD32",    "rgb":[154,205,50,1.0],    "fam":["green","yellow"]  },
+  {"index":0,"name":"OLIVEDRAB",    "hex":"#6B8E23",    "rgb":[107,142,35,1.0],   "fam":["green","olive"]  },
+  {"index":0,"name":"OLIVE",    "hex":"#6B8E23",    "rgb":[128,128,0,1.0],    "fam":["green","olive"]  },
+  {"index":0,"name":"DARKOLIVEGREEN",    "hex":"#556B2F",    "rgb":[85,107,47,1.0],    "fam":["green","olive","dark"]  },
+  {"index":0,"name":"MEDIUMAQUAMARINE",    "hex":"#66CDAA",    "rgb":[102,205,170,1.0],    "fam":["green","blue","aquamarine","medium"]  },
+  {"index":0,"name":"DARKSEAGREEN",    "hex":"#8FBC8B",    "rgb":[143,188,139,1.0],    "fam":["green","sea","dark"]  },
+  {"index":0,"name":"LIGHTSEAGREEN",    "hex":"#20B2AA",    "rgb":[32,178,170,1.0],    "fam":["green","blue","sea","light"]  },
+  {"index":0,"name":"DARKCYAN",    "hex":"#008B8B",    "rgb":[0,139,139,1.0],    "fam":["green","blue","cyan","dark"]  },
+  {"index":0,"name":"TEAL",    "hex":"#008080",    "rgb":[0,128,128,1.0],    "fam":["green","blue"]  },
+  {"index":0,"name":"AQUA",   "hex":"#00FFFF",    "rgb":[0,255,255,1.0],    "fam":["blue","aqua"]  },
+  {"index":0,"name":"CYAN",    "hex":"#00FFFF",    "rgb":[0,255,255,1.0],    "fam":["blue","cyan"]  },
+  {"index":0,"name":"LIGHTCYAN",    "hex":"#E0FFFF",    "rgb":[224,255,255,1.0],    "fam":["blue","cyan","light"]  },
+  {"index":0,"name":"PALETURQUOISE",   "hex":"#AFEEEE",    "rgb":[175,238,238,1.0],    "fam":["blue","turquoise","pale"]  },
+  {"index":0,"name":"AQUAMARINE",    "hex":"#7FFFD4",    "rgb":[127,255,212,1.0],    "fam":["blue","aquamarine"]  },
+  {"index":0,"name":"TURQUOISE",    "hex":"#40E0D0",    "rgb":[64,224,208,1.0],    "fam":["blue","turquoise"]  },
+  {"index":0,"name":"MEDIUMTURQUOISE",    "hex":"#48D1CC",    "rgb":[72,209,204,1.0],    "fam":["blue","turquoise","medium"]  },
+  {"index":0,"name":"DARKTURQUOISE",    "hex":"#00CED1",    "rgb":[0,206,209,1.0],    "fam":["blue","turquoise","dark"]  },
+  {"index":0,"name":"CADETBLUE",    "hex":"#5F9EA0",    "rgb":[95,158,160,1.0],    "fam":["blue","gray"]  },
+  {"index":0,"name":"STEELBLUE",    "hex":"#4682B4",   "rgb":[70,130,180,1.0],    "fam":["blue","steel"]  },
+  {"index":0,"name":"LIGHTSTEELBLUE",    "hex":"#B0C4DE",    "rgb":[176,196,222,1.0],    "fam":["blue","steel","light"]  },
+  {"index":0,"name":"POWDERBLUE",    "hex":"#B0E0E6",    "rgb":[176,224,230,1.0],    "fam":["blue"]  },
+  {"index":0,"name":"LIGHTBLUE",    "hex":"#ADD8E6",    "rgb":[173,216,230,1.0],    "fam":["blue","light"]  },
+  {"index":0,"name":"SKYBLUE",    "hex":"#87CEEB",    "rgb":[135,206,235,1.0],    "fam":["blue","sky"]  },
+  {"index":0,"name":"LIGHTSKYBLUE",    "hex":"#87CEFA",    "rgb":[135,206,250,1.0],    "fam":["blue","sky","light"]  },
+  {"index":0,"name":"DEEPSKYBLUE",    "hex":"#00BFFF",    "rgb":[0,191,255,1.0],    "fam":["blue","sky","deep"]  },
+  {"index":0,"name":"DODGERBLUE",    "hex":"#1E90FF",    "rgb":[30,144,255,1.0],    "fam":["blue"]  },
+  {"index":0,"name":"CORNFLOWERBLUE",    "hex":"#6495ED",    "rgb":[100,149,237,1.0],    "fam":["blue"]  },
+  {"index":0,"name":"ROYALBLUE",    "hex":"#4169E1",    "rgb":[65,105,225,1.0],    "fam":["blue"]  },
+  {"index":0,"name":"BLUE",    "hex":"#0000FF",    "rgb":[0,0,255,1.0],    "fam":["blue"]  },
+  {"index":0,"name":"MEDIUMBLUE",    "hex":"#0000CD",    "rgb":[0,0,205,1.0],    "fam":["blue","medium"]  },
+  {"index":0,"name":"DARKBLUE",    "hex":"#00008B",    "rgb":[0,0,139,1.0],    "fam":["blue","dark"]  },
+  {"index":0,"name":"NAVY",    "hex":"#00008B",    "rgb":[0,0,128,1.0],    "fam":["blue","dark"]  },
+  {"index":0,"name":"MIDNIGHTBLUE",    "hex":"#191970",    "rgb":[25,25,112,1.0],    "fam":["blue","dark"]  },
+  {"index":0,"name":"CORNSILK",    "hex":"#FFF8DC",    "rgb":[255,248,220,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"BLANCHEDALMOND",    "hex":"#FFEBCD",   "rgb":[255,235,205,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"BISQUE",    "hex":"#FFE4C4",    "rgb":[255,228,196,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"NAVAJOWHITE",    "hex":"#FFDEAD",    "rgb":[255,222,173,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"WHEAT",    "hex":"#F5DEB3",    "rgb":[245,222,179,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"BURLYWOOD",    "hex":"#DEB887",    "rgb":[222,184,135,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"TAN",    "hex":"#D2B48C",    "rgb":[210,180,140,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"ROSYBROWN",    "hex":"#BC8F8F",    "rgb":[188,143,143,1.0],    "fam":["brown","tan"]  },
+  {"index":0,"name":"SANDYBROWN",    "hex":"#F4A460",    "rgb":[244,164,96,1.0],    "fam":["brown","orange"]  },
+  {"index":0,"name":"GOLDENROD",    "hex":"#DAA520",    "rgb":[218,165,32,1.0],    "fam":["brown","goldenrod","orange"]  },
+  {"index":0,"name":"DARKGOLDENROD",    "hex":"#B8860B",    "rgb":[184,134,11,1.0],    "fam":["brown","orange","goldenrod","dark"]  },
+  {"index":0,"name":"PERU",    "hex":"#CD853F",    "rgb":[205,133,63,1.0],    "fam":["brown","orange"]  },
+  {"index":0,"name":"CHOCOLATE",    "hex":"#D2691E",    "rgb":[210,105,30,1.0],    "fam":["brown","orange"]  },
+  {"index":0,"name":"SADDLEBROWN",    "hex":"#8B4513",    "rgb":[139,69,19,1.0],    "fam":["brown"]  },
+  {"index":0,"name":"SIENNA",    "hex":"#A0522D",    "rgb":[160,82,45,1.0],    "fam":["brown"]  },
+  {"index":0,"name":"BROWN",    "hex":"#A52A2A",    "rgb":[165,42,42,1.0],    "fam":["brown","red"]  },
+  {"index":0,"name":"MAROON",    "hex":"#800000",    "rgb":[128,0,0,1.0],    "fam":["brown","red"]  },
+  {"index":0,"name":"WHITE",    "hex":"#FFFFFF",    "rgb":[255,255,255,1.0],    "fam":["white"]  },
+  {"index":0,"name":"SNOW",    "hex":"#FFFAFA",    "rgb":[255,250,250,1.0],    "fam":["white"]  },
+  {"index":0,"name":"HONEYDEW",    "hex":"#F0FFF0",    "rgb":[240,255,240,1.0],    "fam":["white"]  },
+  {"index":0,"name":"MINTCREAM",    "hex":"#F5FFFA",    "rgb":[245,255,250,1.0],    "fam":["white"]  },
+  {"index":0,"name":"AZURE",    "hex":"#F0FFFF",    "rgb":[240,255,255,1.0],    "fam":["white"]  },
+  {"index":0,"name":"ALICEBLUE",    "hex":"#F0F8FF",    "rgb":[240,248,255,1.0],    "fam":["white"]  },
+  {"index":0,"name":"GHOSTWHITE",    "hex":"#F8F8FF",    "rgb":[248,248,255,1.0],    "fam":["white"]  },
+  {"index":0,"name":"WHITESMOKE",    "hex":"#F5F5F5",    "rgb":[245,245,245,1.0],    "fam":["white"]  },
+  {"index":0,"name":"SEASHELL",   "hex":"#FFF5EE",    "rgb":[255,245,238,1.0],    "fam":["white","pink"]  },
+  {"index":0,"name":"BEIGE",    "hex":"#F5F5DC",    "rgb":[245,245,220,1.0],    "fam":["white","tan"]  },
+  {"index":0,"name":"OLDLACE",    "hex":"#FDF5E6",    "rgb":[253,245,230,1.0],    "fam":["white","tan"]  },
+  {"index":0,"name":"FLORALWHITE",    "hex":"#FDF5E6",    "rgb":[253,245,230,1.0],    "fam":["white","tan"]  },
+  {"index":0,"name":"IVORY",    "hex":"#FFFFF0",    "rgb":[255,255,240,1.0],    "fam":["white","tan"]  },
+  {"index":0,"name":"ANTIQUEWHITE",    "hex":"#FAEBD7",    "rgb":[250,235,215,1.0],    "fam":["white","tan"]  },
+  {"index":0,"name":"LINEN",    "hex":"#FAF0E6",    "rgb":[250,240,230,1.0],    "fam":["white","tan"]  },
+  {"index":0,"name":"LAVENDERBLUSH",    "hex":"#FFF0F5",    "rgb":[255,240,245,1.0],    "fam":["white","lavender","pink"]  },
+  {"index":0,"name":"MISTYROSE",    "hex":"#FFE4E1",    "rgb":[255,228,225,1.0],    "fam":["white","pink"]  },
+  {"index":0,"name":"GAINSBORO",    "hex":"#DCDCDC",    "rgb":[220,220,220,1.0],    "fam":["gray"]  },
+  {"index":0,"name":"LIGHTGRAY",    "hex":"#D3D3D3",    "rgb":[211,211,211,1.0],    "fam":["gray","light"]  },
+  {"index":0,"name":"SILVER",    "hex":"#C0C0C0",    "rgb":[192,192,192,1.0],    "fam":["gray"]  },
+  {"index":0,"name":"DARKGRAY",    "hex":"#A9A9A9",    "rgb":[169,169,169,1.0],    "fam":["gray","dark"]  },
+  {"index":0,"name":"GRAY",    "hex":"#808080",    "rgb":[128,128,128,1.0],    "fam":["gray"]  },
+  {"index":0,"name":"DIMGRAY",    "hex":"#696969",    "rgb":[105,105,105,1.0],    "fam":["gray"]  },
+  {"index":0,"name":"LIGHTSLATEGRAY",    "hex":"#778899",    "rgb":[119,136,153,1.0],    "fam":["gray","light","slate"]  },
+  {"index":0,"name":"SLATEGRAY",    "hex":"#708090",    "rgb":[112,128,144,1.0],    "fam":["gray", "slate"]  },
+  {"index":0,"name":"DARKSLATEGRAY",    "hex":"#2F4F4F",    "rgb":[47,79,79,1.0],    "fam":["gray", "slate","dark"]  },
+  {"index":0,"name":"BLACK",        "hex":"#000000",    "rgb":[0,0,0,1.0],    "fam":["black"]  }
  ];
  for(p=0;p<gui_obj.web_pal.length;p++)
   {
+  gui_obj.web_pal[p].index=p;
   gui_obj.web_pal[p].rgba="rgba("+gui_obj.web_pal[p].rgb[0]+","+gui_obj.web_pal[p].rgb[1]+","+gui_obj.web_pal[p].rgb[2]+","+gui_obj.web_pal[p].rgb[3]+")";
   }
  }
@@ -4061,7 +4194,13 @@ try {
  }
 
 
-
+/*
+  &1=show/hide changed
+  &2=opacity changed
+  &4=retina changed
+  &8=position changed
+ &16=size changed
+*/
 
 
  function guiExpectCheck  (handle)
@@ -4557,7 +4696,6 @@ try {
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- aa.debugAlert();
  obj.ctx.save();
  return true;
  }
@@ -4665,7 +4803,7 @@ try {
  if(obj.type!="canvas")                             { return false; }
  oper=guiCanvasCompositeOperationFromIndex(index);
  if(oper==null) { return false; }
- grp.ctx.globalCompositeOperation=oper;
+ obj.ctx.globalCompositeOperation=oper;
  return true;
  }
 
@@ -4678,7 +4816,7 @@ try {
  var obj,index;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- index=guiCanvasCompositeOperationToIndex(grp.ctx.globalCompositeOperation);
+ index=guiCanvasCompositeOperationToIndex(obj.ctx.globalCompositeOperation);
  if(index==-1) { return false; }
  return index;
  }
@@ -4709,6 +4847,20 @@ try {
  obj.ctx.closePath();
  return true;
  }
+
+
+
+
+ function guiCanvasClip (handle)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var obj;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(obj.type!="canvas")                             { return false; }
+ obj.ctx.clip();
+ return true;
+ }
+
 
 
 
@@ -5051,123 +5203,6 @@ try {
 
 
 
- function guiCanvasImageWarp3 (handle,xyuv0,xyuv1,xyuv2,img)
- {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var obj,x0,x1,x2,y0,y1,y2,u0,u1,u2,v0,v1,v2,delta_0,delta_a,delta_b,delta_c,delta_d,delta_e,delta_f;
- if((obj=aa.handleCheck(aa.gui_obj.handef,handle))==null) { return false; }
- x0=xyuv0.x;
- x1=xyuv1.x;
- x2=xyuv2.x;
- y0=xyuv0.y;
- y1=xyuv1.y;
- y2=xyuv2.y;
- u0=xyuv0.u;
- u1=xyuv1.u;
- u2=xyuv2.u;
- v0=xyuv0.v;
- v1=xyuv1.v;
- v2=xyuv2.v;
- aa.debugAlert();
- obj.ctx.save();
- obj.ctx.imageSmoothingEnabled=true;
- obj.ctx.imageSmoothingQuality="high";
- obj.ctx.beginPath();
- obj.ctx.moveTo(x0,y0);
- obj.ctx.lineTo(x1,y1);
- obj.ctx.lineTo(x2,y2);
- obj.ctx.closePath();
- obj.ctx.clip();
- delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
- delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
- delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
- delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
- delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
- delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
- delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
- obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
- obj.ctx.drawImage(img,0,0);
- obj.ctx.restore();
- return true;
- }
-
-
-
- function guiCanvasImageWarp4 (handle,xyuv0,xyuv1,xyuv2,xyuv3,img)
- {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var obj,x0,x1,x2,y0,y1,y2,u0,u1,u2,v0,v1,v2,delta_0,delta_a,delta_b,delta_c,delta_d,delta_e,delta_f;
- if((obj=aa.handleCheck(aa.gui_obj.handef,handle))==null) { return false; }
- x0=xyuv0.x;
- x1=xyuv1.x;
- x2=xyuv2.x;
- y0=xyuv0.y;
- y1=xyuv1.y;
- y2=xyuv2.y;
- u0=xyuv0.u;
- u1=xyuv1.u;
- u2=xyuv2.u;
- v0=xyuv0.v;
- v1=xyuv1.v;
- v2=xyuv2.v;
- aa.debugAlert();
- obj.ctx.save();
- obj.ctx.beginPath();
- obj.ctx.moveTo(x0,y0);
- obj.ctx.lineTo(x1,y1);
- obj.ctx.lineTo(x2,y2);
- obj.ctx.closePath();
- obj.ctx.clip();
- delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
- delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
- delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
- delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
- delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
- delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
- delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
- obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
- obj.ctx.drawImage(img,0,0);
- obj.ctx.restore();
- x0=xyuv2.x;
- x1=xyuv3.x;
- x2=xyuv0.x;
- y0=xyuv2.y;
- y1=xyuv3.y;
- y2=xyuv0.y;
- u0=xyuv2.u;
- u1=xyuv3.u;
- u2=xyuv0.u;
- v0=xyuv2.v;
- v1=xyuv3.v;
- v2=xyuv0.v;
- aa.debugAlert();
- obj.ctx.save();
- obj.ctx.beginPath();
- obj.ctx.moveTo(x0,y0);
- obj.ctx.lineTo(x1,y1);
- obj.ctx.lineTo(x2,y2);
- obj.ctx.closePath();
- obj.ctx.clip();
- delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
- delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
- delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
- delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
- delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
- delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
- delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
- obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
- obj.ctx.drawImage(img,0,0);
- obj.ctx.restore();
- return true;
- }
-
-
-
-
-
-
-
-
  function guiCanvasScroll (handle,x,y,w,h,sx,sy)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
@@ -5189,10 +5224,12 @@ try {
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.save(); //drama
  if(bcl) { obj.ctx.strokeStyle=bcl; }
  if(blw) { obj.ctx.lineWidth=blw;   }
  //obj.ctx.strokeRect(x,y,w-blw,h-blw);
  obj.ctx.strokeRect(x,y,w,h);
+ obj.ctx.restore();
  return true;
  }
 
@@ -5253,7 +5290,7 @@ try {
   {
   for(xx=0;xx<w;xx+=sz)
    {
-   if(alt1++==1)  {    guiCanvasFill(handle,xx,yy,sz,sz,fcl2);    alt1=0;    }
+   if(alt1++==1)  {    guiCanvasFill(handle,x+xx,y+yy,sz,sz,fcl2);    alt1=0;    }
    else           {    }//aa.guiCanvasFill(handle,xx,yy,sz,sz,fcl2);               }
    }
   if(alt2++==1) { alt2=0; } alt1=alt2;
@@ -5271,6 +5308,7 @@ try {
  var obj,rs,re,ro;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.save(); //drama
  obj.ctx.beginPath();
  rs=aa.numDegreesToRadian(sa);
  re=aa.numDegreesToRadian(ea);
@@ -5281,6 +5319,7 @@ try {
  obj.ctx.ellipse(x,y,rx,ry,ro,rs,re,iscc);
  obj.ctx.stroke();
  obj.ctx.closePath();
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5312,6 +5351,7 @@ try {
  var obj,rs,re;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.save(); //drama
  obj.ctx.beginPath();
  rs=aa.numDegreesToRadian(sa);
  re=aa.numDegreesToRadian(ea);
@@ -5320,6 +5360,7 @@ try {
  obj.ctx.arc(x,y,r,rs,re);
  obj.ctx.stroke();
  obj.ctx.closePath();
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5350,12 +5391,14 @@ try {
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.save(); //drama
  if(cl) { obj.ctx.strokeStyle=cl; }
  if(lw) { obj.ctx.lineWidth=lw;   }
  obj.ctx.beginPath();
  obj.ctx.moveTo(x1,y1);
  obj.ctx.lineTo(x2,y2);
  obj.ctx.stroke();
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5424,13 +5467,16 @@ try {
 //https://stackoverflow.com/questions/39379392/placing-text-on-html5-canvas-inconsistent-across-browsers
 
 
+
+
+
  function guiCanvasText (handle,x,y,slw,sc,fc,font,text)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj,mes,rec;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- ///obj.ctx.save();
+ obj.ctx.save(); //drama
  if(font) { obj.ctx.font=font; }
  obj.ctx.textAlign="left";
  obj.ctx.textBaseline="top";
@@ -5447,7 +5493,7 @@ try {
   obj.ctx.fillStyle=fc;
   obj.ctx.fillText(text,x,y);//rec.x,rec.y);
   }
-  ///obj.ctx.restore();
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5463,6 +5509,7 @@ try {
  var obj,k,r,b;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.save(); //drama
  if(lw) { obj.ctx.lineWidth=lw; } //obj.ctx.lineJoin="round"; }
  if(fc) { obj.ctx.fillStyle=fc; }
  if(bc) { obj.ctx.strokeStyle=bc; }
@@ -5488,6 +5535,7 @@ try {
  if(fc) { obj.ctx.fill(); }
  if(bc) { obj.ctx.stroke(); }
 // aa.debugLogger(5,aa.debugFunctionName());
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5502,6 +5550,7 @@ try {
  var obj,k,r,b;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
+ obj.ctx.save(); //drama
  if(lw) { obj.ctx.lineWidth=lw; } //obj.ctx.lineJoin="round"; }
  if(fc) { obj.ctx.fillStyle=fc; }
  if(bc) { obj.ctx.strokeStyle=bc; }
@@ -5518,6 +5567,7 @@ try {
  if(fc) { obj.ctx.fill(); }
  if(bc) { obj.ctx.stroke(); }
 // aa.debugLogger(5,aa.debugFunctionName());
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5531,6 +5581,7 @@ try {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var grp;
  if((grp=aa.guiGroupGet(handle))==null) { return false; }
+  obj.ctx.save(); //drama
  if(lw) { grp.ctx.lineWidth=lw;  } // grp.ctx.lineJoin="round";
  if(fc) { grp.ctx.fillStyle=fc; }
  if(bc) { grp.ctx.strokeStyle=bc; }
@@ -5541,6 +5592,7 @@ try {
  grp.ctx.closePath();
  if(fc) { grp.ctx.fill(); }
  if(bc) { grp.ctx.stroke(); }
+ obj.ctx.restore(); //drama
  return true;
  }
 
@@ -5554,8 +5606,7 @@ try {
  var obj,xx,yy,zz,dw,dh;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- ///aa.debugAlert();
- obj.ctx.save();
+ obj.ctx.save(); //drama
  if(lw) { obj.ctx.lineWidth=lw; }
  if(lc) { obj.ctx.strokeStyle=lc; }
  if(xd<=1) { xd=1; }
@@ -5611,16 +5662,21 @@ try {
 
 
 
- function guiCanvasGridToRect (xg,yg,x,y,w,h,xd,yd)
+ function guiGridToRect (gx,gy,gw,gh,wid,hit)//x,y,w,h,xd,yd)
  {
- aa.debugAlert();
+ ///aa.debugAlert();
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var dw,dh,rc;
- if(xd<=1) { xd=1; }
- if(yd<=1) { yd=1; }
- dw=w/xd;
- dh=h/yd;
- rc=guiRectSet(x+(xg*dw),y+(yg*dh),dw,dh);
+ var dw,dh,c0,c1,rc;
+ //if(xd<=1) { xd=1; }
+ //if(yd<=1) { yd=1; }
+ dw=wid/100;
+ dh=hit/100;
+ c0=guiGridToCord(gx,gy,wid,hit);
+ c1=guiGridToCord(gw,gh,wid,hit);
+
+// dw=w/xd;
+// dh=h/yd;
+ rc=guiRectSet(c0.x,c0.y,c1.x,c1.y);
  return rc;
  }
 
@@ -5956,10 +6012,17 @@ try {
    }
   mm=aa.guiEasingStep(obj.ease,obj.val);
   mm=mm*obj.tot;
+  if(obj.rev) { obj.res=(obj.tot)-mm; }
+  else        { obj.res=mm; }
+  /*
+  //console.log(mm);
   res=obj.res;
-  if(obj.rev==true)  {   res=0;           res-=mm;   }
-  else               {   res=-(obj.tot);  res+=mm;   }
+  if(obj.rev)  {   res=0;           res-=mm;   }
+  else         {   res=-(obj.tot);  res+=mm;   }
+      ///console.log(mm+"      "+res);
   obj.res=res;
+  */
+  //obj.res=mm;
   return true;
   }
  //if(obj.state==0) { return false; }
@@ -6015,11 +6078,38 @@ try {
 
 
 
+ function guiRgbaStringRand (rmin,rmax,gmin,gmax,bmin,bmax,amin,amax,aplaces)
+ {
+ var s,r,g,b,a;
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ rmin=aa.numClamp(rmin,0,255);
+ rmax=aa.numClamp(rmax,0,255);
+ gmin=aa.numClamp(gmin,0,255);
+ gmax=aa.numClamp(gmax,0,255);
+ bmin=aa.numClamp(bmin,0,255);
+ bmax=aa.numClamp(bmax,0,255);
+ aplaces=aa.numClamp(aplaces,0,2);
+ amin=aa.numClamp(amin,0,1);
+ amax=aa.numClamp(amax,0,1);
+ if(rmin>rmax) { s=rmin; rmin=rmax; rmax=s; }
+ if(gmin>gmax) { s=gmin; gmin=gmax; gmax=s; }
+ if(bmin>bmax) { s=bmin; bmin=bmax; bmax=s; }
+ if(amin>amax) { s=amin; amin=amax; amax=s; }
+ //console.log(rmin+" "+rmax);
+ r=aa.numRandValue(rmin,rmax);
+ g=aa.numRandValue(gmin,gmax);
+ b=aa.numRandValue(bmin,bmax);
+ a=aa.numRandFloat(amin,amax,aplaces);
+ return(guiRgbaString(r,g,b,a));
+ }
+
+
 
  function guiGridSet (gx,gy,gw,gh)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj;
+ aa.debugAlert();
  obj={};
  obj.type="grid";
  obj.gx=gx;
@@ -6055,10 +6145,10 @@ try {
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  if(rec.type!="rect") { aa.debugAlert(); }
- rec.x+=parseInt(xa);
- rec.y+=parseInt(ya);
- rec.w+=parseInt(wa);
- rec.h+=parseInt(ha);
+ rec.x+=xa;//parseInt(xa);
+ rec.y+=ya;//parseInt(ya);
+ rec.w+=wa;//parseInt(wa);
+ rec.h+=ha;//parseInt(ha);
  rec.left=rec.x;
  rec.top=rec.y;
  rec.width=rec.w;
@@ -6275,6 +6365,33 @@ try {
  return rgba;
  }
 
+
+
+
+ function guiPaletteByIndex (index)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var itm,len;
+ len=aa.gui_obj.web_pal.length;
+ if(index<0)    { return null; }
+ if(index>=len) { return null; }
+ itm=aa.gui_obj.web_pal[index];
+ return itm;
+ }
+
+
+ function guiPaletteByName (name)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var itm,i,len,r;
+ len=aa.gui_obj.web_pal.length;
+ for(i=0;i<len;i++)
+  {
+  itm=aa.gui_obj.web_pal[i];
+  if(aa.stringCompare(itm.name,name,false)==true) { return itm; }
+  }
+ return null;
+ }
 
 
 
@@ -6643,110 +6760,6 @@ try {
 
 
 /*-----------------------------------------------------------------------*/
-
-
-/*
-
-
- function guiWidgetNew (cat,canvasid,uid,msgproc)
- {
- var obj,grp,w,wig;
- if((grp=aa.guiGroupGetById(canvasid))==null) { return null; }
- for(w=0;w<aa.gui_obj.widget_ray.length;w++)
-  {
-  wig=aa.gui_obj.widget_ray[w];
-  if(wig.grp.obj.id!=canvasid) { continue; }
-  if(wig.uid==uid) { aa.debugAlert(uid+" exists for canvasid "+canvasid); return null; }
-  }
- obj={};
- obj.type="widget";
- obj.guc=aa_guc++;
- obj.cat=cat;
- obj.uid=uid;
- obj.stage=0;
- obj.grp=grp;
- obj.msgproc=msgproc;
- obj.vars={};
- aa.gui_obj.widget_ray.push(obj);
- return obj;
- }
-
-
-
-
-
-
- function guiWidgetDelete (obj)
- {
- var w,wig;
- if(obj.type!="widget") { aa.debugAlert(); }
- for(w=0;w<aa.gui_obj.widget_ray.length;w++)
-  {
-  wig=aa.gui_obj.widget_ray[w];
-  if(wig.guc!=obj.guc) { continue; }
-  aa.gui_obj.widget_ray=aa.gui_obj.widget_ray.slice(w);
-  return true;
-  }
- return false;
- }
-
-
-
-
-
-
-
- function guiWidgetMsgSend (obj,msg)
- {
- var reply;
- if(obj.type!="widget") { aa.debugAlert(); }
- reply=obj.msgproc(obj,msg);
- return reply;
- }
-
-*/
-
- /*
- function guiWidgetGather (canvasid)
- {
- var w,wig,ray,grp;
- aa.debugAlert();
- if((grp=aa.guiGroupGetById(canvasid))==null) { return null; }
- ray=[];
- for(w=0;w<aa.gui_obj.widget_ray.length;w++)
-  {
-  wig=aa.gui_obj.widget_ray[w];
-  if(wig.grp.obj.id!=canvasid) { continue; }
-  ray.push(wig);
-  }
- return ray;
- }
-
-
-
-
- function guiWidgetFontSet (obj,weight,size,family)
- {
- if(obj.type!="widget") { aa.debugAlert(); }
- if(weight) { obj.font_weight=weight; }
- if(family) { obj.font_face=family; }
- if(size)   { obj.font_size=size; }
- obj.font_string=aa.guiFontString(obj.font_weight,obj.font_size,obj.font_face);
- return true;
- }
-
-
-
- function guiWidgetRectSet (obj,x,y,w,h)
- {
- if(obj.type!="widget") { aa.debugAlert(); }
- obj.rect=aa.guiRectSet(x,y,w,h);
- return true;
- }
-*/
-
-/*-----------------------------------------------------------------------*/
-
 
 
  function guiLenseNew (lenseid,id0,id1,paintproc)
@@ -7448,20 +7461,15 @@ try {
   {
 //  console.log("a");
   }
-
-
  grp.ctx.save();
  //if(0) { se=true;   sq="high"; }
  //else  { se=false;  sq="low";  }
  se=true; sq="low";
  grp.ctx.imageSmoothingEnabled=se;
  grp.ctx.imageSmoothingQuality=sq;
-
 // if(dh==0&&dw!=0) { dh=dw*rect.ratio_hw; }
  //else
  //if(dw==0&&dh!=0) { dw=dh*rect.ratio_wh; }
-
-
  iw=obj.wid;
  ih=obj.hit;
  crx=dx+(dw/2);
@@ -12014,6 +12022,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  timerTimeoutTest:timerTimeoutTest,
  timerRaterInit:timerRaterInit,
  timerRaterUpdate:timerRaterUpdate,
+ timerUnixGet:timerUnixGet,
 
  numRandFloat:numRandFloat,
  numRand:numRand,
@@ -12021,10 +12030,13 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  numFixed:numFixed,
  numPercentOf:numPercentOf,
  numPercentIs:numPercentIs,
+ numPercentIsOf:numPercentIsOf,
  numPad:numPad,
  numIntToHex:numIntToHex,
+ numIntToBinary:numIntToBinary,
  numPrecision:numPrecision,
  numRound:numRound,
+ numRoundPlaces:numRoundPlaces,
  numFloatFormat:numFloatFormat,
  numIsWhole:numIsWhole,
  numBitGet:numBitGet,
@@ -12182,8 +12194,6 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCssRectGet:guiCssRectGet,
  guiCssCordSet:guiCssCordSet,
  guiCssSizeSet:guiCssSizeSet,
- //guiCanvasFix:guiCanvasFix,
- //guiSizeFix:guiSizeFix,
  guiRetinaSet:guiRetinaSet,
  guiElementFromPoint:guiElementFromPoint,
  guiLineHeightGet:guiLineHeightGet,
@@ -12198,6 +12208,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasCompositeOperationGet:guiCanvasCompositeOperationGet,
  guiCanvasPathBegin:guiCanvasPathBegin,
  guiCanvasPathEnd:guiCanvasPathEnd,
+ guiCanvasClip:guiCanvasClip,
  guiCanvasRotate:guiCanvasRotate,
  guiCanvasSmoothingSet:guiCanvasSmoothingSet,
  guiCanvasFontMatch:guiCanvasFontMatch,
@@ -12211,8 +12222,6 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasImageGet:guiCanvasImageGet,
  guiCanvasImagePut:guiCanvasImagePut,
  guiCanvasImageDraw:guiCanvasImageDraw,
- guiCanvasImageWarp3:guiCanvasImageWarp3,
- guiCanvasImageWarp4:guiCanvasImageWarp4,
  guiCanvasScroll:guiCanvasScroll,
  guiCanvasBorder:guiCanvasBorder,
  guiCanvasFill:guiCanvasFill,
@@ -12229,7 +12238,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasRounded2:guiCanvasRounded2,
  guiCanvasTriangle:guiCanvasTriangle,
  guiCanvasGrid:guiCanvasGrid,
- guiCanvasGridToRect:guiCanvasGridToRect,
+ guiGridToRect:guiGridToRect,
  guiGridToCord:guiGridToCord,
  guiGridFromCord:guiGridFromCord,
  guiCssOpacitySet:guiCssOpacitySet,
@@ -12238,13 +12247,12 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiRectsGet:guiRectsGet,
  guiEasingInit:guiEasingInit,
  guiEasingStep:guiEasingStep,
-// guiEaseInit:guiEaseInit,
- //guiEaseProcess:guiEaseProcess,
  guiEasingHelperInit:guiEasingHelperInit,
  guiEasingHelperStep:guiEasingHelperStep,
 
  guiRgbaString:guiRgbaString,
  guiRgbaStringCommon:guiRgbaStringCommon,
+ guiRgbaStringRand:guiRgbaStringRand,
  guiGridSet:guiGridSet,
  guiRectSet:guiRectSet,
  guiRectAdjust:guiRectAdjust,
@@ -12259,6 +12267,8 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiHsvaSet:guiHsvaSet,
  guiHsvaAdjust:guiHsvaAdjust,
  guiHsvaToRgba:guiHsvaToRgba,
+ guiPaletteByIndex:guiPaletteByIndex,
+ guiPaletteByName:guiPaletteByName,
  guiPaletteGather:guiPaletteGather,
 
  guiSpotPurge:guiSpotPurge,
@@ -12273,13 +12283,6 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiFontStatus:guiFontStatus,
  guiFontString:guiFontString,
  guiFontFix:guiFontFix,
-
- //guiWidgetNew:guiWidgetNew,
- //guiWidgetDelete:guiWidgetDelete,
- //guiWidgetMsgSend:guiWidgetMsgSend,
- //guiWidgetGather:guiWidgetGather,
- //guiWidgetFontSet:guiWidgetFontSet,
- //guiWidgetRectSet:guiWidgetRectSet,
 
  guiLenseNew:guiLenseNew,
  guiLenseAreaCalc:guiLenseAreaCalc,

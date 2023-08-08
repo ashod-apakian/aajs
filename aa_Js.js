@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.74;
+ const aa_version=2.77;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -5203,6 +5203,57 @@ if(1) { event.preventDefault(); }  //march
 
 
 
+
+ function guiCanvasImageWarp (handle,ltx,lty,rtx,rty,lbx,lby,rbx,rby,mx,my,img)
+ {
+ var obj,iw,ih,corners;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ iw=img.width;
+ ih=img.height;
+ corners=[[ltx,lty], [rtx,rty], [mx,my], [lbx,lby], [rbx,rby]];
+
+    function guiCanvasImageWarpTriangle (img,ctx,s1,s2,s3,d1,d2,d3)
+    {
+    var xm,ym,a,b,c,lr1,ls1,lt1,lr2,ls2,lt2,lr3,ls3,lt3;
+    lr1=s1[0]; ls1=s1[1]; lt1=d1[0];
+    lr2=s2[0]; ls2=s2[1]; lt2=d2[0];
+    lr3=s3[0]; ls3=s3[1]; lt3=d3[0];
+    a=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
+    b=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
+    c=lt1-(lr1*a)-(ls1*b);
+    xm=[a,b,c];
+    lr1=s1[0]; ls1=s1[1]; lt1=d1[1];
+    lr2=s2[0]; ls2=s2[1]; lt2=d2[1];
+    lr3=s3[0]; ls3=s3[1]; lt3=d3[1];
+    a=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
+    b=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
+    c=lt1-(lr1*a)-(ls1*b);
+    ym=[a,b,c];
+    ctx.save();
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality="high";
+    ctx.setTransform(xm[0],ym[0],xm[1],ym[1],xm[2],ym[2]);
+    ctx.beginPath();
+    ctx.moveTo(s1[0],s1[1]);
+    ctx.lineTo(s2[0],s2[1]);
+    ctx.lineTo(s3[0],s3[1]);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img,0,0,img.width,img.height);
+    ctx.restore();
+    }
+
+ guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,0 ],[iw/2,ih/2],[0 ,ih],corners[0],corners[2],corners[3]);
+ guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,0 ],[iw/2,ih/2],[iw,0 ],corners[0],corners[2],corners[1]);
+ guiCanvasImageWarpTriangle(img,obj.ctx,[iw,0 ],[iw/2,ih/2],[iw,ih],corners[1],corners[2],corners[4]);
+ guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,ih],[iw/2,ih/2],[iw,ih],corners[3],corners[2],corners[4]);
+ return true;
+ }
+
+
+
+
+
  function guiCanvasScroll (handle,x,y,w,h,sx,sy)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
@@ -6209,20 +6260,6 @@ if(1) { event.preventDefault(); }  //march
 
 
 
- function guiXyUvSet (x,y,u,v)
- {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var xyuv={};
- xyuv.type='xyuv';
- xyuv.x=x;
- xyuv.y=y;
- xyuv.u=u;
- xyuv.v=v;
- return xyuv;
- }
-
-
-
  function guiRgbaSet (r,g,b,a)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
@@ -6901,6 +6938,48 @@ if(1) { event.preventDefault(); }  //march
  guiLenseNeedsPaintSet(obj,false);
  return true;
  }
+
+
+
+
+/*-----------------------------------------------------------------------*/
+
+
+ function imageLoaderNew (url)
+ {
+ var obj;
+ obj={};
+ obj.type="image";
+ obj.url=url;
+ obj.is_loading=true;
+ obj.is_failed=false;
+ obj.is_success=false;
+ obj.is_canvased=false;
+ obj.wid=0;
+ obj.hit=0;
+ obj.img=new Image();
+ obj.img.crossOrigin='anonymous';
+ obj.img.onload=function()  {  obj.is_success=true;  obj.is_loading=false;  }
+ obj.img.onerror=function() {  obj.is_failed=true;   obj.is_loading=false;  }
+ obj.img.src=obj.url;
+ return obj;
+ }
+
+
+
+
+ function imageLoaderDelete (obj)
+ {
+ if(obj.type!="image") { return false; }
+ obj.img.src="";
+ obj.img.onload=null;
+ obj.img.onerror=null;
+ obj.img=null;
+ obj=null;
+ return true;
+ }
+
+
 
 
 
@@ -12222,6 +12301,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasImageGet:guiCanvasImageGet,
  guiCanvasImagePut:guiCanvasImagePut,
  guiCanvasImageDraw:guiCanvasImageDraw,
+ guiCanvasImageWarp:guiCanvasImageWarp,
  guiCanvasScroll:guiCanvasScroll,
  guiCanvasBorder:guiCanvasBorder,
  guiCanvasFill:guiCanvasFill,
@@ -12259,7 +12339,6 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiRectCopy:guiRectCopy,
  guiAreaSet:guiAreaSet,
  guiAreaAdjust:guiAreaAdjust,
- guiXyUvSet:guiXyUvSet,
  guiRgbaSet:guiRgbaSet,
  guiRgbaAdjust:guiRgbaAdjust,
  guiRgbaToHsva:guiRgbaToHsva,
@@ -12292,6 +12371,9 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiLenseNeedsPaintSet:guiLenseNeedsPaintSet,
  guiLensePaint:guiLensePaint,
 
+
+ imageLoaderNew:imageLoaderNew,
+ imageLoaderDelete:imageLoaderDelete,
 
  spriteLoad:spriteLoad,
  spriteRelease:spriteRelease,

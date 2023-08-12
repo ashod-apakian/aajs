@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.77;
+ const aa_version=2.78;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -2131,6 +2131,14 @@ try {
 
 
 
+ function stringToLines (str)
+ {
+ var res;
+ if(1&&aa_profiler.is_started&&aa_profile_group_string) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ res=str.split(/\r?\n/);
+ return res;
+ }
+
 
  function stringTime (unixtimestamp)
  {
@@ -2268,7 +2276,8 @@ try {
   e.preventDefault();
   //e.stopPropagation();
   },false);
- window.addEventListener("wheel",env_obj.event_proc);
+ window.addEventListener("wheel",env_obj.event_proc,{passive: !1});
+ //window.addEventListener("DOMMouseScroll",env_obj.event_proc,{passive: !1});
  window.addEventListener("blur",env_obj.event_proc);
  window.addEventListener("focus",env_obj.event_proc);
  if(navigator.userAgentData)
@@ -2539,6 +2548,7 @@ try {
   break;
 
   case "wheel":
+  //case "DOMMouseScroll":
   //if(event.ctrlKey) alert();
   w=event.deltaY;
   if(w<0) { w=+1; } else
@@ -2550,11 +2560,14 @@ try {
    env_obj.state.event_count++;
    env_obj.state.wheel_value+=w;
    }
-  //if(event.ctrlKey)
-   //{
-   //event.preventDefault();
-   //event.stopPropagation();
-   //}
+  if(event.ctrlKey)
+   {
+   event.preventDefault();
+   event.stopPropagation();
+   }
+  //console.log(event.ctrlKey);
+  //event.preventDefault();
+  ///event.stopPropagation();
   break;
   }
  //event.preventDefault();
@@ -2570,8 +2583,28 @@ try {
 
 
 
+/*
+  aa.guiCanvasFillFull(grp.han,aa.guiRgbaString(190,aa.numRand(200),220,1));
+  fnt=aa.guiFontString(200,rax*14,"srccodepro");
+  fix=aa.guiFontFix(fnt);
+  mes=aa.guiCanvasFontMeasure(grp.han,fnt,".");
+  dif=mes.fh-mes.h;
+  txt=" #include 'aa.h_`'";
+  aa.guiCanvasFill(grp.han,10,10,300*rax,mes.fh,aa.guiRgbaString(232,230,230,1));
+  aa.guiCanvasText(grp.han,10,10+(dif*rax),0,null,aa.guiRgbaString(24,24,25,1),fnt,txt);
 
+  rax=(1.0/obj.this_disp.zoom_ratio);
+  console.log(rax);
+  aa.guiCanvasFillFull(grp.han,aa.guiRgbaString(190,aa.numRand(200),220,1));
+  fnt=aa.guiFontString(200,rax*14,"srccodepro");
+  fix=aa.guiFontFix(fnt);
+  mes=aa.guiCanvasFontMeasure(grp.han,fnt,".");
+  dif=((mes.fh)-(mes.h));
+  txt=" #include 'aa.h_`'";
+  aa.guiCanvasFill(grp.han,10*rax,10*rax,300*rax,mes.fh,aa.guiRgbaString(232,230,230,1));
+  aa.guiCanvasText(grp.han,10*rax,(10*rax)+dif,0,null,aa.guiRgbaString(24,24,25,1),fnt,txt);
 
+*/
 
  function envDisplayGet ()
  {
@@ -2623,8 +2656,6 @@ try {
   if(disp.scr_hit>disp.scr_wid)
    {
    swp=disp.scr_hit;
-   //disp.scr_hit=disp.scr_wid;
-   //disp.scr_wid=swp;
    }
   }
  else
@@ -2632,12 +2663,14 @@ try {
   if(disp.scr_wid>disp.scr_hit)
    {
    swp=disp.scr_hit;
-   //disp.scr_hit=disp.scr_wid;
-   //disp.scr_wid=swp;
    }
   }
  disp.wh_ratio=disp.win_wid/disp.win_hit;
  disp.hw_ratio=disp.win_hit/disp.win_wid;
+
+ disp.zoom_ratio=(window.outerWidth-0)/(window.innerWidth+0);//(window.innerWidth / window.outerWidth)
+ disp.zoom_level=aa.numPercentIs(disp.zoom_ratio,1);
+ disp.zoom_multi=(1.0/disp.zoom_ratio);
 
  //for(go=0;go<2;go++)
   {
@@ -2716,7 +2749,14 @@ try {
  function envZoomFix()
  {
  var viewport,body,wid,hit,isff;
- aa.debugAlert();
+aa.debugAlert();
+ var scale = 'scale(1)';
+ document.body.style.webkitTransform=
+ document.body.style.msTransform=
+ document.body.style.transform=scale;
+ return true;
+
+ //aa.debugAlert();
  viewport=document.querySelector('meta[name="viewport"]');
  if(viewport===null)
   {
@@ -3961,8 +4001,6 @@ if(1) { event.preventDefault(); }  //march
   obj.vars.expect.doh=null;
   //obj.vars.expect.needs_paint=false;
 
-
-
   if(id) {  obj.id=id;        }
   else   {  aa.debugAlert();  }
   obj.ctx=null;
@@ -4013,7 +4051,7 @@ if(1) { event.preventDefault(); }  //march
    while(1)
     {
     if(0) {  obj.dom.style.objectFit="contain";    break; }
-    if(1) {  obj.dom.style.objectFit="cover";      break; }
+     if(1) {  obj.dom.style.objectFit="cover";      break; }
     if(0) {  obj.dom.style.objectFit="fill";       break; }
     if(0) {  obj.dom.style.objectFit="scale-down"; break; }
     obj.dom.style.objectFit="none";
@@ -5111,6 +5149,42 @@ if(1) { event.preventDefault(); }  //march
 
 
 
+
+ function guiCanvasFontMeasureEach (handle,fnt,txt)
+ {
+ var obj,i,str,fob,fray,mes,x;
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(txt.length==0) { return null; }
+ fray=[];
+ i=0;
+ str=""+txt[i];
+ while(1)
+  {
+  mes=aa.guiCanvasFontMeasure(handle,fnt,str);
+  fob={};
+  fob.x=0;
+  fob.w=mes.w;
+  fob.fh=mes.fh;
+  fob.h=mes.h;
+  fob.str=str;
+  fray.push(fob);
+  i++;
+  if(i>=txt.length) { break; }
+  str=""+txt[i];
+  }
+ x=0;
+ for(i=0;i<fray.length;i++)
+  {
+  fray[i].x=x;
+  x+=fray[i].w;
+  }
+ return fray;
+ }
+
+
+
+
 /*
 
  function guiCanvasFontFix (font)
@@ -5202,46 +5276,140 @@ if(1) { event.preventDefault(); }  //march
 
 
 
+ /*
+ function guiCanvasImageWarp4 (handle,xyuv0,xyuv1,xyuv2,xyuv3,img)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var obj,x0,x1,x2,y0,y1,y2,u0,u1,u2,v0,v1,v2,delta_0,delta_a,delta_b,delta_c,delta_d,delta_e,delta_f;
+ if((obj=aa.handleCheck(aa.gui_obj.handef,handle))==null) { return false; }
+ x0=xyuv0.x; x1=xyuv1.x; x2=xyuv2.x;
+ y0=xyuv0.y; y1=xyuv1.y; y2=xyuv2.y;
+ u0=xyuv0.u; u1=xyuv1.u; u2=xyuv2.u;
+ v0=xyuv0.v; v1=xyuv1.v; v2=xyuv2.v;
+// aa.debugAlert();
+ obj.ctx.save();
+ obj.ctx.beginPath();
+ obj.ctx.moveTo(x0,y0);
+ obj.ctx.lineTo(x1,y1);
+ obj.ctx.lineTo(x2,y2);
+ obj.ctx.closePath();
+ obj.ctx.clip();
+ delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
+ delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
+ delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
+ delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
+ delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
+ delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
+ delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
+ obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
+ obj.ctx.drawImage(img,0,0);
+ obj.ctx.restore();
 
+ x0=xyuv2.x; x1=xyuv3.x; x2=xyuv0.x;
+ y0=xyuv2.y; y1=xyuv3.y; y2=xyuv0.y;
+ u0=xyuv2.u; u1=xyuv3.u; u2=xyuv0.u;
+ v0=xyuv2.v; v1=xyuv3.v; v2=xyuv0.v;
+ //aa.debugAlert();
+ obj.ctx.save();
+ obj.ctx.beginPath();
+ obj.ctx.moveTo(x0,y0);
+ obj.ctx.lineTo(x1,y1);
+ obj.ctx.lineTo(x2,y2);
+ obj.ctx.closePath();
+ obj.ctx.clip();
+ delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
+ delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
+ delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
+ delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
+ delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
+ delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
+ delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
+ obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
+ obj.ctx.drawImage(img,0,0);
+ obj.ctx.restore();
+ return true;
+ }
+
+
+
+
+
+
+
+// dom=obj.dom;
+// if(wid!=null) { dom.width=wid;  }
+// if(hit!=null) { dom.height=hit; }
+
+ //function guiCssAreaGet (handle)
 
  function guiCanvasImageWarp (handle,ltx,lty,rtx,rty,lbx,lby,rbx,rby,mx,my,img)
  {
- var obj,iw,ih,corners;
+ var obj,iw,ih,ow,oh,corners,area;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- iw=img.width;
- ih=img.height;
+ area=guiCssAreaGet(handle);
+
+ if(0) { iw=img.width;     ih=img.height; }
+ else  { ow=img.width;     oh=img.height; }
+
+ if(0) { ow=obj.dom.width; oh=obj.dom.height; }
+ else  { iw=obj.dom.width; ih=obj.dom.height; }
+
+ //iw=area.width; ih=area.height;
+
+ //iw=o
+ //console.log(iw);
+ //console.log(obj.dom.width);
+ //console.log(obj.ctx.width);
+ //console.log(area.width);
+ //iw=obj.dom.width;
+ //iw=area.width;
+ //console.log(obj.dom.style.width);
+ //console.log(obj.dom.getBoundingClientRect().width);
+
  corners=[[ltx,lty], [rtx,rty], [mx,my], [lbx,lby], [rbx,rby]];
+
 
     function guiCanvasImageWarpTriangle (img,ctx,s1,s2,s3,d1,d2,d3)
     {
-    var xm,ym,a,b,c,lr1,ls1,lt1,lr2,ls2,lt2,lr3,ls3,lt3;
+    var xm,ym,a1,b1,c1,a2,b2,c2,lr1,ls1,lt1,lr2,ls2,lt2,lr3,ls3,lt3;
     lr1=s1[0]; ls1=s1[1]; lt1=d1[0];
     lr2=s2[0]; ls2=s2[1]; lt2=d2[0];
     lr3=s3[0]; ls3=s3[1]; lt3=d3[0];
-    a=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
-    b=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
-    c=lt1-(lr1*a)-(ls1*b);
-    xm=[a,b,c];
+    a1=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
+    b1=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
+    c1=lt1-(lr1*a1)-(ls1*b1);
+    xm=[a1,b1,c1];
     lr1=s1[0]; ls1=s1[1]; lt1=d1[1];
     lr2=s2[0]; ls2=s2[1]; lt2=d2[1];
     lr3=s3[0]; ls3=s3[1]; lt3=d3[1];
-    a=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
-    b=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
-    c=lt1-(lr1*a)-(ls1*b);
-    ym=[a,b,c];
+    a2=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
+    b2=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
+    c2=lt1-(lr1*a2)-(ls1*b2);
+    ym=[a2,b2,c2];
     ctx.save();
-    ctx.imageSmoothingEnabled=true;
-    ctx.imageSmoothingQuality="high";
+    //console.log(area.width);
+    //ctx.imageSmoothingEnabled=true;
+    //ctx.imageSmoothingQuality="high";
+    //ctx.setTransform(xm[0],ym[0],xm[1],ym[1],xm[2],ym[2]);
     ctx.setTransform(xm[0],ym[0],xm[1],ym[1],xm[2],ym[2]);
     ctx.beginPath();
     ctx.moveTo(s1[0],s1[1]);
     ctx.lineTo(s2[0],s2[1]);
     ctx.lineTo(s3[0],s3[1]);
     ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(img,0,0,img.width,img.height);
+    //ctx.clip();
+    ///ctx.drawImage(img,0,0,iw,ih,0,0,ow,oh);//img.width,img.height);//obj.dom.width,obj.dom.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
+    ctx.drawImage(img,0,0,ow,oh);//,0,0,ow,oh);//img.width,img.height);//obj.dom.width,obj.dom.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
+    //ctx.drawImage(img,0,0,obj.dom.width,obj.dom.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
+    //ctx.drawImage(img,0,0,area.width,area.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
+    //ctx.drawImage(img,0,0,img.width/2,img.height,0,0,obj.dom.width*2,area.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
     ctx.restore();
     }
+
+
+//  const [d1x, d2x, d3x] = expandTriangle(d1, d2, d3, .3),
+//        [s1x, s2x, s3x] = expandTriangle(s1, s2, s3, .3);
+//  drawImageTriangle(img, ctx,   s1x, s2x, s3x,      d1x, d2x, d3x);
 
  guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,0 ],[iw/2,ih/2],[0 ,ih],corners[0],corners[2],corners[3]);
  guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,0 ],[iw/2,ih/2],[iw,0 ],corners[0],corners[2],corners[1]);
@@ -5249,6 +5417,8 @@ if(1) { event.preventDefault(); }  //march
  guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,ih],[iw/2,ih/2],[iw,ih],corners[3],corners[2],corners[4]);
  return true;
  }
+
+*/
 
 
 
@@ -5334,17 +5504,19 @@ if(1) { event.preventDefault(); }  //march
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj,alt1,alt2,xx,yy;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- if(obj.type!="canvas")                                { return false; }
- guiCanvasFill(handle,x,y,w,h,fcl1);
- alt1=alt2=0;
- for(yy=0;yy<h;yy+=sz)
+ if(obj.type!="canvas")                             { return false; }
+ if(fcl1) {  guiCanvasFill(handle,x,y,w,h,fcl1); }
+ if(fcl2)
   {
-  for(xx=0;xx<w;xx+=sz)
+  alt1=alt2=0;
+  for(yy=0;yy<h;yy+=sz)
    {
-   if(alt1++==1)  {    guiCanvasFill(handle,x+xx,y+yy,sz,sz,fcl2);    alt1=0;    }
-   else           {    }//aa.guiCanvasFill(handle,xx,yy,sz,sz,fcl2);               }
+   for(xx=0;xx<w;xx+=sz)
+    {
+    if(alt1++==1)  { guiCanvasFill(handle,x+xx,y+yy,sz,sz,fcl2);  alt1=0;  }
+    }
+   if(alt2++==1) { alt2=0; } alt1=alt2;
    }
-  if(alt2++==1) { alt2=0; } alt1=alt2;
   }
  return true;
  }
@@ -5646,6 +5818,98 @@ if(1) { event.preventDefault(); }  //march
  obj.ctx.restore(); //drama
  return true;
  }
+
+
+
+ function guiRadioButton (handle,x,y,w,h,state,blw,bcl,fcl,scl)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var obj,rec,thk;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ rec=guiRectSet(x,y,w,h);
+ thk=blw;
+ guiCanvasEllipseFill(handle,rec.x+(rec.w>>1),rec.y+(rec.h>>1),rec.w>>1,rec.h>>1,0,0,360,0,fcl);
+ guiCanvasEllipseBorder(handle,rec.x+(rec.w>>1),rec.y+(rec.h>>1),(rec.w>>1)-(thk>>1),(rec.h>>1)-(thk>>1),0,0,360,0,thk,bcl);
+ if(state)
+  {
+  guiCanvasEllipseFill(handle,rec.x+(rec.w>>1),rec.y+(rec.h>>1),(rec.w/5)>>0,(rec.h/5)>>0,0,0,360,0,scl);
+  }
+ return true;
+ }
+
+
+ function guiCheckBox    (handle,x,y,w,h,state,blw,bcl,fcl,scl)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var obj,rec,thk,fnt,fix,mes;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ rec=guiRectSet(x,y,w,h);
+ thk=blw;
+ guiCanvasFill(handle,rec.x,rec.y,rec.w,rec.h,fcl);
+ guiCanvasBorder(handle,rec.x+(thk>>1),rec.y+(thk>>1),rec.w-(thk>>1),rec.h-(thk>>1),thk,bcl);
+ if(state)
+  {
+  fnt=guiFontString(200,h-(blw),"arial");
+  fix=guiFontFix(fnt);
+  mes=guiCanvasFontMeasure(handle,fnt,guiUni("u2714"));
+  guiCanvasText(handle,rec.x+(rec.w>>1)-(mes.aw>>1),rec.y+(rec.h>>1)-(mes.ah>>1),0,null,scl,fnt,guiUni("u2714"));
+  }
+ return true;
+ }
+
+
+
+
+ function guiVScrollBar (handle,x,y,w,h,val,max,ipp,blw,bcl,fcl,scl)
+ {
+ var obj,rec,pgc,npx,pc,nrec,rc1,rc2,rc3;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+
+ rec=guiRectSet(x,y,w,h);
+ val=aa.numClamp(val,0,max);
+ pgc=max/ipp;
+ npx=rec.h/pgc;
+ if(npx<16) { npx=16; }
+ pc=aa.numPercentIsOf(val,max,(rec.h-npx));
+ nrec=guiRectSet(1,pc+1,rec.w-2,npx-2);
+ if(nrec.w<=0) { nrec.w=1; }
+ if(nrec.h<=0) { nrec.h=1; }
+ rc1=guiRectCopy(rec);
+ guiCanvasFill(handle,rc1.x,rc1.y,rc1.w,rc1.h,fcl);
+ rc2=guiRectCopy(nrec);
+ guiCanvasFill(handle,rc1.x+rc2.x,rc1.y+rc2.y,rc2.w,rc2.h,scl);
+ guiCanvasBorder(handle,rc1.x+rc2.x,rc1.y+rc2.y,rc2.w,rc2.h,blw,bcl);
+ rc3=guiRectCopy(rec);
+ guiCanvasBorder(handle,rc3.x,rc3.y,rc3.w,rc3.h,blw,bcl);
+ return true;
+ }
+
+
+
+
+ function guiHScrollBar (handle,x,y,w,h,val,max,ipp,blw,bcl,fcl,scl)
+ {
+ var obj,rec,pgc,npx,pc,nrec,rc1,rc2,rc3;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ rec=guiRectSet(x,y,w,h);
+ val=aa.numClamp(val,0,max);
+ pgc=max/ipp;
+ npx=rec.w/pgc;
+ if(npx<16) { npx=16; }
+ pc=aa.numPercentIsOf(val,max,(rec.w-npx));
+ nrec=guiRectSet(pc+1,1,npx-2,rec.h-2);
+ if(nrec.w<=0) { nrec.w=1; }
+ if(nrec.h<=0) { nrec.h=1; }
+ rc1=guiRectCopy(rec);
+ guiCanvasFill(handle,rc1.x,rc1.y,rc1.w,rc1.h,fcl);
+ rc2=guiRectCopy(nrec);
+ guiCanvasFill(handle,rc1.x+rc2.x,rc1.y+rc2.y,rc2.w,rc2.h,scl);
+ guiCanvasBorder(handle,rc1.x+rc2.x,rc1.y+rc2.y,rc2.w,rc2.h,blw,bcl);
+ rc3=guiRectCopy(rec);
+ guiCanvasBorder(handle,rc3.x,rc3.y,rc3.w,rc3.h,blw,bcl);
+ return true;
+ }
+
 
 
 
@@ -6702,6 +6966,7 @@ if(1) { event.preventDefault(); }  //march
   case 100:
   txt="url("+fontobj.url+") format('"+fontobj.format+"')";
   fontobj.font=new FontFace(fontobj.name,txt);
+  //console.log(fontobj.font);
   fontobj.stage=120;
   break;
 
@@ -6721,7 +6986,8 @@ if(1) { event.preventDefault(); }  //march
    {
    aa.debugAlert("err="+status.err);
    fontobj.is_error=true;
-   aa.debugAlert();   fontobj.stage=666;
+   aa.debugAlert();
+   fontobj.stage=666;
    break;
    }
   if(status.state!=PROMISE_completed) { aa.debugAlert("ss="+status.state); break;  }
@@ -12171,6 +12437,7 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  stringBase64FromUint8:stringBase64FromUint8,
  stringBase64ToUint8:stringBase64ToUint8,
  stringSplitter:stringSplitter,
+ stringToLines:stringToLines,
  stringTime:stringTime,
  stringParms:stringParms,
  stringBytesToSize:stringBytesToSize,
@@ -12296,12 +12563,12 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasFontMeasureAll:guiCanvasFontMeasureAll,
  guiCanvasTextMeasure:guiCanvasTextMeasure,
  guiCanvasTextMeasureAll:guiCanvasTextMeasureAll,
+ guiCanvasFontMeasureEach:guiCanvasFontMeasureEach,
  guiUni:guiUni,
  guiCanvasAlphaSet:guiCanvasAlphaSet,
  guiCanvasImageGet:guiCanvasImageGet,
  guiCanvasImagePut:guiCanvasImagePut,
  guiCanvasImageDraw:guiCanvasImageDraw,
- guiCanvasImageWarp:guiCanvasImageWarp,
  guiCanvasScroll:guiCanvasScroll,
  guiCanvasBorder:guiCanvasBorder,
  guiCanvasFill:guiCanvasFill,
@@ -12317,6 +12584,10 @@ document.addEventListener.passive @ aa_Js.js?1662731000998:9608
  guiCanvasRounded:guiCanvasRounded,
  guiCanvasRounded2:guiCanvasRounded2,
  guiCanvasTriangle:guiCanvasTriangle,
+ guiRadioButton:guiRadioButton,
+ guiCheckBox:guiCheckBox,
+ guiVScrollBar:guiVScrollBar,
+ guiHScrollBar:guiHScrollBar,
  guiCanvasGrid:guiCanvasGrid,
  guiGridToRect:guiGridToRect,
  guiGridToCord:guiGridToCord,

@@ -1,5 +1,5 @@
 /**
- aa_JS, ope(c)n Ashod Apakian
+ aaJS, ope(c)n Ashod Apakian
  Third party credits:
  jesusgollonet easing functions
  https://www.w3.org/TR/css-color-3/ web color names
@@ -11381,10 +11381,10 @@ if(1) { event.preventDefault(); }  //march
 
 
  /*
-aa_Js.js?1662731000998:9608
+aaJs.js?1662731000998:9608
 [Intervention] Ignored attempt to cancel a touchmove event with cancelable=false,
 for example because scrolling is in progress and cannot be interrupted.
-document.addEventListener.passive @ aa_Js.js?1662731000998:9608
+document.addEventListener.passive @ aaJs.js?1662731000998:9608
 */
 
 

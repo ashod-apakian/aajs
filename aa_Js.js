@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.79;
+ const aa_version=2.80;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -5947,11 +5947,11 @@ if(1) { event.preventDefault(); }  //march
 
 
 
- function guiGridToCord (gx,gy,wid,hit)
+ function guiGridToCord (gx,gy,wid,hit,xd,yd)
  {
  var dw,dh,obj;
- dw=wid/100;
- dh=hit/100;
+ dw=wid/xd;
+ dh=hit/yd;
  obj={};
  obj.type="cord";
  obj.x=gx*dw;
@@ -5961,11 +5961,11 @@ if(1) { event.preventDefault(); }  //march
 
 
 
- function guiGridFromCord (x,y,wid,hit)
+ function guiGridFromCord (x,y,wid,hit,xd,yd)
  {
  var dw,dh,obj;
- dw=wid/100;
- dh=hit/100;
+ dw=wid/xd;
+ dh=hit/yd;
  obj={};
  obj.type="grid";
  obj.gx=x/dw;
@@ -5977,17 +5977,17 @@ if(1) { event.preventDefault(); }  //march
 
 
 
- function guiGridToRect (gx,gy,gw,gh,wid,hit)//x,y,w,h,xd,yd)
+ function guiGridToRect (gx,gy,gw,gh,wid,hit,xd,yd)//x,y,w,h,xd,yd)
  {
  ///aa.debugAlert();
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var dw,dh,c0,c1,rc;
  //if(xd<=1) { xd=1; }
  //if(yd<=1) { yd=1; }
- dw=wid/100;
- dh=hit/100;
- c0=guiGridToCord(gx,gy,wid,hit);
- c1=guiGridToCord(gw,gh,wid,hit);
+ dw=wid/xd;
+ dh=hit/yd;
+ c0=guiGridToCord(gx,gy,wid,hit,xd,yd);
+ c1=guiGridToCord(gw,gh,wid,hit,xd,yd);
 
 // dw=w/xd;
 // dh=h/yd;

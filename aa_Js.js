@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.78;
+ const aa_version=2.79;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -5445,12 +5445,12 @@ if(1) { event.preventDefault(); }  //march
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- obj.ctx.save(); //drama
+/// obj.ctx.save(); //tookout
  if(bcl) { obj.ctx.strokeStyle=bcl; }
  if(blw) { obj.ctx.lineWidth=blw;   }
  //obj.ctx.strokeRect(x,y,w-blw,h-blw);
  obj.ctx.strokeRect(x,y,w,h);
- obj.ctx.restore();
+/// obj.ctx.restore();  //tookout
  return true;
  }
 
@@ -5462,10 +5462,10 @@ if(1) { event.preventDefault(); }  //march
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  if(obj.type!="canvas")                             { return false; }
- obj.ctx.beginPath();
+/// obj.ctx.beginPath(); //tookout
  if(fcl) { obj.ctx.fillStyle=fcl; }
  obj.ctx.fillRect(x,y,w,h);//0,0,1,1);//x,y,10,10);//w,h);
- obj.ctx.closePath();
+/// obj.ctx.closePath(); //tookout
  return true;
  }
 

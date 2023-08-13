@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.83;
+ const aa_version=2.84;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -100,6 +100,8 @@ var aa=(function()
  var   stater_obj={};
  var     main_obj={};
  var          ret={};
+ var          geo={};
+ var      hancock={};
 
 
 //-----------------------------------------------------------------------
@@ -113,6 +115,7 @@ var aa=(function()
  function initEverything ()
  {
  retcodeInit();
+ geoAndNamesInit();
  handleObjInit();
  debugObjInit();
  promiseObjInit();
@@ -142,6 +145,7 @@ var aa=(function()
  initEverything();
 
 //-----------------------------------------------------------------------
+
 
  function retcodeInit ()
  {
@@ -188,6 +192,102 @@ var aa=(function()
  obj.UNDERFLOW=38;
  obj.UNKNOWN=39;
  ret=Object.freeze(obj);
+ }
+
+
+//-----------------------------------------------------------------------
+
+ function geoAndNamesInit ()
+ {
+ var obj={};
+ obj.country_code=["--","AP","EU","AD","AE","AF","AG","AI","AL","AM","AN","AO","AQ","AR","AS","AT","AU","AW","AZ","BA","BB",
+                   "BD","BE","BF","BG","BH","BI","BJ","BM","BN","BO","BR","BS","BT","BV","BW","BY","BZ","CA","CC","CD",
+                   "CF","CG","CH","CI","CK","CL","CM","CN","CO","CR","CU","CV","CX","CY","CZ","DE","DJ","DK","DM","DO",
+                   "DZ","EC","EE","EG","EH","ER","ES","ET","FI","FJ","FK","FM","FO","FR","FX","GA","GB","GD","GE","GF",
+                   "GH","GI","GL","GM","GN","GP","GQ","GR","GS","GT","GU","GW","GY","HK","HM","HN","HR","HT","HU","ID",
+                   "IE","IL","IN","IO","IQ","IR","IS","IT","JM","JO",
+                   "JP","KE","KG","KH","KI","KM","KN","KP","KR","KW",
+                   "KY","KZ","LA","LB","LC","LI","LK","LR","LS","LT",
+                   "LU","LV","LY","MA","MC","MD","MG","MH","MK","ML",
+                   "MM","MN","MO","MP","MQ","MR","MS","MT","MU","MV",
+                   "MW","MX","MY","MZ","NA","NC","NE","NF","NG","NI",
+                   "NL","NO","NP","NR","NU","NZ","OM","PA","PE","PF",
+                   "PG","PH","PK","PL","PM","PN","PR","PS","PT","PW",
+                   "PY","QA","RE","RO","RU","RW","SA","SB","SC","SD",
+                   "SE","SG","SH","SI","SJ","SK","SL","SM","SN","SO",
+                   "SR","ST","SV","SY","SZ","TC","TD","TF","TG","TH",
+                   "TJ","TK","TM","TN","TO","TL","TR","TT","TV","TW",
+                   "TZ","UA","UG","UM","US","UY","UZ","VA","VC","VE",
+                   "VG","VI","VN","VU","WF","WS","YE","YT","RS","ZA",
+                   "ZM","ME","ZW","A1","A2","O1","AX","GG","IM","JE"];
+
+ obj.country_name=[
+                  "N/A","Asia/Pacific Region","Europe","Andorra","United Arab Emirates","Afghanistan","Antigua and Barbuda","Anguilla","Albania","Armenia","Netherlands Antilles",
+                  "Angola","Antarctica","Argentina","American Samoa","Austria","Australia","Aruba","Azerbaijan","Bosnia and Herzegovina","Barbados",
+                  "Bangladesh","Belgium","Burkina Faso","Bulgaria","Bahrain","Burundi","Benin","Bermuda","Brunei Darussalam","Bolivia",
+                  "Brazil","Bahamas","Bhutan","Bouvet Island","Botswana","Belarus","Belize","Canada","Cocos (Keeling) Islands","Congo, The Democratic Republic of the",
+                  "Central African Republic","Congo","Switzerland","Cote D'Ivoire","Cook Islands","Chile","Cameroon","China","Colombia","Costa Rica",
+                  "Cuba","Cape Verde","Christmas Island","Cyprus","Czech Republic","Germany","Djibouti","Denmark","Dominica","Dominican Republic",
+                  "Algeria","Ecuador","Estonia","Egypt","Western Sahara","Eritrea","Spain","Ethiopia","Finland","Fiji",
+                  "Falkland Islands (Malvinas)","Micronesia, Federated States of","Faroe Islands","France","France, Metropolitan","Gabon","United Kingdom","Grenada","Georgia","French Guiana",
+                  "Ghana","Gibraltar","Greenland","Gambia","Guinea","Guadeloupe","Equatorial Guinea","Greece","South Georgia and the South Sandwich Islands","Guatemala",
+                  "Guam","Guinea-Bissau","Guyana","Hong Kong","Heard Island and McDonald Islands","Honduras","Croatia","Haiti","Hungary","Indonesia",
+                  "Ireland","Israel","India","British Indian Ocean Territory","Iraq","Iran, Islamic Republic of","Iceland","Italy","Jamaica","Jordan",
+                  "Japan","Kenya","Kyrgyzstan","Cambodia","Kiribati","Comoros","Saint Kitts and Nevis","Korea, Democratic People's Republic of","Korea, Republic of","Kuwait",
+                  "Cayman Islands","Kazakhstan","Lao People's Democratic Republic","Lebanon","Saint Lucia","Liechtenstein","Sri Lanka","Liberia","Lesotho","Lithuania",
+                  "Luxembourg","Latvia","Libyan Arab Jamahiriya","Morocco","Monaco","Moldova, Republic of","Madagascar","Marshall Islands","Macedonia","Mali",
+                  "Myanmar","Mongolia","Macau","Northern Mariana Islands","Martinique","Mauritania","Montserrat","Malta","Mauritius","Maldives",
+                  "Malawi","Mexico","Malaysia","Mozambique","Namibia","New Caledonia","Niger","Norfolk Island","Nigeria","Nicaragua",
+                  "Netherlands","Norway","Nepal","Nauru","Niue","New Zealand","Oman","Panama","Peru","French Polynesia",
+                  "Papua New Guinea","Philippines","Pakistan","Poland","Saint Pierre and Miquelon","Pitcairn Islands","Puerto Rico","Palestinian Territory","Portugal","Palau",
+                  "Paraguay","Qatar","Reunion","Romania","Russian Federation","Rwanda","Saudi Arabia","Solomon Islands","Seychelles","Sudan",
+                  "Sweden","Singapore","Saint Helena","Slovenia","Svalbard and Jan Mayen","Slovakia","Sierra Leone","San Marino","Senegal","Somalia","Suriname",
+                  "Sao Tome and Principe","El Salvador","Syrian Arab Republic","Swaziland","Turks and Caicos Islands","Chad","French Southern Territories","Togo","Thailand",
+                  "Tajikistan","Tokelau","Turkmenistan","Tunisia","Tonga","Timor-Leste","Turkey","Trinidad and Tobago","Tuvalu","Taiwan",
+                  "Tanzania, United Republic of","Ukraine","Uganda","United States Minor Outlying Islands","United States","Uruguay","Uzbekistan","Holy See (Vatican City State)","Saint Vincent and the Grenadines","Venezuela",
+                  "Virgin Islands, British","Virgin Islands, U.S.","Vietnam","Vanuatu","Wallis and Futuna","Samoa","Yemen","Mayotte","Serbia","South Africa",
+                  "Zambia","Montenegro","Zimbabwe","Anonymous Proxy","Satellite Provider","Other","Aland Islands","Guernsey","Isle of Man","Jersey"];
+
+ obj.continent=[
+                  "--","AS","EU","EU","AS","AS","SA","SA","EU","AS","SA",
+                  "AF","AN","SA","OC","EU","OC","SA","AS","EU","SA",
+                  "AS","EU","AF","EU","AS","AF","AF","SA","AS","SA",
+                  "SA","SA","AS","AF","AF","EU","SA","NA","AS","AF",
+                  "AF","AF","EU","AF","OC","SA","AF","AS","SA","SA",
+                  "SA","AF","AS","AS","EU","EU","AF","EU","SA","SA",
+                  "AF","SA","EU","AF","AF","AF","EU","AF","EU","OC",
+                  "SA","OC","EU","EU","EU","AF","EU","SA","AS","SA",
+                  "AF","EU","SA","AF","AF","SA","AF","EU","SA","SA",
+                  "OC","AF","SA","AS","AF","SA","EU","SA","EU","AS",
+                  "EU","AS","AS","AS","AS","AS","EU","EU","SA","AS",
+                  "AS","AF","AS","AS","OC","AF","SA","AS","AS","AS",
+                  "SA","AS","AS","AS","SA","EU","AS","AF","AF","EU",
+                  "EU","EU","AF","AF","EU","EU","AF","OC","EU","AF",
+                  "AS","AS","AS","OC","SA","AF","SA","EU","AF","AS",
+                  "AF","NA","AS","AF","AF","OC","AF","OC","AF","SA",
+                  "EU","EU","AS","OC","OC","OC","AS","SA","SA","OC",
+                  "OC","AS","AS","EU","SA","OC","SA","AS","EU","OC",
+                  "SA","AS","AF","EU","AS","AF","AS","OC","AF","AF",
+                  "EU","AS","AF","EU","EU","EU","AF","EU","AF","AF",
+                  "SA","AF","SA","AS","AF","SA","AF","AF","AF","AS",
+                  "AS","OC","AS","AF","OC","AS","AS","SA","OC","AS",
+                  "AF","EU","AF","OC","NA","SA","AS","EU","SA","SA",
+                  "SA","SA","AS","OC","OC","OC","AS","AF","EU","AF",
+                  "AF","EU","AF","--","--","--","EU","EU","EU","EU"];
+ geo=Object.freeze(obj);
+
+ obj={};
+ obj.male_name=[
+               "Alistar","Bob","Craig","David","Eddy","Fred","Greg","Harry",
+               "Ian","John","Ken","Larry","Mike","Norman","Oscar","Pete",
+               "Quincy","Ron","Steve","Tom","Urving","Victor","William","Xeo","Yuri","Zach"];
+
+ obj.female_name=[
+                 "Angel","Betty","Carol","Dianne","Eliza","Fiona","Grace","Helen",
+                 "Irene","Janene","Kathy","Lisa","Mindy","Nancy","Olivia","Penny","Qeisha",
+                 "Rachael","Sarah","Tanya","Ursela","Vera","Wendy","Xeisha","Yvonne","Zoey"];
+
+ hancock=Object.freeze(obj);
  }
 
 
@@ -1659,15 +1759,18 @@ var aa=(function()
  }
 
 
+
+
  function dataArrayRemove (arr,index)
  {
- var len,io;
+ var len;//,io;
  if(1&&aa_profiler.is_started&&aa_profile_group_data) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  len=arr.length;
- if(index<0) { return null; }
- if(index>len) { return null; }
- io=arr.indexOf(index);
- if(io>=0) { arr.splice(io,1); }
+ if(index<0)    { return null; }
+ if(index>=len) { return null; }
+ arr=splice(index,1);
+ //io=arr.indexOf(index);
+ //if(io>=0) { arr.splice(io,1); }
  return arr;
  }
 
@@ -1865,6 +1968,36 @@ var aa=(function()
  string_obj.is_init=true;
  }
 
+
+
+ function stringHancock (id,first,last,suf)
+ {
+ var fn,ln,px,oi,ia,ib,ic,str;
+ id=id%2646;
+ ia=id%2;
+ ib=(id+ia)%26;
+ if(ia==0) { fn=""+aa.hancock.male_name[ib];   }
+ else      { fn=""+aa.hancock.female_name[ib]; }
+ ib=(id+ib+fn.length)%21;
+ if(ia==0) { ln=""+aa.hancock.male_name[ib];   }
+ else      { ln=""+aa.hancock.female_name[ib]; }
+ ic=id+(fn.length+ln.length);
+ ic=ic%5;
+ if(ic==0) { px="son";   } else
+ if(ic==1) { px="smith"; } else
+ if(ic==2) { px="ly";    } else
+ if(ic==3) { px="child"; } else
+ if(ic==4) { px="ton";   }
+ str="";
+ if(first) { str+=fn; }
+ if(last)
+  {
+  if(str!="") { str+=" "; }
+  str+=ln;
+  if(suf) { str+=px; }
+  }
+ return str;
+ }
 
 
  //function
@@ -12009,6 +12142,10 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  main_obj:main_obj,
  ret:ret,
 
+ geo:geo,
+ hancock:hancock,
+
+
  virtualLogNew:virtualLogNew,
  virtualLogDelete:virtualLogDelete,
  virtualLogGet:virtualLogGet,
@@ -12111,6 +12248,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  dataJsonParse:dataJsonParse,
 
 
+ stringHancock:stringHancock,
  stringIndexOf:stringIndexOf,
  stringLastCharGet:stringLastCharGet,
  stringLastCharTrim:stringLastCharTrim,

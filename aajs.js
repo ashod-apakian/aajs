@@ -10,7 +10,7 @@
 
 //'use strict';
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 //Practically it means that we can safely use only numbers that are safely
 //representable by the aforementioned standard.
@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.81;
+ const aa_version=2.83;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -41,7 +41,7 @@
  var aa_guc=1;
  var aa_profiler={};
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 if(1)
  {
@@ -69,7 +69,7 @@ if(1)
  }
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -102,12 +102,12 @@ var aa=(function()
  var          ret={};
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
  navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUserMedia||
  navigator.mozGetUserMedia||navigator.msGetUserMedia||window.RTCPeerConnection;
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  function initEverything ()
@@ -141,7 +141,7 @@ var aa=(function()
 
  initEverything();
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
  function retcodeInit ()
  {
@@ -191,7 +191,7 @@ var aa=(function()
  }
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
  function virtualLogNew (numlines)
  {
@@ -245,7 +245,7 @@ var aa=(function()
  return true;
  }
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -523,7 +523,7 @@ var aa=(function()
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -888,7 +888,7 @@ var aa=(function()
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -1034,7 +1034,7 @@ var aa=(function()
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -1202,7 +1202,7 @@ var aa=(function()
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -1393,6 +1393,16 @@ var aa=(function()
  }
 
 
+ function numRadianToDegrees (rad)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_num) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var d;
+ d=rad*(180/Math.PI);
+ return d;
+ }
+
+
+
 
 
  function numDistanceGet (x1,y1,x2,y2)
@@ -1464,7 +1474,7 @@ var aa=(function()
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -1636,6 +1646,30 @@ var aa=(function()
  return arr;
  }
 
+
+ function dataArrayInsert (arr,index,val)
+ {
+ var len;
+ if(1&&aa_profiler.is_started&&aa_profile_group_data) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ len=arr.length;
+ if(index<0)   { return null; }
+ if(index>len) { return null; }
+ arr.splice(index,0,val);
+ return arr;
+ }
+
+
+ function dataArrayRemove (arr,index)
+ {
+ var len,io;
+ if(1&&aa_profiler.is_started&&aa_profile_group_data) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ len=arr.length;
+ if(index<0) { return null; }
+ if(index>len) { return null; }
+ io=arr.indexOf(index);
+ if(io>=0) { arr.splice(io,1); }
+ return arr;
+ }
 
 
 
@@ -1820,24 +1854,7 @@ var aa=(function()
  }
 
 
-/*
-try {
-    let sData = `
-        {
-            "id": "1",
-            "name": "UbuntuGod",
-        }
-    `;
-    console.log(JSON.parse(sData));
-} catch (objError) {
-    if (objError instanceof SyntaxError) {
-        console.error(objError.name);
-    } else {
-        console.error(objError.message);
-    }
-}*/
-
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -2231,7 +2248,7 @@ try {
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  document.addEventListener('paste',e=>
@@ -2579,33 +2596,6 @@ try {
 
 
 
-
-
-
-
-/*
-  aa.guiCanvasFillFull(grp.han,aa.guiRgbaString(190,aa.numRand(200),220,1));
-  fnt=aa.guiFontString(200,rax*14,"srccodepro");
-  fix=aa.guiFontFix(fnt);
-  mes=aa.guiCanvasFontMeasure(grp.han,fnt,".");
-  dif=mes.fh-mes.h;
-  txt=" #include 'aa.h_`'";
-  aa.guiCanvasFill(grp.han,10,10,300*rax,mes.fh,aa.guiRgbaString(232,230,230,1));
-  aa.guiCanvasText(grp.han,10,10+(dif*rax),0,null,aa.guiRgbaString(24,24,25,1),fnt,txt);
-
-  rax=(1.0/obj.this_disp.zoom_ratio);
-  console.log(rax);
-  aa.guiCanvasFillFull(grp.han,aa.guiRgbaString(190,aa.numRand(200),220,1));
-  fnt=aa.guiFontString(200,rax*14,"srccodepro");
-  fix=aa.guiFontFix(fnt);
-  mes=aa.guiCanvasFontMeasure(grp.han,fnt,".");
-  dif=((mes.fh)-(mes.h));
-  txt=" #include 'aa.h_`'";
-  aa.guiCanvasFill(grp.han,10*rax,10*rax,300*rax,mes.fh,aa.guiRgbaString(232,230,230,1));
-  aa.guiCanvasText(grp.han,10*rax,(10*rax)+dif,0,null,aa.guiRgbaString(24,24,25,1),fnt,txt);
-
-*/
-
  function envDisplayGet ()
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_env) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
@@ -2931,7 +2921,7 @@ aa.debugAlert();
  }
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -3080,7 +3070,7 @@ aa.debugAlert();
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  function pointerIsDeviceTouch ()
@@ -3138,8 +3128,6 @@ aa.debugAlert();
  //ev.preventDefault();
 //ev.stopPropagation();
 //ev.stopImmediatePropagation();
-
-
  return true;
  }
 
@@ -3151,95 +3139,7 @@ aa.debugAlert();
  var msg,evs,i;
  var tsdif;
  var curms,coal;
-// console.log(ev);
-
-
  curms=aa.timerMsRunning();
-
- /**
- evs=event.getCoalescedEvents();
-
-
-
- //console.log(evs.length);
-  for (coal=0;coal<evs.length;coal++)//let coal of evs)//coalescedEvents)
-  {
-  //console.log(coal);
-  console.log(evs[coal]);
-
- msg={};
- msg.ms=curms;//aa.timerMsRunning();
- msg.stamp=evs[coal].timeStamp;
- msg.counter=aa.pointer_obj.state.event_counter++;
- msg.event={};
- msg.event.pointerType=evs[coal].pointerType;
- msg.event.type=evs[coal].type;
- msg.event.pageX=evs[coal].pageX;
- msg.event.pageY=evs[coal].pageY;
- msg.event.clientX=evs[coal].clientX;
- msg.event.clientY=evs[coal].clientY;
- msg.event.offsetX=evs[coal].offsetX;
- msg.event.offsetY=evs[coal].offsetY;
- msg.event.pointerId=evs[coal].pointerId;
- aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
- pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
- //if(1) { evs[coal].preventDefault(); }  //march
- //return true;
-
-
-  //console.log(coalescedEvent);
-    // give it an offset so we can see the difference and color it red
-  ///  drawCircle(coalescedEvent.clientX + 20, coalescedEvent.clientY + 20, "red");
-  }
-if(1) { event.preventDefault(); }  //march
-
-
- evs=event.getCoalescedEvents();
- if(evs.length>1)
-  {
-  console.log("     ev.timeStamp="+ev.timeStamp);
-  for(i=0;i<evs.length;i++)
-   {
-   if(evs[i].timeStamp<ev.timeStamp)
-    {
-    //console.log(i+"/"+evs.length+" evs["+i+"].timeStamp="+evs[i].timeStamp+"  in the past");
-    tsdif=ev.timeStamp-evs[i].timeStamp;
-    console.log("ev.timestamp="+ev.timeStamp+"  evs.timestamp="+evs[i].timeStamp+"  tsdif="+tsdif);
-    msg={};
-    msg.ms=curms-(tsdif>>0);//aa.timerMsRunning();
-    msg.stamp=ev.timeStamp;
-    msg.counter=aa.pointer_obj.state.event_counter++;
-    msg.event={};
-    msg.event.pointerType=evs[i].pointerType;
-    msg.event.type=evs[i].type;
-    msg.event.pageX=evs[i].pageX;
-    msg.event.pageY=evs[i].pageY;
-    msg.event.clientX=evs[i].clientX;
-    msg.event.clientY=evs[i].clientY;
-    msg.event.offsetX=evs[i].offsetX;
-    msg.event.offsetY=evs[i].offsetY;
-    msg.event.pointerId=evs[i].pointerId;
-    aa.queueWrite(pointer_obj.state.event_queue_handle,msg);
-    pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
-    }
-   else
-   if(evs[i].timeStamp>ev.timeStamp)
-    {
-    alert(i+"/"+evs.length+" evs["+i+"].timeStamp="+evs[i].timeStamp+"  in the future");
-    }
-   else
-   if(evs[i].timeStamp==ev.timeStamp)
-    {
-    //console.log(i+"/"+evs.length+" evs["+i+"].timeStamp="+evs[i].timeStamp+"  in the present");
-    }
-   }
-  }
-
-*/
-
-
-
-
  msg={};
  msg.ms=curms;//aa.timerMsRunning();
  msg.stamp=ev.timeStamp;
@@ -3258,48 +3158,6 @@ if(1) { event.preventDefault(); }  //march
  pointer_obj.state.event_queue_status=aa.queueStatus(pointer_obj.state.event_queue_handle);
  if(1) { ev.preventDefault(); }  //march
  return true;
-
-
-
-
- /*
- if(ev.type=="pointermove")
-  {
-  evs=ev.getCoalescedEvents();
-  if(evs.length>0)
-   {
-   for(i=0;i<evs.length;i++)
-    {
-    if(evs[i].timeStamp!=ev.timeStamp)
-     {
-     aa.pointer_obj.coal_extra++;
-     //console.log(i+"/"+evs.length+"evts="+ev.timeStamp+"  EVTS="+evs[i].timeStamp);
-     }
-    }
-   }
-  }
-  */
-
-
-
- /*
- if(ev.type=="pointermove")
-  {
-  evs=ev.getCoalescedEvents();
-  //console.log("evts="+ev.timeStamp+" coallen="+evs.length);
-  if(evs.length>0)
-   {
-   //console.log("evts="+ev.timeStamp+" coallen="+evs.length);
-   if(evs[0].timeStamp!=ev.timeStamp)
-    {
-    console.log("evts="+ev.timeStamp+" coallen="+evs.length);
-    for(i=0;i<evs.length;i++) {  console.log(i+"/"+evs.length+"=EVTS="+evs[i].timeStamp); }
-    }
-   }
-  //console.log("evsts="+evs.timeStamp);
-  }
-*/
-
  }
 
 
@@ -3345,7 +3203,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  function keyboardObjInit ()
@@ -3520,7 +3378,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -3545,44 +3403,6 @@ if(1) { event.preventDefault(); }  //march
  }
 
 
-/*
-
- function storageRevise (revkey,revval)
- {
- var han,tup;
-
- han=aa.storageCreate(false);
- tup=aa.storageRead(han,revkey);
- if(tup==null||tup!=revval)
-  {
-  aa.storagePurge(han);
-  aa.storageWrite(han,revkey,revval);
-  tup=aa.storageRead(han,revkey);
-  if(tup==null) { aa.debugAlert("sss"); }
-  }
- aa.storageDestroy(han);
- return tup;
- }
-
-
- function dbStart (rev)
- {
- var tup;
- app.db.is_started=true;
- app.db.handle=aa.storageCreate(false);
- tup=aa.storageRead(app.db.handle,"revision");
- if(tup==null||tup!=rev)
-  {
-  aa.storagePurge(app.db.handle);
-  aa.storageWrite(app.db.handle,"revision",rev);
-  tup=aa.storageRead(app.db.handle,"revision");
-  if(tup==null) { aa.debugAlert("sss"); }
-  }
- app.db.revision=tup;
- }
-
-
-*/
 
 
 
@@ -3776,7 +3596,7 @@ if(1) { event.preventDefault(); }  //march
  }
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -4067,19 +3887,6 @@ if(1) { event.preventDefault(); }  //march
    obj.dom.style.pointerEvents="none";
    }
 
-
-   /*
-  if(type=="canvas"||iscs==true)
-   {
-   if(iscs==true)
-    {
-    obj.dom.style.objectFit="cover";
-    obj.dom.style.objectPosition="50% 50%";
-    }
-   obj.ctx.imageSmoothingEnabled=false;
-   }
-  */
-
   return h;
   }
  return 0;
@@ -4289,15 +4096,6 @@ if(1) { event.preventDefault(); }  //march
   if(css.display=="none")    { chg=0; } //obj.vars.expect.needs_paint=false; }
   }
  return chg;
- /*
-  msg={};
-  msg.cmd="paint";
-  reply=guixMsgProc(grp,msg);
-  msg=null;
-  reply=null;
-  grp.vars.needs_paint=false;
-  }
- */
  }
 
 
@@ -5185,49 +4983,6 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*
-
- function guiCanvasFontFix (font)
- {
- var han,grp,img,frm,y,x,z,yy,fi,fl,fo;
- fl=gui_obj.font_fixes.length;
-// console.log("fl="+fl);
- //console.log(font);
- for(fi=0;fi<fl;fi++)
-  {
-  fo=gui_obj.font_fixes[fi];
-//  console.log(fi,fo);
-  if(fo.font==font) { return fo.fix; }
-  }
- if((han=aa.guiCreate("canvas","aa_font_fixer",9000))==0)  { aa.debugAlert(); }
- if((grp=aa.guiGroupGetById("aa_font_fixer"))==null) { aa.debugAlert(); }
- aa.guiRetinaSet(han,0,0,30,200,null,null,false)
- aa.guiCanvasText(han,10,10,0,0,aa.guiRgbaString(240,240,240,1),font,"`");
- img=aa.guiCanvasImageGet(han,0,0,30,200);
- frm=img.data;
- yy=-1;
- for(y=0;y<200;y++)
-  {
-  for(x=0;x<30;x++)
-   {
-   z=(y*30*4)+(x*4);
-   if((frm[z+0]>230)&&(frm[z+1]>230)&&(frm[z+2]>230)) { yy=y; break; }
-   }
-  if(yy!=-1) { break; }
-  }
- aa.guiDestroy(han);
- yy=-(yy-10);
- fo={}
- fo.font=font;
- fo.fix=yy;
- gui_obj.font_fixes.push(fo);
- return yy;
- }
-*/
-
-
-
-
 
 
 
@@ -5273,152 +5028,6 @@ if(1) { event.preventDefault(); }  //march
  return true;
  }
 
-
-
-
- /*
- function guiCanvasImageWarp4 (handle,xyuv0,xyuv1,xyuv2,xyuv3,img)
- {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var obj,x0,x1,x2,y0,y1,y2,u0,u1,u2,v0,v1,v2,delta_0,delta_a,delta_b,delta_c,delta_d,delta_e,delta_f;
- if((obj=aa.handleCheck(aa.gui_obj.handef,handle))==null) { return false; }
- x0=xyuv0.x; x1=xyuv1.x; x2=xyuv2.x;
- y0=xyuv0.y; y1=xyuv1.y; y2=xyuv2.y;
- u0=xyuv0.u; u1=xyuv1.u; u2=xyuv2.u;
- v0=xyuv0.v; v1=xyuv1.v; v2=xyuv2.v;
-// aa.debugAlert();
- obj.ctx.save();
- obj.ctx.beginPath();
- obj.ctx.moveTo(x0,y0);
- obj.ctx.lineTo(x1,y1);
- obj.ctx.lineTo(x2,y2);
- obj.ctx.closePath();
- obj.ctx.clip();
- delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
- delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
- delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
- delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
- delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
- delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
- delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
- obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
- obj.ctx.drawImage(img,0,0);
- obj.ctx.restore();
-
- x0=xyuv2.x; x1=xyuv3.x; x2=xyuv0.x;
- y0=xyuv2.y; y1=xyuv3.y; y2=xyuv0.y;
- u0=xyuv2.u; u1=xyuv3.u; u2=xyuv0.u;
- v0=xyuv2.v; v1=xyuv3.v; v2=xyuv0.v;
- //aa.debugAlert();
- obj.ctx.save();
- obj.ctx.beginPath();
- obj.ctx.moveTo(x0,y0);
- obj.ctx.lineTo(x1,y1);
- obj.ctx.lineTo(x2,y2);
- obj.ctx.closePath();
- obj.ctx.clip();
- delta_0=u0*v1+v0*u2+u1*v2-v1*u2-v0*u1-u0*v2;
- delta_a=x0*v1+v0*x2+x1*v2-v1*x2-v0*x1-x0*v2;
- delta_b=u0*x1+x0*u2+u1*x2-x1*u2-x0*u1-u0*x2;
- delta_c=u0*v1*x2+v0*x1*u2+x0*u1*v2-x0*v1*u2-v0*u1*x2-u0*x1*v2;
- delta_d=y0*v1+v0*y2+y1*v2-v1*y2-v0*y1-y0*v2;
- delta_e=u0*y1+y0*u2+u1*y2-y1*u2-y0*u1-u0*y2;
- delta_f=u0*v1*y2+v0*y1*u2+y0*u1*v2-y0*v1*u2-v0*u1*y2-u0*y1*v2;
- obj.ctx.transform(delta_a/delta_0,delta_d/delta_0,delta_b/delta_0,delta_e/delta_0,delta_c/delta_0,delta_f/delta_0);
- obj.ctx.drawImage(img,0,0);
- obj.ctx.restore();
- return true;
- }
-
-
-
-
-
-
-
-// dom=obj.dom;
-// if(wid!=null) { dom.width=wid;  }
-// if(hit!=null) { dom.height=hit; }
-
- //function guiCssAreaGet (handle)
-
- function guiCanvasImageWarp (handle,ltx,lty,rtx,rty,lbx,lby,rbx,rby,mx,my,img)
- {
- var obj,iw,ih,ow,oh,corners,area;
- if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- area=guiCssAreaGet(handle);
-
- if(0) { iw=img.width;     ih=img.height; }
- else  { ow=img.width;     oh=img.height; }
-
- if(0) { ow=obj.dom.width; oh=obj.dom.height; }
- else  { iw=obj.dom.width; ih=obj.dom.height; }
-
- //iw=area.width; ih=area.height;
-
- //iw=o
- //console.log(iw);
- //console.log(obj.dom.width);
- //console.log(obj.ctx.width);
- //console.log(area.width);
- //iw=obj.dom.width;
- //iw=area.width;
- //console.log(obj.dom.style.width);
- //console.log(obj.dom.getBoundingClientRect().width);
-
- corners=[[ltx,lty], [rtx,rty], [mx,my], [lbx,lby], [rbx,rby]];
-
-
-    function guiCanvasImageWarpTriangle (img,ctx,s1,s2,s3,d1,d2,d3)
-    {
-    var xm,ym,a1,b1,c1,a2,b2,c2,lr1,ls1,lt1,lr2,ls2,lt2,lr3,ls3,lt3;
-    lr1=s1[0]; ls1=s1[1]; lt1=d1[0];
-    lr2=s2[0]; ls2=s2[1]; lt2=d2[0];
-    lr3=s3[0]; ls3=s3[1]; lt3=d3[0];
-    a1=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
-    b1=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
-    c1=lt1-(lr1*a1)-(ls1*b1);
-    xm=[a1,b1,c1];
-    lr1=s1[0]; ls1=s1[1]; lt1=d1[1];
-    lr2=s2[0]; ls2=s2[1]; lt2=d2[1];
-    lr3=s3[0]; ls3=s3[1]; lt3=d3[1];
-    a2=(((lt2-lt3)*(ls1-ls2))-((lt1-lt2)*(ls2-ls3)))/(((lr2-lr3)*(ls1-ls2))-((lr1-lr2)*(ls2-ls3)));
-    b2=(((lt2-lt3)*(lr1-lr2))-((lt1-lt2)*(lr2-lr3)))/(((ls2-ls3)*(lr1-lr2))-((ls1-ls2)*(lr2-lr3)));
-    c2=lt1-(lr1*a2)-(ls1*b2);
-    ym=[a2,b2,c2];
-    ctx.save();
-    //console.log(area.width);
-    //ctx.imageSmoothingEnabled=true;
-    //ctx.imageSmoothingQuality="high";
-    //ctx.setTransform(xm[0],ym[0],xm[1],ym[1],xm[2],ym[2]);
-    ctx.setTransform(xm[0],ym[0],xm[1],ym[1],xm[2],ym[2]);
-    ctx.beginPath();
-    ctx.moveTo(s1[0],s1[1]);
-    ctx.lineTo(s2[0],s2[1]);
-    ctx.lineTo(s3[0],s3[1]);
-    ctx.closePath();
-    //ctx.clip();
-    ///ctx.drawImage(img,0,0,iw,ih,0,0,ow,oh);//img.width,img.height);//obj.dom.width,obj.dom.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
-    ctx.drawImage(img,0,0,ow,oh);//,0,0,ow,oh);//img.width,img.height);//obj.dom.width,obj.dom.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
-    //ctx.drawImage(img,0,0,obj.dom.width,obj.dom.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
-    //ctx.drawImage(img,0,0,area.width,area.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
-    //ctx.drawImage(img,0,0,img.width/2,img.height,0,0,obj.dom.width*2,area.height);//area.width,area.height);//,img.width,img.height,0,0,img.width,img.height);
-    ctx.restore();
-    }
-
-
-//  const [d1x, d2x, d3x] = expandTriangle(d1, d2, d3, .3),
-//        [s1x, s2x, s3x] = expandTriangle(s1, s2, s3, .3);
-//  drawImageTriangle(img, ctx,   s1x, s2x, s3x,      d1x, d2x, d3x);
-
- guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,0 ],[iw/2,ih/2],[0 ,ih],corners[0],corners[2],corners[3]);
- guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,0 ],[iw/2,ih/2],[iw,0 ],corners[0],corners[2],corners[1]);
- guiCanvasImageWarpTriangle(img,obj.ctx,[iw,0 ],[iw/2,ih/2],[iw,ih],corners[1],corners[2],corners[4]);
- guiCanvasImageWarpTriangle(img,obj.ctx,[0 ,ih],[iw/2,ih/2],[iw,ih],corners[3],corners[2],corners[4]);
- return true;
- }
-
-*/
 
 
 
@@ -5626,6 +5235,101 @@ if(1) { event.preventDefault(); }  //march
  }
 
 
+
+ function guiAngleBetweenTwoCords (x1,y1,x2,y2)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var dx,dy,ang,rot,deg;
+ dx=x2-x1;
+ dy=y2-y1;
+ rot=-Math.atan2(dx,dy);
+ deg=aa.numRadianToDegrees(rot);
+ ang=deg+180;
+ return ang;
+ }
+
+
+
+
+
+ function guiEllipseCordGet (x,y,rx,ry,angle)
+ {
+ if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ var rad,mx,my,xx,yy,obj,rax;
+ mx=(rx>>1);
+ my=(ry>>1);
+ xx=x+mx;
+ yy=y+my;
+ rax=aa.numDegreesToRadian(angle);
+ rad=rax-aa.numDegreesToRadian(90);
+ obj={};
+ obj.type="cord";
+ obj.x=Math.round((xx+Math.cos(rad)*mx));
+ obj.y=Math.round((yy+Math.sin(rad)*my));
+ return obj;
+ }
+
+
+
+
+
+
+ function guiCanvasArrow (handle,x1,y1,arsz,angle,p0,p1,p2,p3,lw,lc)
+ {
+ var obj,dx,dy,hl0,hl1,hl2,hl3;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(obj.type!="canvas")                             { return false; }
+ hl0=arsz;
+ hl1=arsz;
+ hl2=arsz;
+ hl3=arsz;
+ dx=x1;
+ dy=y1;
+ //angle=Math.atan2(dy,dx);
+ //rs=aa.numDegreesToRadian(sa);
+ //re=aa.numDegreesToRadian(ea);
+ angle=aa.numDegreesToRadian(angle-90);
+ obj.ctx.save();
+ obj.ctx.beginPath();
+ obj.ctx.strokeStyle=lc;
+ obj.ctx.lineWidth=lw;
+ obj.ctx.moveTo(x1,y1);
+ obj.ctx.lineTo(x1-hl0*Math.cos(angle-Math.PI/p0),y1-hl1*Math.sin(angle-Math.PI/p1));
+ obj.ctx.moveTo(x1,y1);
+ obj.ctx.lineTo(x1-hl2*Math.cos(angle+Math.PI/p2),y1-hl3*Math.sin(angle+Math.PI/p3));
+ obj.ctx.stroke();
+ obj.ctx.closePath();
+ obj.ctx.restore();
+ return true;
+ }
+
+
+ function guiCanvasArrowLine (handle,x1,y1,x2,y2,arsz,p0,p1,p2,p3,lw,lc)
+ {
+ var obj,dx,dy,angle,hl0,hl1,hl2,hl3;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(obj.type!="canvas")                             { return false; }
+ hl0=arsz;
+ hl1=arsz;
+ hl2=arsz;
+ hl3=arsz;
+ dx=x2-x1;
+ dy=y2-y1;
+ angle=Math.atan2(dy,dx);
+ obj.ctx.save();
+ obj.ctx.beginPath();
+ obj.ctx.strokeStyle=lc;
+ obj.ctx.lineWidth=lw;
+ obj.ctx.moveTo(x1,y1);
+ obj.ctx.lineTo(x2,y2);
+ obj.ctx.lineTo(x2-hl0*Math.cos(angle-Math.PI/p0),y2-hl1*Math.sin(angle-Math.PI/p1));
+ obj.ctx.moveTo(x2,y2);
+ obj.ctx.lineTo(x2-hl2*Math.cos(angle+Math.PI/p2),y2-hl3*Math.sin(angle+Math.PI/p3));
+ obj.ctx.stroke();
+ obj.ctx.closePath();
+ obj.ctx.restore();
+ return true;
+ }
 
 
 
@@ -6329,14 +6033,6 @@ if(1) { event.preventDefault(); }  //march
   mm=mm*obj.tot;
   if(obj.rev) { obj.res=(obj.tot)-mm; }
   else        { obj.res=mm; }
-  /*
-  //console.log(mm);
-  res=obj.res;
-  if(obj.rev)  {   res=0;           res-=mm;   }
-  else         {   res=-(obj.tot);  res+=mm;   }
-      ///console.log(mm+"      "+res);
-  obj.res=res;
-  */
   //obj.res=mm;
   return true;
   }
@@ -6720,7 +6416,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -6870,7 +6566,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 ////https://www.ampsoft.net/webdesign-l/WindowsMacFonts.html
 
@@ -7062,7 +6758,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  function guiLenseNew (lenseid,id0,id1,paintproc)
@@ -7208,7 +6904,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  function imageLoaderNew (url)
@@ -7250,7 +6946,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -7868,7 +7564,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -8083,7 +7779,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -8258,15 +7954,6 @@ if(1) { event.preventDefault(); }  //march
   {
   aa.debugAlert("enumerator catch eer");
   obj.is_failed=true;
-  /*
-  obj.state.detect_obj.res="err";
-   obj.state.detect_obj.e_name=error.name;
-   obj.state.detect_obj.e_msg=error.message;
-   obj.state.detect_obj.e_code=error.code;
-   val=mediaErrorEtc(obj.state.detect_obj.e_name,obj.state.detect_obj.e_msg);;
-   obj.state.detect_obj.e_etc0=Math.floor(val/10);
-   obj.state.detect_obj.e_etc1=val%10;
-  */
   });
 
  return obj;
@@ -8847,7 +8534,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -9245,7 +8932,7 @@ if(1) { event.preventDefault(); }  //march
  }
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -9554,7 +9241,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -9797,7 +9484,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -9943,7 +9630,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -10086,7 +9773,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -11198,7 +10885,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -11295,7 +10982,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -11335,7 +11022,7 @@ if(1) { event.preventDefault(); }  //march
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -11841,7 +11528,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -12290,7 +11977,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
 
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
 
@@ -12389,6 +12076,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  numBitClear:numBitClear,
  numBitToggle:numBitToggle,
  numDegreesToRadian:numDegreesToRadian,
+ numRadianToDegrees:numRadianToDegrees,
  numDistanceGet:numDistanceGet,
  numAngleGet:numAngleGet,
  numVelocityGet:numVelocityGet,
@@ -12410,6 +12098,8 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  dataArrayVargs:dataArrayVargs,
  dataArrayUniqueCount:dataArrayUniqueCount,
  dataArrayRotate:dataArrayRotate,
+ dataArrayInsert:dataArrayInsert,
+ dataArrayRemove:dataArrayRemove,
  dataFloat32ArrayToUint8Array:dataFloat32ArrayToUint8Array,
  dataUint8ArrayToFloat32Array:dataUint8ArrayToFloat32Array,
  dataFloat32ArrayToInt16Array:dataFloat32ArrayToInt16Array,
@@ -12580,6 +12270,10 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  guiCanvasArcBorder:guiCanvasArcBorder,
  guiCanvasArcFill:guiCanvasArcFill,
  guiCanvasLine:guiCanvasLine,
+ guiAngleBetweenTwoCords:guiAngleBetweenTwoCords,
+ guiEllipseCordGet:guiEllipseCordGet,
+ guiCanvasArrow:guiCanvasArrow,
+ guiCanvasArrowLine:guiCanvasArrowLine,
  guiCanvasText:guiCanvasText,
  guiCanvasRounded:guiCanvasRounded,
  guiCanvasRounded2:guiCanvasRounded2,
@@ -12798,7 +12492,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
 })();
 
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 
  function aaProfilerGroupsSet (what,state)

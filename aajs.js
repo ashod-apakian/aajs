@@ -12,17 +12,7 @@
 
 //-----------------------------------------------------------------------
 
-//Practically it means that we can safely use only numbers that are safely
-//representable by the aforementioned standard.
-//And it includes integer values in the range: [-9007199254740991; 9007199254740991].
-//Both values are defined as constants: Number.MIN_SAFE_INTEGER and Number.MAX_SAFE_INTEGER
-//correspondingly.
-
-//As I said earlier, parsing JSON is very easy. All you have to do is...
-//var json_data_object = eval("(" + json_string + ")");
-//If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
-
- const aa_version=2.85;
+ const aa_version=2.86;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -70,7 +60,6 @@ if(1)
 
 
 //-----------------------------------------------------------------------
-
 
 
 var aa=(function()
@@ -2442,11 +2431,35 @@ var aa=(function()
 
 
 
+ function envScriptInfoGet ()
+ {
+ var res,obj,yer;
+ const array=[];
+ switch (true)
+  {
+  case !Array.isArray:             res=3;  break;
+  case !window.Promise:            res=5;  break;
+  case !array.includes:            res=6;  break;
+  case !''.padStart:               res=7;  break;
+  case !Promise.prototype.finally: res=8;  break;
+  case !window.BigInt:             res=9;  break;
+  case !Promise.allSettled:        res=10; break;
+  case !''.replaceAll:             res=11; break;
+  case !array.at:                  res=12; break;
+  default:                         res=13; break;
+  }
+ yer={3:1999,5:2009}[res]||(2009+res);
+ obj={};
+ obj.version=res;
+ obj.year=yer;
+ return obj;
+ }
+
 
  function envInfoGet ()
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_env) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var obj,brp,check,ti,so,parts,kv,who,mat,off,ver,fs;
+ var obj,brp,check,ti,so,parts,kv,who,mat,off,ver,fs,ser;
  var name,pre,p0,p1,px;
  var isOpera,isFirefox,isSafari,isIE,isEdge,isChrome,isEdgeChromium,isSamsung;
  var fp0,hasLocalStorage,hasSessionStorage,hasIndexDb,isCanvasSupported,isOldIos;
@@ -2456,6 +2469,7 @@ var aa=(function()
   return env_obj.info;
   }
  obj={};
+ obj.aajs_version=aa_version;
  isOpera=(!!window.opr&&!!opr.addons)||!!window.opera||navigator.userAgent.indexOf(' OPR/')>=0;
  isFirefox=typeof InstallTrigger!=='undefined';
  isSafari=/constructor/i.test(window.HTMLElement)||
@@ -2609,6 +2623,7 @@ var aa=(function()
     }
    }
   }
+ obj.script_info=envScriptInfoGet();
  return obj;
  }
 
@@ -12279,6 +12294,7 @@ if(0)
  stringRandom:stringRandom,
 
 
+ envScriptInfoGet:envScriptInfoGet,
  envInfoGet:envInfoGet,
  envBrowserArgByKey:envBrowserArgByKey,
  envBrowserArgByIndex:envBrowserArgByIndex,
@@ -12866,7 +12882,6 @@ if(0)
  all+="***************************\r\n";
  if(dosummary)
   {
-
 //  stringBytesToSize (bytes,frac)
 //  heap_limit: 4294705152
 //  heap_size: 464500407
@@ -12875,7 +12890,6 @@ if(0)
 //  heap_limit: 4294705152
 //  heap_size: 195850850
 //  heap_used: 158721338
-
   memobj=aa.debugMemoryUsage();
 //  console.log(aa.main_obj.initial_dmm);
 //  console.log(memobj);
@@ -13071,4 +13085,3 @@ if(0)
 
 
 
-//alert("skssswdwazze");

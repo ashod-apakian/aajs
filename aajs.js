@@ -22,7 +22,7 @@
 //var json_data_object = eval("(" + json_string + ")");
 //If you have moral objections with using eval, there are other JSON parsers that don't use eval. Use one of those.
 
- const aa_version=2.84;
+ const aa_version=2.85;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -955,6 +955,7 @@ var aa=(function()
   }
  else
   {
+  ///console.log("NOT SUPPORTED");
   obj.heap_limit=0;
   obj.heap_size=0;
   obj.heap_used=0;
@@ -1872,7 +1873,7 @@ var aa=(function()
    {
    if(islist) { parts.push(aa.dataToJson(value));  }
    else       { parts.push('"'+key+'":'+aa.dataToJson(value)); }
-   //else parts[key] = aa.dataToJson(value); /* :RECURSION: */
+   //else parts[key] = aa.dataToJson(value); // :RECURSION:
    }
   else
    {
@@ -2423,6 +2424,7 @@ var aa=(function()
  env_obj.event_proc=envEventProc;
  window.addEventListener("contextmenu",function(e)
   {
+  //alert();
   e.preventDefault();
   //e.stopPropagation();
   },false);
@@ -4172,13 +4174,13 @@ aa.debugAlert();
  }
 
 
-/*
-  &1=show/hide changed
-  &2=opacity changed
-  &4=retina changed
-  &8=position changed
- &16=size changed
-*/
+
+//&1=show/hide changed
+//&2=opacity changed
+//&4=retina changed
+//&8=position changed
+// &16=size changed
+
 
 
  function guiExpectCheck  (handle)
@@ -4468,16 +4470,16 @@ aa.debugAlert();
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj,ratio,dow,doh;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- /*
- if(retina===undefined)
-  {
-  ratio=obj.ctx.scale_factor;
-  aa.guiSizeSet(handle,w*ratio,h*ratio);
-  aa.guiCssAreaSet(handle,x,y,w,h);
-  if(obj.type=="canvas") { obj.ctx.setTransform(ratio,0,0,ratio,0,0);  }
-  return true;
-  }
- */
+
+// if(retina===undefined)
+//  {
+//  ratio=obj.ctx.scale_factor;
+//  aa.guiSizeSet(handle,w*ratio,h*ratio);
+//  aa.guiCssAreaSet(handle,x,y,w,h);
+//  if(obj.type=="canvas") { obj.ctx.setTransform(ratio,0,0,ratio,0,0);  }
+//  return true;
+//  }
+
  if(retina==true)  {  ratio=Math.ceil(window.devicePixelRatio);  }
  else              {  ratio=1.0;  }
 
@@ -8034,8 +8036,10 @@ aa.debugAlert();
   {
   devices.forEach(function(device)
    {
+   //alert(device.kind+"  "+device.deviceId);
    if(device.kind=="audioinput")
     {
+    //alert("audio "+device.deviceId);
     if(device.deviceId!="")
      {
      obj.aud_input=true;
@@ -8049,8 +8053,9 @@ aa.debugAlert();
      }
     }
    else
-   if(device.kind=="audiooutput")
+   if(device.kind=="videooutput")
     {
+    //alert("vddio "+device.deviceId);
     if(device.deviceId!="")
      {
      obj.aud_output=true;
@@ -10012,13 +10017,13 @@ aa.debugAlert();
   }
  rtcPromiseClear(handle);
  obj.ice_final=false;
- /*
- if(obj.vars.stats_queue_handle!=0)
-  {
-  aa.queueDestroy(obj.vars.stats_queue_handle);
-  obj.vars.stats_queue_handle=0;
-  }
- */
+
+// if(obj.vars.stats_queue_handle!=0)
+//  {
+//  aa.queueDestroy(obj.vars.stats_queue_handle);
+//  obj.vars.stats_queue_handle=0;
+//  }
+
  if(obj.vars.stats_prosync_handle!=0)
   {
   aa.promiseDestroy(obj.vars.stats_prosync_handle);
@@ -11200,12 +11205,12 @@ aa.debugAlert();
 
 
 
- /*
-aaJs.js?1662731000998:9608
-[Intervention] Ignored attempt to cancel a touchmove event with cancelable=false,
-for example because scrolling is in progress and cannot be interrupted.
-document.addEventListener.passive @ aaJs.js?1662731000998:9608
-*/
+//
+//aaJs.js?1662731000998:9608
+//[Intervention] Ignored attempt to cancel a touchmove event with cancelable=false,
+//for example because scrolling is in progress and cannot be interrupted.
+//document.addEventListener.passive @ aaJs.js?1662731000998:9608
+
 
 
  function mainStart (ver,spd,mainproc)
@@ -11885,7 +11890,8 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
 
 
 
-/*
+if(0)
+{
 
 
 
@@ -12078,35 +12084,35 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  }
 
 
-*/
+}
 
-/*
- function mainWasmGraTextSet (obj,index,string)
- {
- var gr;
- gr=mainWasmGraGet(obj,index);
- if(gr==null||gr==false) { return false; }
- gr.mem.set(obj.txt_encoder.encode(string));
- return true;
- }
+//
+// function mainWasmGraTextSet (obj,index,string)
+// {
+// var gr;
+// gr=mainWasmGraGet(obj,index);
+// if(gr==null||gr==false) { return false; }
+// gr.mem.set(obj.txt_encoder.encode(string));
+// return true;
+// }
+//
+//
+//
+//
+//
+//
+//
+// function mainWasmGraTextGet (obj,ptr,length)
+// {
+// var gr;
+// gr=mainWasmGraAdd(obj,"u8",length);
+// if(gr==null||gr==false) { alert("sl"); return false; }
+// //st=obj.txt_decoder.decode(gr.gra)
+// gr.mem.set(obj.txt_decoder.decode(ptr));
+// return true;
+// }
+//
 
-
-
-
-
-
-
- function mainWasmGraTextGet (obj,ptr,length)
- {
- var gr;
- gr=mainWasmGraAdd(obj,"u8",length);
- if(gr==null||gr==false) { alert("sl"); return false; }
- //st=obj.txt_decoder.decode(gr.gra)
- gr.mem.set(obj.txt_decoder.decode(ptr));
- return true;
- }
-
-*/
 
 
 
@@ -12617,20 +12623,24 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  mainPluginFree:mainPluginFree,
  mainWasmLoad:mainWasmLoad,
  mainWasmStatus:mainWasmStatus,
- /*
- mainWasmGraReset:mainWasmGraReset,
- mainWasmGraDump:mainWasmGraDump,
- mainWasmGraAdd:mainWasmGraAdd,
- mainWasmGraGet:mainWasmGraGet,
+
+// mainWasmGraReset:mainWasmGraReset,
+// mainWasmGraDump:mainWasmGraDump,
+// mainWasmGraAdd:mainWasmGraAdd,
+// mainWasmGraGet:mainWasmGraGet,
  //mainWasmGraTextSet:mainWasmGraTextSet,
  //mainWasmGraTextSet:mainWasmGraTextGet,
- */
+
  };
 
 })();
 
 
 //-----------------------------------------------------------------------
+
+
+
+
 
 
  function aaProfilerGroupsSet (what,state)
@@ -12711,12 +12721,14 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  aa_profiler.ray=[];
  aa_profiler.global_hits=0;
  aa_profiler.global_names=0;
+ aa_profiler.dump_hits=0;
  aa_profiler.index_low=1000000000;
  aa_profiler.index_high=0;
  aa_profiler.space=space;
  for(index=0;index<aa_profiler.space;index++)
   {
   obj={};
+  obj.is_frozen=false;
   obj.state=0;
   obj.name="";
   obj.hash=0;
@@ -12763,11 +12775,11 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  {
  var hash,raylen,obj,index,cnt;
  if(Object.keys(aa_profiler).length==0) { return false; }
- if(aa_profiler.is_started!=true) { return false; }
+ if(aa_profiler.is_started!=true)       { return false; }
  if(arguments.length==2)  { cnt=count; }
  else                     { cnt=1;     }
  if(name=="") { return false; }
- if(cnt<=0)               { return false; }
+ if(cnt<=0)   { return false; }
  raylen=aa_profiler.ray.length;
  hash=aaProfilerHashCode(name);
  index=hash%raylen;
@@ -12800,6 +12812,39 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
 
 
 
+
+
+ function aaProfilerFreeze (name)
+ {
+ var hash,raylen,obj,index,cnt;
+ if(Object.keys(aa_profiler).length==0) { return false; }
+ if(aa_profiler.is_started!=true)       { return false; }
+ if(name=="") { return false; }
+ cnt=1;
+ raylen=aa_profiler.ray.length;
+ hash=aaProfilerHashCode(name);
+ index=hash%raylen;
+ while(cnt--)
+  {
+  obj=aa_profiler.ray[index];
+  if(index<aa_profiler.index_low)  { aa_profiler.index_low=index; }
+  if(index>aa_profiler.index_high) { aa_profiler.index_high=index; }
+  if(obj.state!=1) { continue; }
+  if(obj.name!=name||obj.hash!=hash) { alert("freeze profilerErr "+obj.name+"  "+name+"  "+index+"  "+obj.hash+"  "+hash+"  increase hash space"); }
+  //obj.hits++;
+  //aa_profiler.global_hits++;
+  //aa_profiler.ray[index]=obj;
+  //aa_profiler.
+  obj.is_frozen=true;
+  }
+ return true;
+ }
+
+
+
+
+
+
 //dopathed 0=exclude all pathed names
 //         1=include all
 //         2=include only pathed
@@ -12821,16 +12866,16 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
  all+="***************************\r\n";
  if(dosummary)
   {
-  /*
-  stringBytesToSize (bytes,frac)
-  heap_limit: 4294705152
-  heap_size: 464500407
-  heap_used: 437620527
-  --
-  heap_limit: 4294705152
-  heap_size: 195850850
-  heap_used: 158721338
-  */
+
+//  stringBytesToSize (bytes,frac)
+//  heap_limit: 4294705152
+//  heap_size: 464500407
+//  heap_used: 437620527
+//  --
+//  heap_limit: 4294705152
+//  heap_size: 195850850
+//  heap_used: 158721338
+
   memobj=aa.debugMemoryUsage();
 //  console.log(aa.main_obj.initial_dmm);
 //  console.log(memobj);
@@ -12841,6 +12886,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
   //all+="speed_req/got="+aa.main_state.speed_req+"/"+aa.main_state.speed_got+"\r\n";
   all+="speed="+aa.main_state.speed_req+"/"+aa.main_state.speed_got+"\r\n";
   all+="global_names="+aa_profiler.global_names+"   global_hits="+aa_profiler.global_hits+"  ";
+  all+="dump_hits="+aa_profiler.dump_hits+"  ";
   all+="\r\n";
   all+="init heap size: "+aa.stringBytesToSize(aa.main_obj.initial_dmm.heap_size,0)+"  used: "+aa.stringBytesToSize(aa.main_obj.initial_dmm.heap_used,0)+" ";
   all+="\r\n";
@@ -12921,6 +12967,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
   if(obj.state) { obj.flag=0; }
   }
  all+="***************************";
+ aa_profiler.dump_hits++;
  return all;
  }
 
@@ -12983,6 +13030,7 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
   enabled=true;
   };
 
+
   var disable=function()
   {
   window.removeEventListener('touchstart',handleTouchstart,false);
@@ -13023,4 +13071,4 @@ document.addEventListener.passive @ aaJs.js?1662731000998:9608
 
 
 
-
+//alert("skssswdwazze");

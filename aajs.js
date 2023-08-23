@@ -8,11 +8,11 @@
  developer.mozilla.org
 **/
 
-//'use strict';
+//"use strict";
 
 //-----------------------------------------------------------------------
 
- const aa_version=2.86;
+ const aa_version=2.89;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -1229,11 +1229,15 @@ var aa=(function()
 
 
 
- function timerTimeoutTest (tmo)
+ function timerTimeoutTest (tmo,doreset)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_timer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  tmo.el=aa.timerMsRunning()-tmo.ms;
- if(tmo.el>=tmo.to) { return true; }
+ if(tmo.el>=tmo.to)
+  {
+  if(doreset) { timerTimeoutReset(tmo,tmo.to); }
+  return true;
+  }
  return false;
  }
 
@@ -1285,11 +1289,37 @@ var aa=(function()
   case 2: return new Date(d);
   case 3: return new Date(d).toGMTString();
   case 4: return new Date(d).toISOString();
+  //case 5:
   }
  return 0;
  }
 
 
+ function timerMsToDuration (ms)
+ {
+ var obj,we,da,ho,mi,se;
+ //console.log(ms);
+ obj={};
+ obj.type="duration";
+ obj.ms=ms;
+  we=(ms/604800000)>>0;
+ ms-=(we*604800000);
+  da=(ms/86400000)>>0;
+ ms-=(da*86400000);
+  ho=(ms/3600000)>>0;
+ ms-=(ho*3600000);
+  mi=(ms/60000)>>0;
+ ms-=(mi*60000);
+  se=(ms/1000)>>0;
+ ms-=(se*1000);
+ obj.weeks=we>>0;
+ obj.days=da>>0;
+ obj.hours=ho>>0;
+ obj.mins=mi>>0;
+ obj.secs=se>>0;
+ obj.milli=ms>>0;
+ return obj;
+ }
 
 
 //-----------------------------------------------------------------------
@@ -1758,7 +1788,7 @@ var aa=(function()
  len=arr.length;
  if(index<0)    { return null; }
  if(index>=len) { return null; }
- arr=splice(index,1);
+ arr.splice(index,1);
  //io=arr.indexOf(index);
  //if(io>=0) { arr.splice(io,1); }
  return arr;
@@ -11143,7 +11173,9 @@ aa.debugAlert();
  {
  var raw,ttt;
  raw=new XMLHttpRequest();
+ raw.file_name=file;
  raw.text_lines=null;
+ raw.mime=null;
  raw.open("GET",file,false);
  raw.onreadystatechange=function()
   {
@@ -11154,6 +11186,9 @@ aa.debugAlert();
     ttt=raw.responseText;
     ///raw.text_lines=ttt.split("\n");
     raw.text_lines=ttt.split(/\r\n|\r|\n/);
+
+    raw.mime=raw.getResponseHeader("Content-Type");
+
     ///console.log(ttt.length);
     ///raw.text_lines=raw.text_lines.split("\n");
     ///raw.text_lines=raw.responseText.split("\n");
@@ -12213,6 +12248,7 @@ if(0)
  timerRaterInit:timerRaterInit,
  timerRaterUpdate:timerRaterUpdate,
  timerUnixGet:timerUnixGet,
+ timerMsToDuration:timerMsToDuration,
 
  numRandFloat:numRandFloat,
  numRand:numRand,
@@ -13052,10 +13088,7 @@ if(0)
   enabled=false;
   };
 
-  var isEnabled=function()
-  {
-  return enabled;
-  };
+  var isEnabled=function()  {  return enabled;  };
 
   var testDiv=document.createElement('div');
   document.documentElement.appendChild(testDiv);
@@ -13064,13 +13097,7 @@ if(0)
   document.documentElement.removeChild(testDiv);
   if(isScrollSupported) { enable(); }
 
-  var iNoBounce=
-  {
-  enable: enable,
-  disable: disable,
-  isEnabled: isEnabled,
-  isScrollSupported: isScrollSupported
-  };
+  var iNoBounce={enable:enable,disable:disable,isEnabled:isEnabled,isScrollSupported:isScrollSupported };
 
  if(typeof module!=='undefined'&&module.exports) { module.exports=iNoBounce; }
  if(typeof global.define==='function')

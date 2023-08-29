@@ -12,7 +12,7 @@
 
 //-----------------------------------------------------------------------
 
- const aa_version=2.89;
+ const aa_version=2.92;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -780,6 +780,17 @@ var aa=(function()
  return true;
  }
 
+
+ function debugPrompt (text,def)
+ {
+ return(prompt(text,def));
+ }
+
+
+ function debugConfirm (text)
+ {
+ return(window.confirm(text));
+ }
 
 
  function debugLevelSet (level)
@@ -2399,6 +2410,15 @@ var aa=(function()
 
 
 
+ function stringHtmlDecode (str)
+ {
+ var res;
+ if(1&&aa_profiler.is_started&&aa_profile_group_string) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ res=new DOMParser().parseFromString(str,"text/html");
+ return res.documentElement.textContent;
+ }
+
+
 
 
 //-----------------------------------------------------------------------
@@ -3102,8 +3122,17 @@ aa.debugAlert();
 
 
 //-----------------------------------------------------------------------
+// https://codepen.io/Hyperplexed/full/MWXBRBp
 
 
+//https://www.tg007.net/raws
+//https://www.alien.net.au/irc/irc2numerics.html
+//http://chi.cs.uchicago.edu/chirc/irc_examples.html
+
+// queueWrite   push() method adds new items to the end of an array.
+// queuePush unshift() method adds new items to the beginning of an array.
+// queuePop      pop() method removes (pops) the last item of an array.
+// queueRead   shift() method removes the first item of an array.
 
 
 
@@ -8544,7 +8573,7 @@ aa.debugAlert();
 
 
 
- function mediaAudioMuteSet (handle,state)  //////////===================
+ function mediaAudioMuteSet (handle,state)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_media) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj;
@@ -12214,6 +12243,8 @@ if(0)
  debugStackUsage:debugStackUsage,
  debugStackGet:debugStackGet,
  debugAlert:debugAlert,
+ debugPrompt:debugPrompt,
+ debugConfirm:debugConfirm,
  debugLevelSet:debugLevelSet,
  debugClear:debugClear,
  debugGroup:debugGroup,
@@ -12328,6 +12359,7 @@ if(0)
  stringBytesToSize:stringBytesToSize,
  stringCompare:stringCompare,
  stringRandom:stringRandom,
+ stringHtmlDecode:stringHtmlDecode,
 
 
  envScriptInfoGet:envScriptInfoGet,

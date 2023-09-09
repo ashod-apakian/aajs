@@ -8,11 +8,11 @@
  developer.mozilla.org
 **/
 
-//"use strict";
+"use strict";
 
 //-----------------------------------------------------------------------
 
- const aa_version=2.92;
+ const aa_version=2.96;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -55,6 +55,7 @@ if(1)
  var aa_profile_group_dsp     =0;
  var aa_profile_group_bitio   =0;
  var aa_profile_group_rtc     =0;
+ var aa_profile_group_widget  =0;
  var aa_profile_group_main    =0;
  }
 
@@ -87,6 +88,7 @@ var aa=(function()
  var    bitio_obj={};
  var      rtc_obj={};
  var   stater_obj={};
+ var   widget_obj={};
  var     main_obj={};
  var          ret={};
  var          geo={};
@@ -127,6 +129,7 @@ var aa=(function()
   dspObjInit();
   bitioObjInit();
   rtcObjInit();
+ widgetObjInit();
  mainObjInit();
  }
 
@@ -1397,7 +1400,7 @@ var aa=(function()
 
  function numPercentIsOf (numb,tota,totb)
  {
- var pca;
+ var pca,pcb;
  if(1&&aa_profiler.is_started&&aa_profile_group_num) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  pca=aa.numPercentIs(numb,tota);
  pcb=aa.numPercentOf(pca,totb);
@@ -1691,6 +1694,16 @@ var aa=(function()
  return keyValues.join('&');
  }
 
+
+
+//let possiblePromise = f1();
+//let isPromise = possiblePromise instanceof Promise;
+
+ function dataObjectIsPromise (obj)
+ {
+ if(obj instanceof Promise) { return true; }
+ return false;
+ }
 
 
 
@@ -2423,9 +2436,10 @@ var aa=(function()
 
 //-----------------------------------------------------------------------
 
-
+/*
  document.addEventListener('paste',e=>
   {
+  alert("pase event");
   let data=(e.clipboardData||window.clipboardData).getData('text/plain');
   aa.env_obj.state.paste_event_count++;
   aa.env_obj.state.paste_value=data;
@@ -2433,6 +2447,16 @@ var aa=(function()
 
 
 
+
+ window.addEventListener('copy',e=>
+  {
+  alert();
+  let data=(e.clipboardData||window.clipboardData).getData('text/plain');
+  aa.env_obj.state.paste_event_count++;
+  aa.env_obj.state.paste_value=data;
+  });
+
+*/
 
  function envObjInit ()
  {
@@ -2456,11 +2480,21 @@ var aa=(function()
 
  state.paste_event_count=0;
  state.paste_value="";
+ //state.copy_value="";
+
 
  state.is_reloading=false;
  env_obj.state=state;
  env_obj.event_listening=true;
  env_obj.event_proc=envEventProc;
+ /*
+ window.addEventListener("copy",function(e)
+  {
+  alert();
+  e.preventDefault();
+  //e.stopPropagation();
+  },false);
+*/
  window.addEventListener("contextmenu",function(e)
   {
   //alert();
@@ -2477,6 +2511,8 @@ var aa=(function()
   .then(ua=>         {   env_obj.info.ud=ua;   })
   .catch(function()  {   env_obj.info.ud={};   });
   }
+
+//aa.env_obj.state.copy_value="ee "+txt
  }
 
 
@@ -2616,9 +2652,13 @@ var aa=(function()
  obj.is_touch=pointerIsDeviceTouch();
  elem=document.createElement('canvas');
  isCanvasSupported=!!(elem.getContext&&elem.getContext('2d'));
+ //var language = window.navigator.userLanguage || window.navigator.language;
+ obj.language=navigator.language;
+ obj.languages=navigator.languages;
  keys=[];
  //keys.push(navigator.userAgent);
  //keys.push(navigator.language);
+ //console.log(navigator);
  keys.push(screen.colorDepth);
  keys.push(new Date().getTimezoneOffset());
  keys.push(hasSessionStorage);
@@ -2627,6 +2667,7 @@ var aa=(function()
  if(document.body){  keys.push(typeof(document.body.addBehavior));      }
  else             {  keys.push(typeof undefined);      }
  keys.push(typeof(window.openDatabase));
+ //console.log(keys);
  //keys.push(navigator.cpuClass);
  //keys.push(navigator.platform);
  //keys.push(navigator.doNotTrack);
@@ -2794,6 +2835,11 @@ var aa=(function()
 
 
 
+ function envIsOnline ()
+ {
+ if (navigator.onLine) { return true; }
+ return false;
+ }
 
 
  function envDisplayGet ()
@@ -2862,8 +2908,6 @@ var aa=(function()
  disp.zoom_level=aa.numPercentIs(disp.zoom_ratio,1);
  disp.zoom_multi=(1.0/disp.zoom_ratio);
 
- //for(go=0;go<2;go++)
-  {
   sat=getComputedStyle(document.documentElement).getPropertyValue("--sat");
   sar=getComputedStyle(document.documentElement).getPropertyValue("--sar");
   sab=getComputedStyle(document.documentElement).getPropertyValue("--sab");
@@ -2877,8 +2921,6 @@ var aa=(function()
  disp.safety_sab=sab;
  disp.safety_sal=sal;
  disp.safety=guiRectSet(sal,sat,sar-sal,sab-sat);
-  }
-
 
  return disp;
  }
@@ -3111,15 +3153,44 @@ aa.debugAlert();
 
  function envClipboardWrite (txt)
  {
- navigator.clipboard.writeText(txt);//obj.vars.txt.substring(obj.vars.sel_start,obj.vars.sel_end+1));
+ return navigator.clipboard.writeText(txt);//obj.vars.txt.substring(obj.vars.sel_start,obj.vars.sel_end+1));
  }
 
 
  function envClipboardRead ()
  {
- return(aa.env_obj.state.paste_value);
+ //delete aa.env_obj.state.copy_value;
+ navigator.clipboard
+  .readText()
+  .then((txt)=>
+   (
+   aa.env_obj.state.copy_value="ee "+txt
+   //app.coc=txt
+   //aa.env_obj.copy_val=txt
+   ///document.getElementById("outbox").innerText =txt
+   ));
+ /*
+  .then((txt)=>
+   (
+   alert(txt)
+   //document.getElementById("outbox").innerText = clipText
+   ));
+*/
+ //return(aa.env_obj.state.paste_value);
  }
 
+
+
+ function envClipboardGet ()
+ {
+ var res=aa.env_obj.state.copy_value;
+ if(res!=undefined)
+  {
+ // delete aa.env_obj.state.copy_value;
+  return res;
+  }
+ return res;
+ }
 
 //-----------------------------------------------------------------------
 // https://codepen.io/Hyperplexed/full/MWXBRBp
@@ -4626,11 +4697,11 @@ aa.debugAlert();
    zi=grp.dom.style.zIndex;
    if(zi!=zil) { continue; }
    if(grp.dom.style.display=="none") { continue; }
-   are=aa.guiCssAreaGet(grp.han);
-   x1=(are.left>>0);
-   y1=(are.top>>0);
-   x2=x1+(are.width>>0);
-   y2=y1+(are.height>>0);
+   area=aa.guiCssAreaGet(grp.han);
+   x1=(area.left>>0);
+   y1=(area.top>>0);
+   x2=x1+(area.width>>0);
+   y2=y1+(area.height>>0);
    if((x<x1)||(y<y1)) { continue; }
    if((x>x2)||(y>y2)) { continue; }
    //console.log(grp.id);
@@ -5011,6 +5082,7 @@ aa.debugAlert();
 
  function guiCanvasFontMeasure (handle,fnt,txt)
  {
+ var obj;
  //aa.debugAlert();
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
@@ -6931,14 +7003,15 @@ aa.debugAlert();
  {
  var han,grp,img,frm,y,x,z,yy,fi,fl,fo;
  fl=gui_obj.font_fixes.length;
-// console.log("fl="+fl);
  //console.log(font);
+
  for(fi=0;fi<fl;fi++)
   {
   fo=gui_obj.font_fixes[fi];
 //  console.log(fi,fo);
   if(fo.font==font) { return fo.fix; }
   }
+   //console.log("fl="+fl);
  if((han=aa.guiCreate("canvas","aa_font_fixer",9000))==0)  { aa.debugAlert(); }
  if((grp=aa.guiGroupGetById("aa_font_fixer"))==null) { aa.debugAlert(); }
  aa.guiRetinaSet(han,0,0,30,200,null,null,false)
@@ -8096,24 +8169,28 @@ aa.debugAlert();
  obj.guc=aa_guc++;
  obj.is_ready=false;
  obj.is_failed=false;
+ obj.vid_output=false;
  obj.vid_input=false;
  obj.aud_input=false;
  obj.aud_output=false;
+ obj.vid_output_list=[];
  obj.vid_input_list=[];
  obj.aud_input_list=[];
  obj.aud_output_list=[];
  ////aa.debugAlert("mediadeviceenumerator guc="+obj.guc);
 
- console.log("about to enum");
+ ///console.log("about to enum");
  navigator.mediaDevices.enumerateDevices()
  .then(function(devices)
   {
   devices.forEach(function(device)
    {
    //alert(device.kind+"  "+device.deviceId);
+   ///console.log(device.kind+"  "+device.deviceId);
    if(device.kind=="audioinput")
     {
     //alert("audio "+device.deviceId);
+    ///console.log("audio "+device.deviceId);
     if(device.deviceId!="")
      {
      obj.aud_input=true;
@@ -8127,9 +8204,10 @@ aa.debugAlert();
      }
     }
    else
-   if(device.kind=="videooutput")
+   if(device.kind=="audiooutput")
     {
-    //alert("vddio "+device.deviceId);
+    //alert("audio "+device.deviceId);
+    ///console.log("audio "+device.deviceId);
     if(device.deviceId!="")
      {
      obj.aud_output=true;
@@ -8140,6 +8218,23 @@ aa.debugAlert();
      ray.label=device.label;
      ray.clean=aa.mediaDeviceLabelClean(ray.label);
      obj.aud_output_list.push(ray);
+     }
+    }
+   else
+   if(device.kind=="videooutput")
+    {
+    //alert("vddio "+device.deviceId);
+    ///console.log("vddio "+device.deviceId);
+    if(device.deviceId!="")
+     {
+     obj.vid_output=true;
+     ray={};
+     ray.deviceId=device.deviceId;
+     ray.groupId=device.groupId;
+     ray.kind=device.kind;
+     ray.label=device.label;
+     ray.clean=aa.mediaDeviceLabelClean(ray.label);
+     obj.vid_output_list.push(ray);
      }
     }
    else
@@ -8158,8 +8253,10 @@ aa.debugAlert();
      }
     }
    ///aa.debugAlert(obj.guc+"  "+obj.is_ready+"  "+obj.is_failed+"  "+obj.type);
+   ///console.log(obj.guc+"  "+obj.is_ready+"  "+obj.is_failed+"  "+obj.type);
    });
   ////aa.debugAlert("enumerator ready "+obj.guc+"  "+obj.vid_input_list.length+"  "+obj.aud_input_list.length);
+  ///console.log("enumerator ready "+obj.guc+"  "+obj.vid_input_list.length+"  "+obj.aud_input_list.length);
   obj.is_ready=true;
   })
  .catch(function(error)
@@ -11241,6 +11338,16 @@ aa.debugAlert();
 
 //-----------------------------------------------------------------------
 
+ function widgetObjInit ()
+ {
+ if(Object.keys(widget_obj).length!=0) { return; }
+ widget_obj.is_init=true;
+ }
+
+
+
+//-----------------------------------------------------------------------
+
 
 
  function mainObjInit ()
@@ -12314,6 +12421,7 @@ if(0)
  dataObjectApxSize:dataObjectApxSize,
  dataGlobalExists:dataGlobalExists,
  dataGlobalPropertiesGet:dataGlobalPropertiesGet,
+ dataObjectIsPromise:dataObjectIsPromise,
  dataObjectIsEmpty:dataObjectIsEmpty,
  dataObjectIsUndefined:dataObjectIsUndefined,
  dataObjectLength:dataObjectLength,
@@ -12367,6 +12475,7 @@ if(0)
  envBrowserArgByKey:envBrowserArgByKey,
  envBrowserArgByIndex:envBrowserArgByIndex,
  envBrowserArg:envBrowserArg,
+ envIsOnline:envIsOnline,
  envDisplayGet:envDisplayGet,
  envDisplayCompareText:envDisplayCompareText,
  envDisplayCompare:envDisplayCompare,
@@ -12384,6 +12493,7 @@ if(0)
  envCpuMonitorGet:envCpuMonitorGet,
  envClipboardWrite:envClipboardWrite,
  envClipboardRead:envClipboardRead,
+ envClipboardGet:envClipboardGet,
 
 
  handleDefine:handleDefine,

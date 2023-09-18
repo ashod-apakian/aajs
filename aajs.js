@@ -1,4 +1,4 @@
-/**
+/** AAJS.js
  aaJS, ope(c)n Ashod Apakian
  Third party credits:
  jesusgollonet easing functions
@@ -8,11 +8,11 @@
  developer.mozilla.org
 **/
 
-"use strict";
+//"use strict";
 
 //-----------------------------------------------------------------------
 
- const aa_version=2.96;
+ const aa_version=2.98;
 
  const PROMISE_completed=1;
  const PROMISE_pending=2;
@@ -1201,7 +1201,7 @@ var aa=(function()
 
  function timerMicroRunning ()
  {
- if(1&&aa_profiler.is_started&&aa_profile_group_timer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ //if(1&&aa_profiler.is_started&&aa_profile_group_timer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  return(timerTikNow(true));
  }
 
@@ -1210,7 +1210,7 @@ var aa=(function()
 
  function timerMicroElapsed (ms)
  {
- if(1&&aa_profiler.is_started&&aa_profile_group_timer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
+ //if(1&&aa_profiler.is_started&&aa_profile_group_timer) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  return(timerTikNow(true)-ms);
  }
 
@@ -2437,6 +2437,16 @@ var aa=(function()
 //-----------------------------------------------------------------------
 
 /*
+ screen.orientation.addEventListener("change", function(e)
+ {
+ //var ee;
+ //ee=JSON.parse(e);
+ ///alert(e.target.type+" "+e.target.angle);
+ //alert(JSON.stringify(JSON.parse(e),0,2));
+ //alert(e);//   // Do something on change
+ });
+
+
  document.addEventListener('paste',e=>
   {
   alert("pase event");
@@ -2444,9 +2454,6 @@ var aa=(function()
   aa.env_obj.state.paste_event_count++;
   aa.env_obj.state.paste_value=data;
   });
-
-
-
 
  window.addEventListener('copy',e=>
   {
@@ -2457,6 +2464,7 @@ var aa=(function()
   });
 
 */
+
 
  function envObjInit ()
  {
@@ -2469,6 +2477,7 @@ var aa=(function()
  env_obj.is_init=true;
  env_obj.cpu_speed=0;
  env_obj.cpu_tries=0;
+ //env_obj.
  state={};
  state.wheel=0;
  state.is_focus=true;//true;
@@ -2511,7 +2520,6 @@ var aa=(function()
   .then(ua=>         {   env_obj.info.ud=ua;   })
   .catch(function()  {   env_obj.info.ud={};   });
   }
-
 //aa.env_obj.state.copy_value="ee "+txt
  }
 
@@ -2550,10 +2558,7 @@ var aa=(function()
  var isOpera,isFirefox,isSafari,isIE,isEdge,isChrome,isEdgeChromium,isSamsung;
  var fp0,hasLocalStorage,hasSessionStorage,hasIndexDb,isCanvasSupported,isOldIos;
  var elem,keys,canvas,ctx,txt,url;
- if(env_obj.info)
-  {
-  return env_obj.info;
-  }
+ if(env_obj.info)  {  return env_obj.info;  }
  obj={};
  obj.aajs_version=aa_version;
  isOpera=(!!window.opr&&!!opr.addons)||!!window.opera||navigator.userAgent.indexOf(' OPR/')>=0;
@@ -2715,6 +2720,10 @@ var aa=(function()
    }
   }
  obj.script_info=envScriptInfoGet();
+ obj.has_screenlock=('wakeLock' in navigator);
+ if(obj.has_screenlock===undefined) { obj.has_screenlock=false; }
+ obj.has_fullscreen=document.fullscreenEnabled||document.webkitFullscreenEnabled||document.msFullscreenEnabled;
+ if(obj.has_fullscreen===undefined) { obj.has_fullscreen=false; }
  return obj;
  }
 
@@ -2944,7 +2953,6 @@ var aa=(function()
   if(lastdisp.hw_ratio==undefined||disp.hw_ratio!=lastdisp.hw_ratio) { txt+="256hwRAt "; }
   if(lastdisp.orient==undefined||disp.orient!=lastdisp.orient)   { txt+="512Orient "; }
   if(lastdisp.angle==undefined||disp.angle!=lastdisp.angle)   { txt+="1024Angle "; }
-
   break;
   }
  return txt;
@@ -4083,15 +4091,18 @@ aa.debugAlert();
 
   obj.vars={};
   obj.vars.is_retina=false;
-  obj.vars.stage=0;
+  obj.vars.scale_w=1;
+  obj.vars.scale_h=1;
 
+  obj.vars.stage=0;
   obj.vars.spot={};
   obj.vars.spot.slots=256;
   obj.vars.spot.count=0;
-//  obj.vars.spot.id_counter=1000+(s*256);
   obj.vars.spot.ray=[];
   for(i=0;i<obj.vars.spot.slots;i++)  {  obj.vars.spot.ray[i]=null;  }
 
+
+  /**
   obj.vars.expect={};
   obj.vars.expect.disp="none";
   obj.vars.expect.retina=false;
@@ -4100,6 +4111,10 @@ aa.debugAlert();
   obj.vars.expect.dow=null;
   obj.vars.expect.doh=null;
   //obj.vars.expect.needs_paint=false;
+  */
+
+
+
 
   if(id) {  obj.id=id;        }
   else   {  aa.debugAlert();  }
@@ -4116,10 +4131,10 @@ aa.debugAlert();
    obj.dom.loop=false;
    }
 
-   // "contain" "cover" "fill" "none" "scale-down"
-   // cover is default i use
-
-  obj.dom.style.position="fixed";
+  // "contain" "cover" "fill" "none" "scale-down"
+  // cover is default i use
+ obj.dom.style.position="absolute";
+ // obj.dom.style.position="fixed";
   obj.dom.style.zIndex=zindex; // higher zi is on top
   obj.dom.style.opacity=1.0;
   obj.dom.style.display="none";
@@ -4132,7 +4147,7 @@ aa.debugAlert();
    obj.ctx=document.getElementById(obj.id).getContext("2d");
    obj.ctx.self_handle=h;
    obj.ctx.han=h;
-   obj.ctx.scale_factor=1.0;
+   ///obj.ctx.scale_factor=1.0;
    guiCanvasReset(h);
    }
 
@@ -4144,22 +4159,34 @@ aa.debugAlert();
    obj.dom.setAttribute('webkit-playsinline','webkit-playsinline');
    }
 
-  if(1)
-  {
   if(type=="video"||iscs==true||type=="canvas")
    {
+   //guiFitSet(h,"fill","0% 0%");
+   //guiFitSet(h,"none","0% 0%");
+   //guiFitSet(h,"contain","50% 50%");
+   }
+
+
+   /*
    while(1)
     {
     if(0) {  obj.dom.style.objectFit="contain";    break; }
-     if(1) {  obj.dom.style.objectFit="cover";      break; }
+    if(0) {  obj.dom.style.objectFit="cover";      break; }
     if(0) {  obj.dom.style.objectFit="fill";       break; }
     if(0) {  obj.dom.style.objectFit="scale-down"; break; }
     obj.dom.style.objectFit="none";
     break;
     }
    obj.dom.style.objectPosition="50% 50%";
+   //obj.dom.style.objectPosition="5% 5%";
    }
   }
+  */
+
+  //guiFitSet(h,"fill","0% 0%");
+ obj.dom.style.objectFit="fill";
+ obj.dom.style.objectPosition="0% 0%";
+
 
   if(1) // burp
    {
@@ -4274,112 +4301,35 @@ aa.debugAlert();
 
 
 
- function guiExpect       (handle,disp,retina,opacity,dow,doh,dorect)
+
+ function guiFitSet (handle,fit,opos)
  {
- var obj,rect;
+ var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- rect=null;
- while(1)
-  {
-  if(dorect==null) { break; }
-  rect=dorect;
-  break;
-  }
- while(1)
-  {
-  if(disp==null) { break; }
-  if(disp==1||disp==true)  {  obj.vars.expect.disp="inline-block"; break; }
-  if(disp==0||disp==false) {  obj.vars.expect.disp="none";         break; }
-  obj.vars.expect.disp=disp;
-  break;
-  }
- while(1)
-  {
-  if(retina==null) { break; }
-  if(retina==1||retina==true)  {  obj.vars.expect.retina=true;   break; }
-  if(retina==0||retina==false) {  obj.vars.expect.retina=false;  break; }
-  obj.vars.expect.retina=retina;
-  break;
-  }
- while(1)
-  {
-  if(opacity==null) { break; }
-  obj.vars.expect.opacity=opacity;
-  break;
-  }
- while(1)
-  {
-  if(rect==null) { break; }
-  obj.vars.expect.rect=rect;
-  break;
-  }
- obj.vars.expect.dow=dow;
- obj.vars.expect.doh=doh;
+ obj.dom.style.objectFit=fit;
+ obj.dom.style.objectPosition=opos;
  return true;
  }
 
 
 
-//&1=show/hide changed
-//&2=opacity changed
-//&4=retina changed
-//&8=position changed
-// &16=size changed
 
-
-
- function guiExpectCheck  (handle)
+ function guiProbe (handle)
  {
- var obj,chg,exp,area,isnanxy,isnanwh,ok,css;
- if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- chg=0;
- exp=obj.vars.expect;
- css=obj.dom.style;
- //console.log(css);
- if(css.display!=exp.disp)    {  css.display=exp.disp;     chg+=1;  }
- if(css.opacity!=exp.opacity) {  css.opacity=exp.opacity;  chg+=2;  }
- area=aa.guiCssAreaGet(obj.han);
- if(isNaN(area.left)||isNaN(area.top))     { isnanxy=true; } else { isnanxy=false; }
- if(isNaN(area.width)||isNaN(area.height)) { isnanwh=true; } else { isnanwh=false; }
- if(obj.vars.is_retina!=exp.retina)        { chg+=4;  }
- while(1)
-  {
-  if(isnanxy==true)                { chg+=8;  break; }
-  if(area.left!=exp.rect.left)     { chg+=8;  break; }
-  if(area.top!=exp.rect.top)       { chg+=8;  break; }
-  break;
-  }
- while(1)
-  {
-  if(isnanwh==true)                { chg+=16; break; }
-  if(area.width!=exp.rect.width)   { chg+=16; break; }
-  if(area.height!=exp.rect.height) { chg+=16; break; }
-  break;
-  }
- while(1)
-  {
-  ok=0;
-  if(obj.vars.is_retina!=exp.retina) { ok+=1; }
-  if(area.left!=exp.rect.x)          { ok+=2; }
-  if(area.top!=exp.rect.y)           { ok+=4; }
-  if(area.width!=exp.rect.w)         { ok+=8; }
-  if(area.height!=exp.rect.h)        { ok+=16; }
-  break;
-  }
- if(ok!=0)
-  {
-  aa.guiRetinaSet(obj.han,exp.rect.x,exp.rect.y,exp.rect.w,exp.rect.h,exp.dow,exp.doh,exp.retina);
-  }
- //if(chg!=0) { obj.vars.expect.needs_paint=true;   }
- if(chg!=0)//obj.vars.expect.needs_paint==true)
-  {
-  if(css.display=="none")    { chg=0; } //obj.vars.expect.needs_paint=false; }
-  }
- return chg;
+ var grp,obj,isnanxy,isnanwh,area;
+ if((grp=aa.guiGroupGet(handle))==null) { return null; }
+ obj={};
+ obj.type="probe";
+ obj.id=grp.obj.id;
+ obj.css_display=grp.css.display;
+ obj.css_area=aa.guiCssAreaGet(grp.han);
+ obj.opacity=parseFloat(grp.css.opacity);
+ obj.is_retina=grp.vars.is_retina;
+ obj.scale_wh=[grp.vars.scale_w,grp.vars.scale_h];
+ obj.dom_widhit=[grp.dom.width,grp.dom.height];
+ obj.vid_widhit=[grp.dom.videoWidth,grp.dom.videoHeight];
+ return obj;
  }
-
-
-
 
 
 
@@ -4435,9 +4385,32 @@ aa.debugAlert();
 
 
 
+
+
+ function guiSizesGet (handle)
+ {
+ var grp,etc,area,ori,ora;
+ if((grp=aa.guiGroupGet(handle))==null) { return null; }
+ if((area=aa.guiCssAreaGet(grp.han))==null) { aa.debugAlert(); }
+ etc={};
+ etc.type="sizes";
+ ora=(screen.orientation||{}).angle;
+ etc.ora=ora;
+ etc.vidwh=[0,0];
+ if(grp.dom.videoWidth!==undefined) { etc.vidwh=[grp.dom.videoWidth,grp.dom.videoHeight];    }
+ etc.domwh=[grp.dom.width,grp.dom.height];
+ //etc.domwh=[grp.dom.offsetWidth,grp.dom.offsetHeight];
+ etc.csswh=[area.width,area.height];
+ return etc;
+ }
+
+
+
+
+
+
  function guiSizeSet (handle,wid,hit)
  {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj,dom;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  dom=obj.dom;
@@ -4450,17 +4423,6 @@ aa.debugAlert();
 
 
 
- function guiVideoSizeSet (handle,wid,hit)
- {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var obj,dom;
- aleert("this is readonly");
- if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- dom=obj.dom;
- dom.videoWidth=wid;
- dom.videoHeight=hit;
- return true;
- }
 
 
 
@@ -4487,19 +4449,19 @@ aa.debugAlert();
 
 
 
-
  function guiCssAreaSet (handle,x,y,w,h)
  {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj,css;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
  css=obj.dom.style;
- if(x!=null) { css.left=x+"px"; }
- if(y!=null) { css.top=y+"px"; }
- if(w!=null) { css.width=w+"px"; }
+ if(x!=null) { css.left=x+"px";   }
+ if(y!=null) { css.top=y+"px";    }
+ if(w!=null) { css.width=w+"px";  }
  if(h!=null) { css.height=h+"px"; }
  return true;
  }
+
+
 
 
 
@@ -4513,6 +4475,8 @@ aa.debugAlert();
  rect=obj.dom.getBoundingClientRect();
  ///console.log(obj.dom.style.left);
  //console.log(rect);
+
+ //console.log("css area get "+obj.id,rect);
 
  rect={};
  if(0)
@@ -4535,6 +4499,8 @@ aa.debugAlert();
   }
  //console.log(rect.left);
 
+ //console.log("css area get "+obj.id,rect);
+
 
  //console.log(parseInt(rect.left));
  area={};
@@ -4553,10 +4519,15 @@ aa.debugAlert();
   area.width=rect.width;
   area.height=rect.height;
   }
+
+ //console.log("css area get "+obj.id,area);
+
  area.lstr=area.left+"px";
  area.tstr=area.top+"px";
  area.wstr=area.width+"px";
  area.hstr=area.height+"px";
+
+ // console.log("css area get "+obj.id,area);
  return area;
  }
 
@@ -4607,54 +4578,66 @@ aa.debugAlert();
  }
 
 
-
-
-
- function guiRetinaSet (handle,x,y,w,h,dw,dh,retina)
- {
- if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var obj,ratio,dow,doh;
- if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
-
-// if(retina===undefined)
-//  {
-//  ratio=obj.ctx.scale_factor;
-//  aa.guiSizeSet(handle,w*ratio,h*ratio);
-//  aa.guiCssAreaSet(handle,x,y,w,h);
-//  if(obj.type=="canvas") { obj.ctx.setTransform(ratio,0,0,ratio,0,0);  }
-//  return true;
-//  }
-
- if(retina==true)  {  ratio=Math.ceil(window.devicePixelRatio);  }
- else              {  ratio=1.0;  }
-
- if(dw===null) { dow=w;  }
- else          { dow=dw; }
- if(dh===null) { doh=h;  }
- else          { doh=dh; }
-
- aa.guiSizeSet(handle,dow*ratio,doh*ratio);
- aa.guiCssAreaSet(handle,x,y,w,h);
-
- if(obj.id=="b_canstream_0"||obj.id=="b_video_0"||obj.id=="b_video_1")
-  {
-  //console.log("*******");
-  //console.log(obj.id+"  "+x+" "+y+" "+w+" "+h+"  "+dow+" "+doh);
-  }
-
- if(obj.type=="canvas")  {  obj.ctx.setTransform(ratio,0,0,ratio,0,0);  }
- //console.log("pre "+ratio+" "+obj.vars.is_retina);
- if(ratio<=1.0) { obj.vars.is_retina=false; }
- else           { obj.vars.is_retina=true; }
- //console.log("post "+ratio+" "+obj.vars.is_retina);
- obj.vars.scale_factor=ratio;
- return true;
+/*
+{
+ var grp,etc,area,ori,ora;
+ if((grp=aa.guiGroupGet(handle))==null) { return null; }
+ if((area=aa.guiCssAreaGet(grp.han))==null) { aa.debugAlert(); }
+ etc={};
+ etc.type="sizes";
+ ora=(screen.orientation||{}).angle;
+ etc.ora=ora;
+ etc.vidwh=[0,0];
+ if(grp.dom.videoWidth!==undefined) { etc.vidwh=[grp.dom.videoWidth,grp.dom.videoHeight];    }
+ etc.domwh=[grp.dom.width,grp.dom.height];
+ //etc.domwh=[grp.dom.offsetWidth,grp.dom.offsetHeight];
+ etc.csswh=[area.width,area.height];
+ return etc;
  }
 
+*/
 
-//can.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
 
-
+ function guiRetinaSet (handle,ratw,rath,x,y,wid,hit)
+ {
+ var obj,aaa,bbb,osw,osh,arx;
+ if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
+ if(ratw==0)  {  ratw=Math.ceil(window.devicePixelRatio);   }
+ if(rath==0)  {  rath=Math.ceil(window.devicePixelRatio);   }
+ osw=obj.vars.scale_w;
+ osh=obj.vars.scale_h;
+ obj.vars.scale_w=ratw;
+ obj.vars.scale_h=ratw;
+ aaa=wid*obj.vars.scale_w;
+ bbb=hit*obj.vars.scale_h;
+ ///console.log(obj.dom.width,wid,aaa,osw,obj.vars.scale_w,  obj.dom.height,hit,bbb,osh,obj.vars.scale_h);
+ if(obj.dom.width!=aaa||obj.dom.height!=bbb)
+  {
+//  console.log("guisizeset",obj.id,aaa,bbb);
+  guiSizeSet(handle,aaa,bbb);
+  }
+ arx={};
+ arx.x=parseInt(obj.dom.style.left);
+ arx.y=parseInt(obj.dom.style.top);
+ arx.w=parseInt(obj.dom.style.width);
+ arx.h=parseInt(obj.dom.style.height);
+ if(arx.x!=x||arx.y!=y||arx.w!=wid||arx.h!=hit)
+  {
+  if(x==null) { aa.debugAlert(); }
+  if(y==null) { aa.debugAlert(); }
+  if(wid==null) { aa.debugAlert(); }
+  if(hit==null) { aa.debugAlert(); }
+//  console.log("guicssareaset",obj.id,x,y,wid,hit);
+  guiCssAreaSet(handle,x,y,wid,hit)
+  }
+ if(obj.type=="canvas")
+  {
+  obj.ctx.setTransform(obj.vars.scale_w,0,0,obj.vars.scale_h,0,0);
+  }
+ obj.vars.is_retina=false;
+ if(obj.vars.scale_w<=1.0&&obj.vars.scale_h<=1.0) { obj.vars.is_retina=true; }
+ return true;
+ }
 
 
 
@@ -4704,7 +4687,6 @@ aa.debugAlert();
    y2=y1+(area.height>>0);
    if((x<x1)||(y<y1)) { continue; }
    if((x>x2)||(y>y2)) { continue; }
-   //console.log(grp.id);
    return grp.han;
    }
   }
@@ -4725,7 +4707,8 @@ aa.debugAlert();
  if(window.devicePixelRatio!=0.0) { dn=window.devicePixelRatio; }
  fh=((ah/dn)/lines);
  fh=fh*dn;
- fh=fh*obj.ctx.scale_factor;
+ ///fh=fh*obj.ctx.scale_factor;
+ fh=fh*obj.vars.scale_h;
  return fh;
  }
 
@@ -4749,7 +4732,7 @@ aa.debugAlert();
 // fh=(pixels/dn);
  fh=((ah/dn)*pixels);
  fh=fh*dn;
- fh=fh*obj.ctx.scale_factor;
+ fh=fh*obj.vars.scale_h;//obj.ctx.scale_factor;
  return fh;
  }
 
@@ -4838,17 +4821,17 @@ aa.debugAlert();
  var oper;
  switch(index)
   {
-  default: oper=null; break;
-  case 0:  oper="source-over";      break;
-  case 1:  oper="source-in";        break;
-  case 2:  oper="source-out";       break;
-  case 3:  oper="source-atop";      break;
-  case 4:  oper="destination-over";  break;
-  case 5:  oper="destination-in";    break;
-  case 6:  oper="destination-out";   break;
-  case 7:  oper="destination-atop"; break;
-  case 8:  oper="lighter";    break;
-  case 9:  oper="copy";        break;
+  default:  oper=null; break;
+  case 0:   oper="source-over";      break;
+  case 1:   oper="source-in";        break;
+  case 2:   oper="source-out";       break;
+  case 3:   oper="source-atop";      break;
+  case 4:   oper="destination-over";  break;
+  case 5:   oper="destination-in";    break;
+  case 6:   oper="destination-out";   break;
+  case 7:   oper="destination-atop"; break;
+  case 8:   oper="lighter";    break;
+  case 9:   oper="copy";        break;
   case 10:  oper="xor";        break;
   case 11:  oper="multiply";    break;
   case 12:  oper="screen";      break;
@@ -4894,7 +4877,7 @@ aa.debugAlert();
   case "screen":     index=12; break;
   case "overlay":    index=13; break;
   case "darken":     index=14; break;
-  case "lighten":    index=15; break;
+  case "lighten":     index=15; break;
   case "color-dodge": index=16; break;
   case "color-burn": index=17; break;
   case "hard-light": index=18; break;
@@ -5021,8 +5004,8 @@ aa.debugAlert();
   obj.ctx.oImageSmoothingEnabled=true;
   obj.ctx.webkitImageSmoothingEnabled=true;
   obj.ctx.imageSmoothingEnabled=true;
-  //obj.ctx.imageSmoothingQuality="high";
-  obj.ctx.imageSmoothingQuality="low";
+  obj.ctx.imageSmoothingQuality="high";
+  //obj.ctx.imageSmoothingQuality="low";
   obj.ctx.shadowBlur=blur;
   obj.ctx.shadowOffsetX=offx;
   obj.ctx.shadowOffsetY=offy;
@@ -5262,7 +5245,22 @@ aa.debugAlert();
  }
 
 
+/*
+ The getImageData() returns an ImageData object representing the underlying pixel data
+ getImageData(sx, sy, sw, sh, settings)
+ function guiCanvasImageGet (handle,x,y,w,h)
+ img=obj.ctx.getImageData(x,y,w,h);
 
+ The putImageData() paints data from ImageData onto canvas
+ putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight)
+ function guiCanvasImagePut (handle,x,y,sx,sy,sw,sh,img)
+ obj.ctx.putImageData(img,x,y,sx,sy,sw,sh);
+
+ The drawImage() provides different ways to draw an image onto the canvas
+ drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+ function guiCanvasImageDraw (handle,x,y,w,h,dx,dy,dw,dh,img)
+ obj.ctx.drawImage(img,x,y,w,h,dx,dy,dw,dh);
+*/
 
 
 
@@ -5274,8 +5272,6 @@ aa.debugAlert();
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return null; }
  img=obj.ctx.getImageData(x,y,w,h);
  return img;
- //img=obj.ctx.getImageData(x,y,w,h);
- //return img;
  }
 
 
@@ -5287,7 +5283,20 @@ aa.debugAlert();
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- obj.ctx.putImageData(img,x,y,sx,sy,sw,sh);
+ if(x!=null&&y!=null&&sx==null&&sy==null&&sw==null&&sh==null)
+  {
+  obj.ctx.putImageData(img,x,y);
+  }
+ else
+ if(x!=null&&y!=null&&sx!=null&&sy!=null&&sw!=null&&sh!=null)
+  {
+  obj.ctx.putImageData(img,x,y,sx,sy,sw,sh);
+  }
+ else
+  {
+  aa.debugAlert();
+  }
+ //obj.ctx.putImageData(img,x,y,sx,sy,sw,sh);
  return true;
  }
 
@@ -5299,13 +5308,31 @@ aa.debugAlert();
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var obj;
  if((obj=handleCheck(gui_obj.handef,handle))==null) { return false; }
- //aa.debugLogger(5,"img=");
- //aa.debugLogger(5,img);
- //aa.debugLogger(5,obj.ctx);
- //aa.debugLogger(5,"sas");
- //aa.debugLogger(5,img.data);
- obj.ctx.drawImage(img,x,y,w,h,dx,dy,dw,dh);
- //aa.debugLogger(5,"ss");
+ if(x==null&&y==null&&w==null&&h==null&&dx!=null&&dy!=null&&dw==null&&dh==null)
+  {
+  obj.ctx.drawImage(img,dx,dy);
+  }
+ else
+ if(x==null&&y==null&&w==null&&h==null&&dx!=null&&dy!=null&&dw!=null&&dh!=null)
+  {
+  obj.ctx.drawImage(img,dx,dy,dw,dh);
+  }
+ else
+ if(x!=null&&y!=null&&w!=null&&h!=null&&dx!=null&&dy!=null&&dw!=null&&dh!=null)
+  {
+  obj.ctx.drawImage(img,x,y,w,h,dx,dy,dw,dh);
+  }
+ else
+  {
+  aa.debugAlert();
+  }
+
+
+
+
+ //obj.ctx.drawImage(img,x,y,w,h,dx,dy,dw,dh);
+// obj.ctx.drawImage(img,x,y,dw,dh);//w,h,dx,dy,dw,dh);
+
  return true;
  }
 
@@ -5780,16 +5807,24 @@ aa.debugAlert();
  }
 
 
+/*
 
-
-
+ grp={};
+ grp.han=handle;
+ grp.obj=obj;
+ grp.dom=obj.dom;
+ grp.css=obj.dom.style;
+ grp.ctx=obj.ctx;
+ grp.vars=obj.vars;
+// grp.dom=guiGet(grp.han,"dom");
+*/
 
  function guiCanvasTriangle (handle,x1,y1,x2,y2,x3,y3,lw,bc,fc)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var grp;
  if((grp=aa.guiGroupGet(handle))==null) { return false; }
-  obj.ctx.save(); //drama
+ grp.ctx.save(); //drama
  if(lw) { grp.ctx.lineWidth=lw;  } // grp.ctx.lineJoin="round";
  if(fc) { grp.ctx.fillStyle=fc; }
  if(bc) { grp.ctx.strokeStyle=bc; }
@@ -5800,7 +5835,7 @@ aa.debugAlert();
  grp.ctx.closePath();
  if(fc) { grp.ctx.fill(); }
  if(bc) { grp.ctx.stroke(); }
- obj.ctx.restore(); //drama
+ grp.ctx.restore(); //drama
  return true;
  }
 
@@ -6340,10 +6375,10 @@ aa.debugAlert();
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_gui) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var opa;
- if(opacity===undefined||opacity===null||arguments.length==1)  {  opa=1;  }
+ if(opacity===undefined||opacity===null||arguments.length==1)  {  opa=1.0;  }
  else                                                          {  opa=opacity;  }
- if(opa<0) { opa=0; }
- if(opa>1) { opa=1; }
+ if(opa<0.0) { opa=0.0; }
+ if(opa>1.0) { opa=1.0; }
  switch(index)
   {
   case 0:  return(guiRgbaString(0,0,0,opa));        // black
@@ -7014,7 +7049,12 @@ aa.debugAlert();
    //console.log("fl="+fl);
  if((han=aa.guiCreate("canvas","aa_font_fixer",9000))==0)  { aa.debugAlert(); }
  if((grp=aa.guiGroupGetById("aa_font_fixer"))==null) { aa.debugAlert(); }
- aa.guiRetinaSet(han,0,0,30,200,null,null,false)
+
+ aa.guiRetinaSet(han,1.0,1.0,0,0,30,200);
+ //aa.guiRetinaSet(han, (handle,ratw,rath,wid,hit)
+ //aa.guiRetinaSet(han,0,0,30,200,null,null,false)
+
+
  aa.guiCanvasText(han,10,10,0,0,aa.guiRgbaString(240,240,240,1),font,"`");
  img=aa.guiCanvasImageGet(han,0,0,30,200);
  frm=img.data;
@@ -7323,7 +7363,7 @@ aa.debugAlert();
  function spriteStatus (obj)
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_sprite) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
- var iw,ih,x,y,z,four;
+ var iw,ih,x,y,w,h,z,four;
  var han,grp,han2,grp2,han3,grp3,han4,grp4;
  var ok,pen,todo,r,g,b,a,go;
  var minX,minY,maxX,maxY,xx,yy,off,hob,bound;
@@ -8477,7 +8517,7 @@ aa.debugAlert();
 
    if(dobj.prom!=null) { alert("DOBJ mediaAttach prom not null"); }
 
-   console.log("mediaAttach about to PLAY!!!!!!!!!!");
+   if(0) { console.log("mediaAttach about to PLAY!!!!!!!!!!"); }
    ///console.log("pre prom="+dobj.prom);
    dobj.prom=dobj.dom.play();
    ///console.log("post prom="+dobj.prom);
@@ -8486,17 +8526,15 @@ aa.debugAlert();
     {
     dobj.prom.then(()=>
      {
-     aa.debugLogger(0,"DOBJ mediaAttach PLAY ok!!!!!!!!!!!!!!!");
+     if(0) { console.log("DOBJ mediaAttach PLAY ok!!!!!!!!!!!!!!!"); }
      dobj.prom=null;
      })
     .catch(error=>
      {
-     aa.debugLogger(0,"DOBJ mediaAttach PLAY err!!!!!!!!!!!!!!",error);
+     if(1) { console.log("DOBJ mediaAttach PLAY err!!!!!!!!!!!!!!",error); }
      dobj.prom=null;
      });
     }
-
-
    }
   else
    {
@@ -8798,7 +8836,7 @@ aa.debugAlert();
  {
  if(1&&aa_profiler.is_started&&aa_profile_group_media) { aaProfilerHit(arguments.callee.name); aaProfilerHit(arguments.callee.name+"<-"+arguments.callee.caller.name);  }
  var line,lines,i,newLines;
- aa.debugAlert();
+// aa.debugAlert();
  lines=sdp.split("\r\n");
  line=-1;
  for(i=0;i<lines.length;i++)
@@ -10457,10 +10495,14 @@ aa.debugAlert();
 
   case "ontrack":
   if(docon) { aa.debugLog("RTCONPROC: "+name); }
+  //aa.debugAlert();
+  //console.log(event.streams);
   if(event.streams&&event.streams[0])
    {
+   //aa.debugAlert();
    ///aa.debugLog("#############  ontrack, track has been added");
    ///aa.debugLog(event.streams[0]);
+   ///console.log("##########");
    rtc.rem_stream=event.streams[0];
    rtc.gui_id=null;
    }
@@ -10952,32 +10994,45 @@ aa.debugAlert();
 
  function rtcBitrateChange (handle,arate,vrate)
  {
- var rtc,snd;
+ var rtc,snd,prm;
  if((rtc=rtcGet(handle))==null) { return false; }
 
- if(rtc.prom!=null) { alert("rtcprom not null"); }
+ if(rtc.prom!=null) { return false; } //alert("rtcprom not null"); }
 
- if(arate)
+ if(arate<=0&&vrate<=0) { return true; }
+ if(arate>0&&vrate>0)   { return false; }
+
+ if(arate>0)
   {
-  snd=rtc.pc.getSenders().filter(s=>s.track.kind==='audio')[0];
-  rtc.prom=snd.setParameters({...(snd.getParameters()), encodings: [{  maxBitrate:(arate*1000),}]});
-
+  snd=rtc.pc.getSenders()[0];
+  prm=snd.getParameters();
+  prm.encodings[0].maxBitrate=arate*1000;
+  rtc.prom=snd.setParameters(prm);
+  //alert(snd.track.kind);
+  //snd=rtc.pc.getSenders().filter(s=>s.track.kind==='audio')[0];
+  //rtc.prom=snd.setParameters({...(snd.getParameters()), encodings: [{  maxBitrate:(arate*1000),}]});
   }
- if(vrate)
+ if(vrate>0)
   {
-  snd=rtc.pc.getSenders().filter(s=>s.track.kind==='video')[0];
-  rtc.prom=snd.setParameters({...(snd.getParameters()), encodings: [{  maxBitrate:(vrate*1000),}]});
+  snd=rtc.pc.getSenders()[1];
+  prm=snd.getParameters();
+  prm.encodings[0].maxBitrate=vrate*1000;
+  rtc.prom=snd.setParameters(prm);
+  //snd=rtc.pc.getSenders().filter(s=>s.track.kind==='video')[0];
+  //rtc.prom=snd.setParameters({...(snd.getParameters()), encodings: [{  maxBitrate:(vrate*1000),}]});
   }
 
  if(rtc.prom!==undefined)
   {
   rtc.prom.then(()=>
    {
-   aa.debugLog("bitrate changed ok");
+//   alert("ok");
+//   aa.debugLog("bitrate changed ok");
    rtc.prom=null;
    })
   .catch(error=>
    {
+   alert(error);
    aa.debugLog(rtc.prom);
    aa.debugLog(error);
    aa.debugLog("bitrate changed err ",error.message);
@@ -12556,12 +12611,17 @@ if(0)
  guiGroupGet:guiGroupGet,
  guiGroupGetById:guiGroupGetById,
  guiIdFind:guiIdFind,
- guiExpect:guiExpect,
- guiExpectCheck:guiExpectCheck,
+ guiFitSet:guiFitSet,
+
+ guiProbe:guiProbe,
+ ///guiApply:guiApply,
+
+ //guiExpect:guiExpect,
+ //guiExpectCheck:guiExpectCheck,
  guiParentAdd:guiParentAdd,
  guiParentRemove:guiParentRemove,
+ guiSizesGet:guiSizesGet,
  guiSizeSet:guiSizeSet,
- guiVideoSizeSet:guiVideoSizeSet,
  guiCursorSet:guiCursorSet,
  guiCssAreaSet:guiCssAreaSet,
  guiCssAreaGet:guiCssAreaGet,
